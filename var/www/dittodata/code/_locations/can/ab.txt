@@ -1,0 +1,222 @@
+airdrie
+alberta beach
+ardrossan
+athabasca
+balzac
+banff
+barnwell
+barrhead
+bashaw
+bassano
+beaumont
+beaverlodge
+beiseker
+bentley
+bezanson
+big valley
+black diamond
+blackfalds
+blairmore
+bon accord
+bonnyville
+bow island
+bowden
+boyle
+bragg creek
+breton
+brooks
+brule
+byemoor
+cadomin
+calgary
+calmar
+camrose
+canmore
+carbon
+cardston
+caroline
+carseland
+carstairs
+caslan
+castor
+cayley
+chestermere
+chipman
+claresholm
+coaldale
+coalhurst
+cochrane
+cold lake
+colinton
+conklin
+consort
+coronation
+coutts
+cowley
+cremona
+crooked creek
+crossfield
+crowsnest pass
+dalemead
+dapp
+de winton
+delburne
+devon
+didsbury
+donalda
+drayton valley
+drumheller
+eckville
+edberg
+edgerton
+edmonton
+edson
+egremont
+elk point
+empress
+evansburg
+fairview
+falher
+ferintosh
+foremost
+fort assiniboine
+fort macleod
+fort mcmurray
+fort saskatchewan
+fort vermilion
+fox creek
+gem
+gibbons
+grande cache
+grande prairie
+granum
+grimshaw
+gull lake
+hanna
+heinsburg
+high level
+high prairie
+high river
+hill spring
+hinton
+hobbema
+holden
+innisfail
+iron river
+irricana
+jasper
+kananaskis village
+killam
+la crete
+la glace
+lac la biche
+lacombe
+lake louise
+lamont
+langdon
+leduc
+legal
+leslieville
+lethbridge
+linden
+lloydminster
+lomond
+lousana
+magrath
+ma-me-o beach
+mannville
+marwayne
+mayerthorpe
+medicine hat
+metiskow
+milk river
+millarville
+millet
+morinville
+mountain view
+mundare
+namao
+nanton
+new norway
+nisku
+nordegg
+okotoks
+olds
+onoway
+opal
+oyen
+peace river
+peers
+penhold
+picture butte
+pigeon lake
+pincher creek
+pine lake
+ponoka
+priddis
+provost
+rainbow lake
+raymond
+red deer
+red earth creek
+redcliff
+redwater
+redwood meadows
+rimbey
+rocky mountain house
+rockyford
+rosebud
+ryley
+sangudo
+sarcee
+sedgewick
+seven persons
+sexsmith
+sherwood park
+slave lake
+smoky lake
+spirit river
+springbrook
+spruce grove
+st. albert
+st. paul
+standard
+stavely
+stettler
+stirling
+stony plain
+strathmore
+strome
+sundre
+swan hills
+sylvan lake
+taber
+thorhild
+thorsby
+three hills
+tofield
+tsuu t'ina
+turner valley
+valleyview
+vauxhall
+vegreville
+vermilion
+veteran
+viking
+villeneuve
+vulcan
+wabasca
+wainwright
+water valley
+waterton park
+westerose
+westlock
+wetaskiwin
+whitecourt
+wildwood
+willingdon
+wimborne
+winfield
+worsley
+youngstown
+zama city

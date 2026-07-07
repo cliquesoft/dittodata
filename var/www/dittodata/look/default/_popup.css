@@ -1,0 +1,176 @@
+#divPopup {
+	display: none;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -200px;
+	margin-left: -190px;
+	width: 380px;
+	height: 400px;
+	color: rgba(0,0,0,0.5);
+	background-color: rgba(165,186,210,1);
+	font-size: 13px;
+	border: 1px solid rgba(255,255,255,1);
+	border-radius: 0.6em;
+	overflow: hidden;
+	z-index: 1002;					/* NOTE: this has to be higher than the global.css > .overlay > z-index value */
+
+	box-shadow: 0 0 5px rgba(0,0,0,0.3) inset;
+}
+.PopupMin {						/* this can be used to shrink the height of the popup by half for smaller prompts */
+/* this segment was moved into default.formats.css on 2017/05/11
+*/
+	margin-top: -100px !important;
+	height: 200px !important;
+}
+.PopupMax {
+/* this segment was moved into default.formats.css on 2017/05/11
+*/
+	margin-top: -250px!important;
+	margin-left: -335px!important;
+	width: 650px!important;				/* NOTE: this takes into account that the div (with padding) is 670px wide */
+	height: 500px!important;
+}
+
+#divPopup a { color: #cc4400; }
+#divPopup a:hover { color: #0e8cbe; }
+
+#divPopup h2 { margin-bottom: 20px; text-decoration: underline; }
+#divPopup h3 {
+	margin: 3px;
+	padding: 10px;
+	height: 20px;
+	background-color: rgba(0,0,0,0.1);
+	border: 1px solid rgba(0,0,0,0.3);
+	border-top-left-radius: 0.3em;
+	border-top-right-radius: 0.3em;
+	box-shadow: 0 0 4px rgba(255,255,255,1);
+	text-decoration: underline;
+}
+#divPopup h4 {
+	border-bottom: 1px solid rgba(0,0,0,0.3);
+	color: rgba(0,0,0,0.6);
+	font-size: 15px;
+	font-weight: bold;
+}
+#divPopup p { }
+#divPopup ul { width: 100%; }
+#divPopup ul li { padding: 3px 0; font-size: 16px;text-align: right;  }
+#divPopup ul li label { float: left; font-size: 13px; }
+#divPopup .button { width: 60px; }
+#divPopup .textbox { width: 194px; }
+#divPopup #lblCaptcha { font-size: 10px; cursor: pointer; }
+#divPopup #txtCaptcha { margin-right: 4px; width: 100px; }
+#divPopup #imgCaptcha { display: inline-block; margin-right: 4px; padding: 2px; width: 20px; height: 20px; cursor: pointer; vertical-align: top; background-color: rgba(0,0,0,0.2); border: 1px solid #396AA4; border-radius: 0.3em; }
+#divPopup #captcha {
+	border: 1px solid #6FCEF4;
+/*   border-radius: 0.3em; */
+
+	box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+#divPopup .gallery {			/* https://stackoverflow.com/questions/7273338/how-to-vertically-align-an-image-inside-a-div */
+	max-height: 100%;  
+	max-width: 100%; 
+	width: auto;
+	height: auto;
+	position: absolute;  
+	top: 0;  
+	bottom: 0;  
+	left: 0;  
+	right: 0;  
+	margin: auto;
+}
+#divPopup .busy { display: block; margin-top: 142px; margin-left: 150px; width: 64px; height: 64px; }
+#divPopup.PopupMax .busy { margin-top: 170px; margin-left: 285px; }
+
+#divPopupClose {
+	float: right;
+	margin: 4px;
+	padding: 0 10px;
+	height: 40px;
+	font-size: 32px;
+	border-top-right-radius: 0.1em;
+/*
+  border-top-right-radius: 0.2em;
+  border-bottom-left-radius: 0.2em;
+*/
+	cursor: pointer;
+
+	box-shadow:         inset 0 0 15px #000000;
+	-ms-box-shadow:     inset 0 0 15px #000000;
+	-moz-box-shadow:    inset 0 0 15px #000000;
+	-webkit-box-shadow: inset 0 0 15px #000000;
+}
+#divPopupClose:hover { color: red; }
+
+
+.PopupOverflow {
+	position: absolute;
+	top: 85px;					/* LEFT OFF - this needs to be more dynamic so the preceeding <p> can be variable length */
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 0 10px;
+	overflow: auto;
+}
+
+
+#divPopup p.pBold {
+	margin: 10px;
+	padding: 10px;
+	font-weight: bold;
+	background-color: rgba(0,0,0,0.2);
+	border: 1px solid rgba(0,0,0,0.3);
+	border-radius: 0.5em;
+	box-shadow: 0 0 4px rgba(255,255,255,1);
+}
+#divPopup .divBody {
+	position: absolute;
+	top: 50px;
+	bottom: 50px;					/* NOTE: this gives us 10px between the bottom of <p> and the start of the button footer <div> below */
+	left: 10px;
+	right: 4px;
+	margin: 0;
+	padding-right: 7px;
+	text-align: justify;
+	overflow: auto;
+}
+#divPopup .divBody .ulSpecs { margin-bottom: 20px; }
+#divPopup .divBody .ulSpecs li { font-size: 13px; }
+
+#divPopup .divBody .ulList { margin-bottom: 20px; padding-left: 30px; width: calc(100% - 30px); }
+#divPopup .divBody .ulList li { font-size: 13px; list-style-type: circle !important; text-align: left !important; }
+#divPopup .divBody ul li.liTitle {
+	padding-left: 0;
+	margin-left: 0;
+	color: rgba(255,255,255,0.7);
+	font-size: 15px;
+	font-weight: bold;
+	text-decoration: underline;
+	text-align: left;
+	list-style-type: none !important;
+}
+#divPopup .divBodyFull { bottom: 10px; }
+#divPopup .divButtons {
+	position: absolute;
+	top: auto;
+	bottom: 4px;
+	left: 4px;
+	right: 4px;
+	height: 40px;
+	padding-right: 30px;
+	text-align: right;
+	background-color: rgba(0,0,0,0.1);
+	border: 1px solid rgba(0,0,0,0.3);
+	border-bottom-left-radius: 0.3em;
+	border-bottom-right-radius: 0.3em;
+	box-shadow: 0 0 4px rgba(255,255,255,1);
+}
+#divPopup .divButtons span { float: left; margin: 20px 10px 0; color: rgba(0,0,0,0.4); font-weight: bold; }
+#divPopup .divButtons .textbox { margin-top: 8px; margin-right: 10px; width: 140px; }
+#divPopup .divButtons .button { margin-top: 8px; margin-left: 5px; }
+

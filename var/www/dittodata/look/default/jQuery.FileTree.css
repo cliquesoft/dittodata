@@ -1,0 +1,23 @@
+ul.jqueryFileTree {
+	margin: 0px;
+	padding: 0px;
+	font-size: 11px;
+	line-height: 18px;
+}
+
+ul.jqueryFileTree li {
+	padding-left: 24px;
+	list-style: none;
+	white-space: nowrap;
+}
+
+ul.jqueryFileTree li a {
+	display: block;
+	padding: 0px 2px;
+	color: #fff;
+	text-decoration: none;
+	outline: 0;				/* 'outline' removes the dotted border of the just-clicked <a> */
+	cursor: default;
+}
+ul.jqueryFileTree li a:hover { background-color: #4088ff; }
+

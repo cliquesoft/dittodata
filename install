@@ -1,0 +1,350 @@
+#!/bin/sh
+# install	This script installs the dittodata project to the device
+#
+# Unless a valid Cliquesoft Private License (CPLv1) has been purchased for your
+# device, this software is licensed under the Cliquesoft Public License (CPLv2)
+# as found on the Cliquesoft website at www.cliquesoft.org.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the appropriate Cliquesoft License for details.
+#
+# Created	2022-04-11 by Dave Henderson (support@cliquesoft.org)
+# Updated	2022-06-01 by Dave Henderson (support@cliquesoft.org)
+#
+# Requirements:
+
+
+
+
+
+
+
+
+# GLOBAL VARIABLES
+
+# --- SYSTEM ---
+DATETIME="$(date +"%Y-%m-%d %H:%M:%S")"				# sets a default epoch so in the event of failure, a full backup should be performed via this date for safety
+RJN=$(( $RANDOM + 2 + $RANDOM ))
+
+# --- GLOBAL ---
+DIRCONF='/etc/dittodata'					# directory for global and specific job settings
+DIRHOME='${HOME}/.dittodata'					# directory for private job settings
+DIRTEMP='/tmp'
+DIRMNTS='/mnt'
+DIRLOGS='/var/log'
+DIRSSH="${HOME}/.ssh"
+JOBLOG="dittodata/${RJN}.log"
+ERRLOG="dittodata/${RJN}.err"
+SYSLOG='dittodata.log'
+FIFO="${DIRTEMP}/backup_${RJN}"
+
+# -- SPECIFIC --
+DIRCRON='/etc/cron.d'
+LOCATION='lsb'							# the location to install files to: lsb (linux standards base: /usr/local/bin) | wdnas | xinix (/bin)
+PREFIX=''
+
+
+
+# ----- DO NOT EDIT BELOW THIS LINE -----
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR EXPORT
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR INTERNAL USE
+
+
+
+
+# EXIT IF APPROPRIATE
+
+
+
+
+# VARIABLE PROCESSING
+
+# process stored variables first
+[ -e "${DIRCONF}/global.cfg" ] && . "${DIRCONF}/global.cfg"	# read the global config first
+
+for i in "$@"; do						# process each of the passed parameters (looking for the --config value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--config=' ); then		# read in the passed config file
+		TEMP="${i##*=}"
+		[ -e "${TEMP}" ] && . "${TEMP}"			# read in the stored values for this script if it exists
+	fi
+done
+
+# process passed variables last (since they will have presidence)
+for i in "$@"; do						# process each of the passed parameters (after setting default values above)
+	if [ "${i}" == "--version" ] || [ "${i}" == "-v" ]; then
+		head -15 "$0" | grep "Updated	" | sed 's/.*\t//;s/ by .*//;s/-/./g'
+		exit 0
+
+	elif [ "${i}" == "--help" ] || [ "${i}" == '/?' ]; then
+		echo
+		echo "The syntax for this script is:"
+		echo "   ${0##*/} [ACTION] [--OPTION=\"VALUE\" ...] [--config filename]"
+	        echo
+		echo "Full documentation located at:"
+		echo "   http://wiki.cliquesoft.org/index.php?title=dittodata"
+		echo
+		echo "The short project description:"
+		echo "   This script installs the dittodata project to the device."
+		echo
+		echo "   [ACTIONS]"
+		echo
+		echo " --help		this screen"
+		echo " --version	shows the version of this script"
+		echo
+		echo "   [OPTIONS]"
+		echo
+		echo " --config	specifies a pre-built configuration via a text file.  The syntax"
+		echo "		should contain a list of \"OPTION=VALUE\" pairs (one per line) for"
+		echo "		anything that could be passed on the command line."
+		echo "		NOTE: capitalize all OPTION's; enclose string VALUE's in quotes."
+		echo " --location	the location to install files to on the system:"
+		echo "			lsb|wdnas|xinix"
+		echo " --prefix	a prefix to add to the directory structure for package creation"		# e.g. add a prefix for a staging area to create a distributable package for a package repo
+		echo
+		exit 0
+
+	elif ( echo "${i}" | grep -q ^'--verbose' ); then
+		VERBOSE='/dev/stdout'
+	elif ( echo "${i}" | grep -q ^'--config' ); then
+		continue					# so that this doesn't trigger an invalid parameter prompt
+	elif ( echo "${i}" | grep -q ^'--location=' ); then
+		LOCATION="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--prefix=' ); then
+		PREFIX="${i#*=}"
+
+	else
+		echo "ERROR: This script was called with an invalid parameter (${i})."
+		exit 1
+	fi
+done
+
+
+
+
+# VALIDATE INFORMATION
+
+# variable values
+echo -n "Checking for necessary variable values:"
+echo -n " [location]"
+if [ "${LOCATION}" != 'lsb' ] && [ "$LOCATION" != 'wdnas' ] && [ "$LOCATION" != 'xinix' ]; then
+	echo " [failure]"
+	echo "ERROR: This script was called with an invalid value for the '--location' parameter, exiting."
+	exit 1
+fi
+echo " [done]"
+
+
+
+
+# file existence
+echo -n "Checking for stated files:"
+for i in "$@"; do						# process each of the passed parameters (looking for the --config value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--config=' ); then		# read in the passed config file
+		echo -n " [config]"
+		TEMP="${i##*=}"
+		[ ! -e "${TEMP}" ] && {				# read in the stored values for this script if it exists
+			echo " [failure]"
+			echo "ERROR: The passed config file can NOT be found, exiting."
+			exit 1
+		}
+	fi
+done
+echo " [done]"
+
+
+
+
+# user priviledges
+echo -n "Checking the effective UID:"				# check for root account priviledges
+if [ $(id -u) -gt 0 ]; then					# checks that this ACTION is being run as an elevated account (e.g. as root or using sudo) so we don't have any issues getting the directories all setup
+	echo " [failure]"
+	echo "ERROR: This script was executed without sufficient priviledges. Try using a different account or prefixing the call with 'sudo'."
+	exit 1
+fi
+echo " [done]"
+
+
+
+
+# START THE INSTALLATION
+
+echo
+echo -e "Starting the software installation: ${DATETIME}"
+
+echo -n "Creating the configuration:"
+[ "$LOCATION" == 'wdnas' ] && ( ! echo "${DIRCONF}" | grep -q ^"/DataVolume/dittodata" ) && DIRCONF="/DataVolume/dittodata${DIRCONF}"
+if [ ! -e "${PREFIX}${DIRCONF}" ]; then
+	( mkdir -p "${PREFIX}${DIRCONF}" ) || {
+		echo " [failure]"
+		echo "ERROR: The configuration directory can NOT be created, exiting."
+		exit 1
+	}
+	( cp "etc/dittodata/"* "${PREFIX}${DIRCONF}" ) || {
+		echo " [failure]"
+		echo "ERROR: The config files can NOT be installed to the device, exiting."
+		exit 1
+	}
+fi
+if [ -e "${PREFIX}${DIRCONF}/global.cfg" ]; then
+	echo -n " [exists]"
+else
+	if [ "$LOCATION" == 'lsb' ]; then
+		ln -s "${PREFIX}${DIRCONF}/_lsb.cfg" "${PREFIX}${DIRCONF}/global.cfg"
+	elif [ "$LOCATION" == 'wdnas' ]; then
+		[ ! -e "${PREFIX}${DIRCONF}" ] && ln -s "${PREFIX}${DIRCONF}" "/etc/dittodata"				# we write all the info to the external drive, not the eprom
+		ln -s "${PREFIX}${DIRCONF}/_wdnas.cfg" "${PREFIX}${DIRCONF}/global.cfg"
+	elif [ "$LOCATION" == 'xinix' ]; then
+		ln -s "${PREFIX}${DIRCONF}/_xinix.cfg" "${PREFIX}${DIRCONF}/global.cfg"
+	fi
+fi
+echo " [done]"
+
+echo -n "Installing the executables:"
+[ "$LOCATION" == 'wdnas' ] && ( ! echo "${PREFIX}" | grep -q "/DataVolume/dittodata" ) && PREFIX="${PREFIX}/DataVolume/dittodata"
+if [ "$LOCATION" == 'lsb' ]; then
+	for FILE in $(ls -1 "usr/local/bin"); do
+		[ "$FILE" != 'backup' ] && [ "$FILE" != 'restore' ] && [ "$FILE" != 'dittodata' ] && continue		# skip any binaries for the WDNas
+
+		echo -n " [${FILE}]"
+		( cp -f usr/local/bin/${FILE} /usr/local/bin ) || {
+			echo " [failure]"
+			echo "ERROR: The executables can NOT be installed to the device, exiting."
+			exit 1
+		}
+	done
+elif [ "$LOCATION" == 'wdnas' ]; then
+	if [ ! -e "${PREFIX}/bin" ]; then
+		( mkdir -p "${PREFIX}/bin" ) || {
+			echo " [failure]"
+			echo "ERROR: The executables directory can NOT be created, exiting."
+			exit 1
+		}
+	fi
+	if [ ! -e "${PREFIX}/log" ]; then
+		( mkdir -p "${PREFIX}/log" ) || {
+			echo " [failure]"
+			echo "ERROR: The logs directory can NOT be created, exiting."
+			exit 1
+		}
+	fi
+	if [ ! -e "${PREFIX}/mnt" ]; then
+		( mkdir -p "${PREFIX}/mnt" ) || {
+			echo " [failure]"
+			echo "ERROR: The mount point directory can NOT be created, exiting."
+			exit 1
+		}
+	fi
+	if [ ! -e "${PREFIX}/tmp" ]; then
+		( mkdir -p "${PREFIX}/tmp" ) || {
+			echo " [failure]"
+			echo "ERROR: The temporary directory can NOT be created, exiting."
+			exit 1
+		}
+	fi
+	( cp -f usr/local/bin/* "${PREFIX}/bin" ) || {
+		echo " [failure]"
+		echo "ERROR: The executables can NOT be installed to the device, exiting."
+		exit 1
+	}
+	echo " [done]"
+	echo -n "Symlinking the executables:"
+	for FILE in $(ls -1 "${PREFIX}/bin"); do
+		( [ "$FILE" == 'reinstall.sh' ] || [ "$FILE" == 'relink.sh' ] ) && continue		# skip any supplimental scripts for the WDNas
+
+		echo -n " [${FILE}]"
+		[ ! -e "/usr/local/bin/${FILE}" ] && ln -s "${PREFIX}/bin/${FILE}" "/usr/local/bin/${FILE}" || echo -n " [exists]"			# we write all the info to the external drive, not the eprom
+	done
+	echo " [done]"
+	echo -n "Installing required packages:"
+	( which mount.fuse >/dev/null ) || {
+		echo -n " [fuse]"
+		dpkg -i ../opt/libfuse2_2.8.4-1.1_powerpc.deb ../opt/fuse-utils_2.8.4-1.1_powerpc.deb 2>&1 >"${DIRLOGS}/dittodata.log" || {
+			echo " [failure]"
+			echo "ERROR: The fuse package can NOT be installed, exiting."
+			exit 1
+		}
+	}
+	( which sshpass >/dev/null ) || {
+		echo -n " [sshpass]"
+		dpkg -i ../opt/sshpass_1.01-2_powerpc.deb 2>&1 >"${DIRLOGS}/dittodata.log" || {
+			echo
+			echo "ERROR: The sshfs package can NOT be installed, exiting."
+			exit 1
+		}
+	}
+	( which sshfs >/dev/null ) || {
+		echo -n " [sshfs]"
+		dpkg -i ../opt/sshfs_2.1-1_powerpc.deb 2>&1 >"${DIRLOGS}/dittodata.log" || {
+			echo
+			echo "ERROR: The sshfs package can NOT be installed, exiting."
+			exit 1
+		}
+	}
+	( which at >/dev/null ) || {
+		echo -n " [at]"
+		dpkg -i ../opt/at_3.1.10.2_powerpc.deb 2>&1 >"${DIRLOGS}/dittodata.log" || {
+			echo
+			echo "ERROR: The at scheduler package can NOT be installed, exiting."
+			exit 1
+		}
+	}
+	( which pv >/dev/null ) || {
+		echo -n " [pv]"
+		dpkg -i ../opt/pv_1.1.4-1_powerpc.deb 2>&1 >"${DIRLOGS}/dittodata.log" || {
+			echo
+			echo "ERROR: The pv package can NOT be installed, exiting."
+			exit 1
+		}
+	}
+	( which numfmt >/dev/null ) || {
+		echo -n " [numfmt]"
+		( cp numfmt "/usr/local/bin" 2>&1 >"${DIRLOGS}/dittodata.log" ) || {
+			echo
+			echo "ERROR: The numfmt binary can NOT be installed, exiting."
+			exit 1
+		}
+	}
+elif [ "$LOCATION" == 'xinix' ]; then
+	for FILE in $(ls -1 "bin"); do
+		[ "$FILE" != 'backup' ] && [ "$FILE" != 'restore' ] && [ "$FILE" != 'dittodata' ] && continue		# skip any binaries for the WDNas
+
+		echo -n " [${FILE}]"
+		( cp -f bin/${FILE} /bin ) || {
+			echo " [failure]"
+			echo "ERROR: The executables can NOT be installed to the device, exiting."
+			exit 1
+		}
+	done
+fi
+echo " [done]"
+
+if [ "$LOCATION" == 'wdnas' ]; then
+	echo -n "Redirecting configurations:"
+	( ln -s "${DIRCONF}" "${PREFIX}${DIRCONF/\/DataVolume\/dittodata}" ) || {
+		echo " [failure]"
+		echo "ERROR: The config directory can NOT be symlinked, exiting."
+		exit 1
+	}
+
+	if [ ! -e "${PREFIX}${DIRCRON}/dittodata" ]; then
+		( ln -s "${DIRCONF}${DIRCRON}/dittodata" "${PREFIX}${DIRCRON}/dittodata" ) || {
+			echo " [failure]"
+			echo "ERROR: The crontab file can NOT be symlinked, exiting."
+			exit 1
+		}
+	fi
+	echo " [done]"
+fi
+
+echo
+echo "Congrats! Your software is installed and ready for use!"
+echo

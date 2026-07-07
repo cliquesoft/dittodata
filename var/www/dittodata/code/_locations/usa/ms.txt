@@ -1,0 +1,461 @@
+abbeville
+aberdeen
+ackerman
+agricola
+alcorn state
+algoma
+alligator
+amory
+anguilla
+arcola
+arkabutla
+artesia
+ashland
+avalon
+avon
+bailey
+baldwyn
+banner
+bassfield
+batesville
+bay saint louis
+bay springs
+beaumont
+becker
+belden
+belen
+bellefontaine
+belmont
+belzoni
+benoit
+benton
+bentonia
+beulah
+big creek
+biloxi
+blue mountain
+blue springs
+bogue chitto
+bolton
+booneville
+boyle
+brandon
+braxton
+brookhaven
+brooklyn
+brooksville
+bruce
+buckatunna
+bude
+burnsville
+byhalia
+caledonia
+calhoun
+camden
+camp shelby
+canton
+carlisle
+carolina
+carriere
+carrollton
+carson
+carthage
+cary
+cascilla
+cedarbluff
+centreville
+charleston
+chatawa
+chatham
+chunky
+church hill
+city
+clara
+clarksdale
+cleary
+cleveland
+clinton
+coahoma
+coffeeville
+coila
+coldwater
+collins
+collinsville
+columbia
+columbus
+columbus afb
+como
+conehatta
+corinth
+courtland
+crawford
+crenshaw
+crosby
+crowder
+cruger
+crystal springs
+d' iberville
+daleville
+darling
+de kalb
+decatur
+delta city
+dennis
+derma
+diamondhead
+d'lo
+doddsville
+drew
+dublin
+duck hill
+dumas
+duncan
+dundee
+durant
+eastabuchie
+ecru
+edinburg
+edwards
+elliott
+ellisville
+enid
+enterprise
+escatawpa
+ethel
+etta
+eupora
+falcon
+falkner
+farrell
+fayette
+flora
+florence
+flowood
+forest
+foxworth
+franklin county
+french camp
+friars point
+fulton
+gallman
+gattman
+gautier
+georgetown
+glen
+glen allan
+glendora
+gloster
+golden
+goodman
+gore springs
+grace
+greenville
+greenwood
+greenwood springs
+grenada
+gulfport
+gunnison
+guntown
+hamilton
+harperville
+harriston
+harrisville
+hattiesburg
+hazlehurst
+heidelberg
+hermanville
+hernando
+hickory
+hickory flat
+hillsboro
+holcomb
+hollandale
+holly bluff
+holly ridge
+holly springs
+horn lake
+houlka
+houston
+hurley
+independence
+indianola
+inverness
+isola
+itta bena
+iuka
+jackson
+jayess
+jonestown
+keesler afb
+kilmichael
+kiln
+kokomo
+kosciusko
+kossuth
+kreole
+lake
+lake cormorant
+lakeshore
+lamar
+lambert
+lauderdale
+laurel
+lawrence
+leakesville
+leland
+lena
+lexington
+liberty
+little rock
+long beach
+lorman
+louin
+louise
+louisville
+lucedale
+ludlow
+lula
+lumberton
+lyon
+maben
+macon
+madden
+madison
+magee
+magnolia
+mantachie
+mantee
+marietta
+marion
+marks
+matherville
+mathiston
+mattson
+mayersville
+mayhew
+mc adams
+mccall creek
+mccarley
+mccomb
+mccondy
+mccool
+mchenry
+mclain
+mcneill
+meadville
+mendenhall
+meridian
+meridian nas
+merigold
+metcalfe
+michigan city
+midnight
+minter city
+mississippi state
+mize
+money
+monticello
+montpelier
+mooreville
+moorhead
+morgan city
+morton
+moselle
+moss
+moss point
+mound bayou
+mount olive
+mount pleasant
+myrtle
+natchez
+neely
+nesbit
+nettleton
+new albany
+new augusta
+new site
+newhebron
+newton
+nicholson
+nitta yuma
+north carrollton
+noxapater
+oak vale
+oakland
+ocean springs
+okolona
+olive branch
+osyka
+ovett
+oxford
+pace
+pachuta
+panther burn
+parchman
+paris
+pascagoula
+pass christian
+pattison
+paulding
+pearl
+pearlington
+pelahatchie
+percy
+perkinston
+petal
+pheba
+philadelphia
+philipp
+picayune
+pickens
+piney woods
+pinola
+pittsboro
+plantersville
+pocahontas
+pontotoc
+pope
+poplarville
+port gibson
+port of pascagoula
+porterville
+potts camp
+prairie
+prentiss
+preston
+puckett
+pulaski
+purvis
+quitman
+raleigh
+randolph
+raymond
+red banks
+redwood
+rena lara
+richland
+richton
+ridgeland
+rienzi
+ripley
+robinsonville
+rolling fork
+rome
+rose hill
+rosedale
+roxie
+ruleville
+ruth
+sallis
+saltillo
+sanatorium
+sandersville
+sandhill
+sandy hook
+sarah
+sardis
+satartia
+saucier
+schlater
+scobey
+scooba
+scott
+sebastopol
+seminary
+senatobia
+sessums
+shannon
+sharon
+shaw
+shelby
+sherard
+sherman
+shubuta
+shuqualak
+sibley
+sidon
+silver city
+silver creek
+slate
+sledge
+smithdale
+smithville
+sontag
+soso
+southaven
+spring
+star
+starkville
+state line
+steens
+stewart
+stoneville
+stonewall
+stringer
+sturgis
+summit
+sumner
+sumrall
+sunflower
+swan lake
+swiftown
+taylor
+taylorsville
+tchula
+terry
+thaxton
+thomastown
+tie plant
+tillatoba
+tinsley
+tiplersville
+tippo
+tishomingo
+toccopola
+toomsuba
+tougaloo
+trebloc
+tremont
+tula
+tunica
+tupelo
+tutwiler
+tylertown
+union
+union church
+university
+utica
+vaiden
+valley park
+van
+vance
+vancleave
+vardaman
+verona
+vicksburg
+victoria
+vleet
+vossburg
+walls
+walnut
+walnut grove
+walthall
+washington
+water valley
+waterford
+waveland
+waynesboro
+wayside
+webb
+weir
+wesson
+west
+west point
+wheeler
+whitfield
+wiggins
+winona
+winstonville
+winterville
+woodland
+woodville

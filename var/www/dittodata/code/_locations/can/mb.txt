@@ -1,0 +1,157 @@
+altona
+arborg
+arden
+ashern
+austin
+baldur
+beausejour
+belmont
+benito
+binscarth
+birtle
+boissevain
+brandon
+carberry
+carman
+cartwright
+churchill
+clearwater
+coldwell
+cooks creek
+cormorant
+cranberry portage
+crystal city
+cypress river
+dauphin
+deloraine
+dugald
+east selkirk
+east st. paul
+elie
+elkhorn
+elm creek
+emerson
+erickson
+falcon lake
+fannystelle
+fisher branch
+flin flon
+fraserwood
+garson
+gillam
+gimli
+gladstone
+glenboro
+gods river
+grahamdale
+grand beach
+grandview
+grosse isle
+grunthal
+gull lake
+gypsumville
+hadashville
+hamiota
+hartney
+headingley
+hillside beach
+holland
+ile des chenes
+inglis
+killarney
+kleefeld
+lac du bonnet
+lake audy
+lake st. martin
+langruth
+lariviere
+lauder
+laurier
+lockport
+lorette
+lynn lake
+macgregor
+manitou
+matlock
+mccreary
+melita
+miami
+miniota
+minnedosa
+minto
+montcalm
+morden
+morris
+neepawa
+ninette
+niverville
+norway house
+notre-dame-de-lourdes
+oak bluff
+oak lake
+oakbank
+oakville
+onanole
+peguis
+pilot mound
+pinawa
+pine falls
+piney
+pipestone
+plum coulee
+plumas
+pointe du bois
+portage la prairie
+powerview
+rapid city
+rennie
+reston
+reynolds
+richer
+rivers
+riverton
+roblin
+rosenort
+rossburn
+russell
+saint claude
+saint francois-xavier
+selkirk
+seven sisters falls
+shoal lake
+sidney
+snow lake
+somerset
+souris
+southport
+sperling
+springfield
+st. andrews
+st. jean baptiste
+st. laurent
+st. malo
+starbuck
+ste. anne
+ste. rose du lac
+steinbach
+stonewall
+st-pierre-jolys
+swan river
+the pas
+teulon
+thompson
+traverse bay
+treherne
+virden
+wabowden
+warren
+wasagaming
+waskada
+wawanesa
+waywayseecappo
+whitemouth
+winkler
+winnipeg
+winnipeg beach
+winnipegosis
+york factory

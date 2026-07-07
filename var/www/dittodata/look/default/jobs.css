@@ -1,0 +1,46 @@
+#scn1 #formJob { height: 100%; }
+#scn1 { display: none; }
+#scn1 ul { width: 400px; }
+#scn1 ul li { height: 25px; text-align: right; }
+#scn1 ul li span { float: left; }
+#scn1 ul li div { display: inline-block; text-align: left; }
+#scn1 ul li div label { float: none; }
+#scn1 ul li .listbox,
+#scn1 ul li .textbox { text-align: center; }
+#scn1 ul.ulJobsBackup { width: 100%; height: calc(100% - 326px); }
+#scn1 ul.full li .textbox { width: calc(100% - 205px); }
+#scn1 ul.full li:last-child { height: calc(100% - 54px); }
+/* this is for the restore page */
+#scn1 ul.ulJobsRestore { width: 100%; height: calc(100% - 225px); }
+#scn1 ul li #cmbArchives { height: 145px; }
+
+
+#scn1 ul li #cmbJobList { text-align: left; }
+#scn1 ul li #cmbType optgroup { color: #333; font-weight: bold; font-style: italic; }
+#scn1 ul li #cmbType option { color: #fff; font-weight: normal; font-style: normal; }
+#scn1 ul li #txtHour { width: 25px; }
+#scn1 ul li #txtMinute { width: 25px; }
+#scn1 ul li #cmbAMPM { width: 50px; }
+#scn1 ul li #cmbFrequency { width: 74px; }
+#scn1 ul li #txtStoreQuota,
+#scn1 ul li #txtStoreAmt { width: 50px; }
+#scn1 ul li #cmbAlert { text-align: left; }
+
+
+#scn1 ul li #txtParameters { text-align: left; }
+#scn1 ul li #txtNotes { height: 100%; text-align: left; }
+
+
+#divPopup .divBody table.dow { width: 100%; text-align: center; }
+#divPopup .divBody table.dow td { width: 14%; border: 1px solid rgba(0,0,0,0.2); }
+#divPopup .divBody table.dow td.selected { color: #fff; background-color: rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.4); }
+
+#divPopup .divBody table.dom { margin-top: -8px; width: 100%; text-align: center; }
+#divPopup .divBody table.dom td { border: 1px solid rgba(0,0,0,0.2); }
+#divPopup .divBody table.dom td.selected { color: #fff; background-color: rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.4); }
+
+#divPopup .divBody ul.freq { width: 100%; text-align: center; }
+#divPopup .divBody ul.freq li { display: inline-block; text-align: center; }
+#divPopup .divBody ul.freq li #txtFreq { width: 50px; text-align: center; }
+#divPopup .divBody ul.freq li #cmbFreq { margin-left: 4px; width: 100px; }
+

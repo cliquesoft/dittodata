@@ -1,0 +1,92 @@
+#divHeader { height: 100px; }
+
+
+#divHeader #imgTab {
+	position:absolute;
+	top: 0px;
+	left: 50%;
+	margin-left: -64px;
+	opacity: 0.7;
+	z-index: -10;
+}
+
+
+#divHeader #divTitle {
+	margin: 0 250px;
+	padding: 6px 0;
+	border-bottom: 1px solid rgba(255,255,255,0.5);
+	text-align: center;
+}
+#divHeader #divTitle a {
+	margin: 0 62px;
+	padding: 0 10px;
+	font-size: 18px;
+	background-color: #4088ff;
+	border: solid 1px #fff;
+}
+#divHeader #divTitle a:hover { color: #fff; background-color: #0055e3; }
+#divHeader #divTitle a.selected {
+	color: #fff;
+	border: 1px solid #fff;
+	background-color: #555;
+	cursor: default;
+}
+
+
+#divHeader #divTab { position: absolute; top: 58px; left: 40px; }
+#divHeader #divTab ul { }
+#divHeader #divTab ul li { display: inline; }
+#divHeader #divTab ul li a {
+	text-decoration: none;
+	padding: 5px 15px;
+	font-size: 15px;
+	font-weight: bold;
+	background-color: #4088ff;
+	border: solid 1px #fff;
+}
+#divHeader #divTab ul li a:hover { color: #fff; background-color: #0055e3; }
+#divHeader #divTab ul li a.aTabSel { cursor: default; color: #fff; background-color: #555; }
+#divHeader #divTab ul li a.aTabSel:hover { background-color: #555; }
+
+  
+#divHeader #divBtn { position: absolute; top: 53px; right: 40px; }
+#divHeader #divBtn input[type=button],
+#divHeader #divBtn input[type=submit],
+#divHeader #divBtn input[type=reset] {
+	margin-left: 4px;
+	padding: 4px 15px;
+	font-size: 15px;
+	font-weight: bold;
+}
+
+
+
+
+
+.btnHeader {
+/*   color: #777; */
+/*   background-color: #aaa; */
+color: rgba(255,255,255,0.5);
+background-color: #0055e3;
+  border: 1px solid #fff;
+  cursor: pointer; }
+.btnHeader:hover { color: #fff; background-color: #4088ff; }
+
+
+
+
+
+
+#divContent {
+	margin: 0 10px;
+	padding: 10px;
+	height: calc(100% - 121px);
+	background-color: #555;
+	border: 1px solid #4088ff;
+	border-bottom-width: 0;
+	border-top-left-radius: 0.5em;
+	border-top-right-radius: 0.5em;
+}
+
+.divScreen { height: 100%; }
+

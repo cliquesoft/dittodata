@@ -1,0 +1,17 @@
+#scn5 { display: none; }
+#scn5 a { color: #333; }
+#scn5 table { margin: 0 auto; width: 650px; }
+
+
+
+
+.thCol {							/* these are for the "about" tab */
+  padding-right: 10px;
+  width: 150px;
+  color: #ccc;
+  text-align: right; }
+.thManufacturer { font-size: 16pt; text-align: center; }
+.thWebsite { text-align: center; }
+
+.ulAboutLinks { margin: 20px auto; width: 100%; text-align: center; }
+.ulAboutLinks li { display: inline; }

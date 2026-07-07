@@ -1,0 +1,128 @@
+/* Core Styles */
+li.collapsed { background: url(../imgs/_mime/_folder.closed.png) 4px 2px no-repeat; }
+li.expanded { background: url(../imgs/_mime/_folder.opened.png) 4px 2px no-repeat; }
+li.folder { background: url(../imgs/_mime/_folder.closed.png) 4px 2px no-repeat; }
+li.file { background: url(../imgs/_mime/_file.png) 4px 2px no-repeat; }
+li.symlink { background: url(../imgs/_mime/_symlink.png) 4px 2px no-repeat; }
+li.share { background: url(../imgs/_mime/_share.png) 4px 2px no-repeat; }
+li.busy { background: url(../imgs/_mime/_busy.gif) 4px 2px no-repeat !important; }
+li.dot { background: url(../imgs/_mime/_dot.png) 4px 2px no-repeat; }
+li.dotdot { display: none; background: url(../imgs/_mime/_dotdot.png) 4px 2px no-repeat; }
+li.error { background: url(../imgs/_mime/_error.png) 4px 2px no-repeat; }
+li.warning { background: url(../imgs/_mime/_warning.png) 4px 2px no-repeat; }
+
+/* Special Styles */			/* WARNING: this MUST come after 'Core Styles' */
+li.configure { background: url(../imgs/_mime/_configure.png) 4px 2px no-repeat; }
+li.library { background: url(../imgs/_mime/_library.png) 4px 2px no-repeat; }
+li.favorites { background: url(../imgs/_mime/_favorites.png) 4px 2px no-repeat; }
+li.device { background: url(../imgs/_mime/_device.png) 4px 2px no-repeat; }
+li.local { background: url(../imgs/_mime/_local.png) 4px 2px no-repeat; }
+li.attached { background: url(../imgs/_mime/_attached.png) 4px 2px no-repeat; }
+li.data { background: url(../imgs/_mime/_data.png) 4px 2px no-repeat; }
+li.network { background: url(../imgs/_mime/_network.png) 4px 2px no-repeat; }
+li.apple { background: url(../imgs/_mime/_apple.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.linux { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.windows { background: url(../imgs/_mime/_windows.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.xinix { background: url(../imgs/_mime/_xinix.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.group { background: url(../imgs/_mime/_group.png) 4px 2px no-repeat; }
+li.other { background: url(../imgs/_mime/_other.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.backups { background: url(../imgs/_mime/_backups.png) 4px 2px no-repeat; }
+li.duplicates { background: url(../imgs/_mime/_duplicates.png) 4px 2px no-repeat; }
+
+/* Services */
+li.service { background: url(../imgs/_mime/_service.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.hulu { background: url(../imgs/_mime/_hulu.png) 4px 2px no-repeat; }
+li.netflix { background: url(../imgs/_mime/_netflix.png) 4px 2px no-repeat; }
+li.wwenetwork { background: url(../imgs/_mime/_wwenetwork.png) 4px 2px no-repeat; }
+li.youtube { background: url(../imgs/_mime/_youtube.png) 4px 2px no-repeat; }
+li.pinterest { background: url(../imgs/_mime/_pinterest.png) 4px 2px no-repeat; }
+
+/* File Extensions*/
+li.mime_3gp { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_afp { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_afpa { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_asp { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_aspx { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_avi { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_bat { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_bmp { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_bz { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+li.mime_bz2 { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+li.mime_c { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_cfm { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_cgi { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_com { background: url(../imgs/_mime/executable.png) 4px 2px no-repeat; }
+li.mime_cpp { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_css { background: url(../imgs/_mime/css.png) 4px 2px no-repeat; }
+li.mime_csv { background: url(../imgs/_mime/text.png) 4px 2px no-repeat; }
+li.mime_deb { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_dia { background: url(../imgs/_mime/dia.png) 4px 2px no-repeat; }
+li.mime_doc { background: url(../imgs/_mime/document.png) 4px 2px no-repeat; }
+li.mime_docx { background: url(../imgs/_mime/document.png) 4px 2px no-repeat; }
+li.mime_exe { background: url(../imgs/_mime/executable.png) 4px 2px no-repeat; }
+li.mime_gif { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_gz { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+li.mime_fla { background: url(../imgs/_mime/fla.png) 4px 2px no-repeat; }
+li.mime_h { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_htm { background: url(../imgs/_mime/html.png) 4px 2px no-repeat; }
+li.mime_html { background: url(../imgs/_mime/html.png) 4px 2px no-repeat; }
+li.mime_jar { background: url(../imgs/_mime/java.png) 4px 2px no-repeat; }
+li.mime_java { background: url(../imgs/_mime/java.png) 4px 2px no-repeat; }
+li.mime_jpg { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_jpeg { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_js { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_k3b { background: url(../imgs/_mime/k3b.png) 4px 2px no-repeat; }
+li.mime_lasso { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_log { background: url(../imgs/_mime/text.png) 4px 2px no-repeat; }
+li.mime_lua { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_m4p { background: url(../imgs/_mime/audio.png) 4px 2px no-repeat; }
+li.mime_mkv { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_mov { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_mp3 { background: url(../imgs/_mime/audio.png) 4px 2px no-repeat; }
+li.mime_mp4 { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_mpg { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_mpeg { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_odg { background: url(../imgs/_mime/odg.png) 4px 2px no-repeat; }
+li.mime_odp { background: url(../imgs/_mime/presentation.png) 4px 2px no-repeat; }
+li.mime_ods { background: url(../imgs/_mime/spreadsheet.png) 4px 2px no-repeat; }
+li.mime_odt { background: url(../imgs/_mime/document.png) 4px 2px no-repeat; }
+li.mime_ogg { background: url(../imgs/_mime/audio.png) 4px 2px no-repeat; }
+li.mime_pac { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_pagez { background: url(../imgs/_mime/document.png) 4px 2px no-repeat; }
+li.mime_pet { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_pcx { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_pdf { background: url(../imgs/_mime/pdf.png) 4px 2px no-repeat; }
+li.mime_php { background: url(../imgs/_mime/php.png) 4px 2px no-repeat; }
+li.mime_png { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_ppt { background: url(../imgs/_mime/presentation.png) 4px 2px no-repeat; }
+li.mime_pptx { background: url(../imgs/_mime/presentation.png) 4px 2px no-repeat; }
+li.mime_psd { background: url(../imgs/_mime/psd.png) 4px 2px no-repeat; }
+li.mime_pl { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_py { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_qt { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_rb { background: url(../imgs/_mime/ruby.png) 4px 2px no-repeat; }
+li.mime_rbx { background: url(../imgs/_mime/ruby.png) 4px 2px no-repeat; }
+li.mime_rhtml { background: url(../imgs/_mime/ruby.png) 4px 2px no-repeat; }
+li.mime_rpm { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_ruby { background: url(../imgs/_mime/ruby.png) 4px 2px no-repeat; }
+li.mime_sh { background: url(../imgs/_mime/script.png) 4px 2px no-repeat; }
+li.mime_soft { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_sql { background: url(../imgs/_mime/database.png) 4px 2px no-repeat; }
+li.mime_svg { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_swf { background: url(../imgs/_mime/swf.png) 4px 2px no-repeat; }
+li.mime_tar { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_tbz { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+li.mime_tgz { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+li.mime_tif { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_tiff { background: url(../imgs/_mime/picture.png) 4px 2px no-repeat; }
+li.mime_txt { background: url(../imgs/_mime/text.png) 4px 2px no-repeat; }
+li.mime_vb { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_wav { background: url(../imgs/_mime/audio.png) 4px 2px no-repeat; }
+li.mime_wmv { background: url(../imgs/_mime/video.png) 4px 2px no-repeat; }
+li.mime_wpd { background: url(../imgs/_mime/document.png) 4px 2px no-repeat; }
+li.mime_xls { background: url(../imgs/_mime/spreadsheet.png) 4px 2px no-repeat; }
+li.mime_xlsx { background: url(../imgs/_mime/spreadsheet.png) 4px 2px no-repeat; }
+li.mime_xml { background: url(../imgs/_mime/code.png) 4px 2px no-repeat; }
+li.mime_yum { background: url(../imgs/_mime/_linux.png) 4px 2px no-repeat; background-size: 16px 16px; }
+li.mime_zip { background: url(../imgs/_mime/compressed.png) 4px 2px no-repeat; }
+

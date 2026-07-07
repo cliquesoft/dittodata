@@ -1,0 +1,400 @@
+aberdeen
+agar
+agency village
+akaska
+alcester
+alexandria
+allen
+alpena
+amherst
+andover
+arlington
+armour
+artesian
+ashton
+astoria
+aurora
+avon
+badger
+baltic
+barnard
+batesland
+bath
+belle fourche
+belvidere
+beresford
+bethlehem
+big stone city
+bison
+black hawk
+black hills
+blunt
+bonesteel
+bowdle
+box elder
+bradley
+brandon
+brandt
+brentford
+bridgewater
+bristol
+britton
+brookings
+bruce
+bryant
+buffalo
+buffalo gap
+buffalo ridge
+bullhead
+burbank
+burke
+camp
+canistota
+canova
+canton
+caputa
+carpenter
+carter
+carthage
+castlewood
+cavour
+centerville
+chamberlain
+chancellor
+cherry
+chester
+city
+claire
+claremont
+clark
+clear lake
+colman
+colome
+colton
+columbia
+conde
+corona
+corsica
+crazy horse
+creek
+creighton
+cresbard
+crocker
+crook
+crooks
+custer
+dakota dunes
+dallas
+dante
+davis
+de smet
+deadwood
+dell rapids
+delmont
+dimock
+doland
+draper
+dupree
+eagle butte
+eden
+edgemont
+egan
+elk point
+elkton
+elm springs
+emery
+enning
+erwin
+esmond
+estelline
+ethan
+eureka
+fairburn
+fairfax
+fairview
+faith
+faulkton
+fedora
+ferney
+firesteel
+flandreau
+florence
+fort meade
+fort pierre
+fort thompson
+frankfort
+frederick
+freeman
+fruitdale
+fulton
+gann valley
+garden city
+garretson
+gary
+gayville
+geddes
+gettysburg
+glad valley
+glencross
+glenham
+goodwin
+gregory
+grenville
+groton
+hamill
+harrisburg
+harrison
+harrold
+hartford
+hayes
+hayti
+hazel
+hecla
+henry
+hermosa
+herreid
+herrick
+hetland
+highmore
+hill city
+hitchcock
+holabird
+hosmer
+hot springs
+houghton
+hoven
+howard
+howes
+hudson
+humboldt
+hurley
+huron
+ideal
+interior
+iona
+ipswich
+irene
+iroquois
+isabel
+java
+jefferson
+kadoka
+kaylor
+keldron
+kennebec
+keystone
+kimball
+kranzburg
+kyle
+labolt
+lake andes
+lake city
+lake norden
+lake preston
+lane
+langford
+lantry
+lead
+lebanon
+lemmon
+lennox
+leola
+lesterville
+letcher
+little eagle
+lodgepole
+long valley
+longlake
+loomis
+lower brule
+ludlow
+lyons
+madison
+mahto
+manderson
+mansfield
+marcus
+marion
+martin
+marty
+marvin
+mc intosh
+mc laughlin
+meadow
+meckling
+mellette
+menno
+midland
+milbank
+milesville
+miller
+mina
+mission
+mission hill
+mission ridge
+mitchell
+mobridge
+monroe
+montrose
+morristown
+mound city
+mount vernon
+mud butte
+murdo
+nemo
+new effington
+new holland
+new underwood
+newell
+nisland
+norris
+north sioux city
+northville
+nunda
+oacoma
+oelrichs
+oglala
+okaton
+okreek
+oldham
+olivet
+onaka
+onida
+opal
+oral
+orient
+ortley
+owanka
+parade
+parker
+parkston
+parmelee
+peever
+philip
+pickstown
+piedmont
+pierpont
+pierre
+pine ridge
+plankinton
+platte
+pollock
+porcupine
+prairie city
+presho
+pringle
+provo
+pukwana
+quinn
+ralph
+ramona
+rapid city
+ravinia
+raymond
+red owl
+redfield
+redig
+ree heights
+reliance
+renner
+reva
+revillo
+ridgeview
+rochford
+rockham
+roscoe
+rosebud
+rosholt
+roslyn
+rowena
+rutland
+saint charles
+saint francis
+saint lawrence
+saint onge
+salem
+scenic
+scotland
+selby
+seneca
+shadehill
+shore
+sinai
+sioux falls
+sisseton
+sky ranch
+smithwick
+south
+spearfish
+spencer
+springfield
+stephan
+stickney
+stockholm
+strandburg
+stratford
+sturgis
+summit
+tabor
+tea
+timber lake
+tolstoy
+toronto
+trail city
+trent
+tripp
+tulare
+turton
+tuthill
+twin brooks
+tyndall
+union center
+utica
+vale
+valley springs
+veblen
+vermillion
+viborg
+vienna
+virgil
+vivian
+volga
+volin
+wagner
+wakonda
+wakpala
+wall
+wallace
+wanblee
+ward
+warner
+wasta
+watauga
+watertown
+waubay
+waverly
+webster
+wentworth
+wessington
+wessington springs
+westport
+wewela
+white
+white lake
+white owl
+white river
+whitehorse
+whitewood
+willow lake
+wilmot
+winfred
+winner
+witten
+wolsey
+wood
+woonsocket
+worthing
+wounded knee
+yale
+yankton
+zeona

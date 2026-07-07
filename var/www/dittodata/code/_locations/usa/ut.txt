@@ -1,0 +1,263 @@
+alpine
+alta
+altamont
+alton
+american fork
+aneth
+annabella
+antimony
+aurora
+bear river city
+beaver
+bicknell
+big water
+bingham canyon
+blanding
+bluebell
+bluff
+boulder
+bountiful
+brian head
+brigham city
+brighton
+bryce
+bryce canyon
+bullfrog
+cache valley
+cannonville
+castle dale
+cedar city
+cedar hills
+cedar valley
+centerfield
+centerville
+chester
+circleville
+cisco
+clarkston
+clawson
+clearfield
+cleveland
+clinton
+coalville
+corinne
+cornish
+cottonwood
+delta
+deweyville
+draper
+duchesne
+duck creek village
+dutch john
+eagle mountian
+east carbon
+echo
+eden
+elberta
+elmo
+elsinore
+emery
+enterprise
+ephraim
+erda
+escalante
+eureka
+fairview
+farmington
+fayette
+ferron
+fielding
+fillmore
+fort duchesne
+fountain green
+fremont
+fruit heights
+fruitland
+garden city
+garland
+garrison
+glendale
+glenwood
+goshen
+grantsville
+green river
+grouse creek
+gunlock
+gunnison
+gusher
+halls crossing
+hanksville
+hanna
+hatch
+heber city
+helper
+henefer
+henrieville
+herriman
+highland
+hill afb
+hinckley
+hite
+holden
+holladay
+honeyville
+hooper
+howell
+huntington
+huntsville
+hurricane
+hyde park
+hyrum
+ibapah
+ivins
+jensen
+junction
+kamas
+kanab
+kanarraville
+kanosh
+kaysville
+kearns
+kingston
+koosharem
+la sal
+lake powell
+laketown
+lapoint
+laverkin
+layton
+leamington
+leeds
+lehi
+levan
+lewiston
+lindon
+loa
+logan
+long valley junction
+lyman
+lynndyl
+magna
+manila
+manti
+mapleton
+marysvale
+mayfield
+meadow
+mendon
+mexican hat
+midvale
+midway
+milford
+millville
+minersville
+moab
+modena
+mona
+monroe
+montezuma creek
+monticello
+monument valley
+morgan
+moroni
+mount carmel
+mount pleasant
+mountain home
+murray
+myton
+neola
+nephi
+new harmony
+newcastle
+newton
+north logan
+north salt lake
+oak city
+oakley
+oasis
+ogden
+orangeville
+orderville
+orem
+panguitch
+paradise
+paragonah
+park city
+park valley
+parowan
+payson
+perry
+pleasant grove
+plymouth
+price
+providence
+provo
+randlett
+randolph
+redmond
+richfield
+richmond
+riverdale
+riverside
+riverton
+rockville
+roosevelt
+roy
+rush valley
+saint george
+salem
+salina
+salt lake city
+sandy
+santa clara
+santaquin
+scipio
+sigurd
+smithfield
+snowbird
+snowville
+snyderville
+south jordan
+south salt lake
+spanish fork
+spring city
+springdale
+springville
+stansbury park
+sterling
+stockton
+summit
+sundance
+sunnyside
+sunset
+syracuse
+tabiona
+talmage
+taylorsville
+teasdale
+thompson
+tooele
+toquerville
+torrey
+tremonton
+trenton
+tridell
+tropic
+vernal
+vernon
+veyo
+virgin
+wales
+wallsburg
+washington terrace
+wellington
+wellsville
+wendover
+west bountiful
+west jordan
+west point
+west valley city
+whiterocks
+willard
+woodruff
+woods cross

@@ -1,0 +1,289 @@
+aguila
+ajo
+alpine
+amado
+apache junction
+arivaca
+arizona city
+arlington
+ash fork
+avondale
+bagdad
+bapchule
+bellemont
+benson
+bisbee
+black canyon city
+blue
+blue gap
+bouse
+bowie
+brenda
+buckeye
+bullhead city
+bylas
+cameron
+camp verde
+carefree
+casa grande
+casas adobes
+cascabel
+cashion
+cave creek
+central
+chambers
+chandler
+chandler heights
+chinle
+chino valley
+chloride
+cibicue
+clarkdale
+clay springs
+claypool
+clifton
+cochise
+colorado city
+concho
+congress
+coolidge
+cornville
+cortaro
+cottonwood
+crown king
+dateland
+davis-monthan afb
+dennehotso
+dewey
+dolan springs
+douglas
+dragoon
+duncan
+eagar
+ehrenberg
+el mirage
+eleven mile corner
+elfrida
+elgin
+eloy
+fairbank
+flagstaff
+florence
+forest lakes
+fort apache
+fort defiance
+fort huachuca
+fort mohave
+fort thomas
+fountain hills
+fredonia
+gadsden
+ganado
+gila bend
+gilbert
+gleeson
+glendale
+globe
+golden valley
+goodyear
+grand canyon
+gray mountain
+green valley
+greenehaven
+greer
+guadalupe
+happy jack
+hayden
+heber
+hereford
+higley
+holbrook
+hope
+hotevilla
+houck
+huachuca city
+hualapai
+humboldt
+indian wells
+iron springs
+jacob lake
+jerome
+joseph city
+kaibito
+kayenta
+keams canyon
+kearny
+kingman
+kirkland
+kykotsmovi village
+lake havasu city
+lake montezuma
+lake powell
+lakeside
+laveen
+leupp
+litchfield park
+littlefield
+lukachukai
+luke afb
+lukeville
+lupton mammoth
+many farms
+marana
+marble canyon
+maricopa
+mayer
+mcnary
+mcneal
+meadview
+mesa
+miami
+mohave valley
+morenci
+mormon lake
+morristown
+mount lemmon
+munds park
+naco
+nazlini
+new river
+nogales
+north rim
+nutrioso
+oatman
+oracle
+oro valley
+overgaard
+page
+palo verde
+palominas
+paradise valley
+parker
+parks
+patagonia
+paulden
+payson
+peach springs
+pearce
+peoria
+peridot
+phoenix
+picacho
+pima
+pine
+pinedale
+pinetop
+pinon
+pirtleville
+pisinemo
+polacca
+pomerene
+portal
+poston
+prescott
+prescott valley
+quartzsite
+queen creek
+red rock
+red valley
+rico
+rillito
+rimrock
+rio
+rio verde
+rock
+rock point
+roll
+roosevelt
+round
+sacaton
+safford
+sahuarita
+saint david
+saint johns
+saint michaels
+salome
+san carlos
+san luis
+san manuel
+san simon
+sanders
+sasabe
+sawmill
+scottsdale
+second mesa
+sedona
+seligman
+sells
+shonto
+show low
+shungopavi
+sierra vista
+skull valley
+snowflake
+solomon
+somerton
+sonoita
+sonora
+spring valley
+springerville
+stanfield
+sun city
+sun city west
+sun lakes
+sun valley
+supai
+superior
+surprise
+tacna
+taylor
+teec nos pos
+tempe
+temple bar marina
+thatcher
+tolleson
+tombstone
+tonalea
+tonopah
+tonto basin
+topawa
+topock
+tortilla flat
+tortolita
+tsaile
+tuba city
+tubac
+tucson
+tumacacori
+tusayan
+vail
+valentine
+valley farms
+verde valley
+vernon
+waddell
+wellton
+wenden
+west sedona
+whetstone
+white mountain lake
+white sands mr
+whiteriver
+why
+wickenburg
+wikieup
+willcox
+williams
+willow beach
+window rock
+winkelman
+winslow
+wittmann
+woodruff
+yarnell
+young
+youngtown
+yucca
+yuma
+yuma mcas
+yuma pg

@@ -1,0 +1,8 @@
+# This is a sample include file; exclude files follow same principles.
+# Files can include comments such as these, blank lines, and listings.
+# WARNING: directories MUST end with a '/' character!
+
+directory/
+directory2/sub/
+*.pdf
+directory3/foo/file *.odf

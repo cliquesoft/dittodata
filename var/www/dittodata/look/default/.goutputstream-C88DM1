@@ -1,0 +1,386 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<title>DittoData [Backup]</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="author" content="Dave Henderson">
+	<meta name="description" content="DittoData [Backup]">
+	<meta name="keywords" content="" />
+	<!-- http://stackoverflow.com/questions/49547/making-sure-a-web-page-is-not-cached-across-all-browsers -->
+	<!--
+	<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
+	<meta http-equiv='Pragma' content='no-cache' />
+	<meta http-equiv='Expires' content='0' />
+	-->
+	<!-- http://stackoverflow.com/questions/21738675/why-wont-my-viewport-tag-properly-use-device-width-no-zoom-on-most-mobile-dev -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- https://www.favicon-generator.org/ -->
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="home/${UN}/imgs/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link rel="manifest" href="home/${UN}/imgs/manifest.json">
+	<link rel="apple-touch-icon" sizes="57x57" href="home/${UN}/imgs/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="home/${UN}/imgs/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="home/${UN}/imgs/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="home/${UN}/imgs/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="home/${UN}/imgs/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="home/${UN}/imgs/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="home/${UN}/imgs/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="home/${UN}/imgs/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="home/${UN}/imgs/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="home/${UN}/imgs/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="home/${UN}/imgs/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="home/${UN}/imgs/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="home/${UN}/imgs/favicon-16x16.png">
+	<link rel="shortcut icon" type="image/x-icon" href="home/${UN}/imgs/favicon.ico" />
+
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_global.css?v=1.0">	<!-- WARNING: these two MUST come first!!! -->
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_module.css?v=1.0">
+<!--	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_calendar.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_contact.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_filedrop.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_gallery.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_login.css?v=1.0">		-->
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_mime.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_popup.css?v=1.0">
+<!--	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_share.css?v=1.0">		-->
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/about.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/data.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/jobs.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/log.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/overview.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/status.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/default.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/jQuery.FileTree.css?v=1.0">
+
+	<script language="javascript" src="code/_ajax.js"></script>
+	<script language="javascript" src="code/_browser.js"></script>
+<!--	<script language="javascript" src="code/_calendar.js"></script>
+	<script language="javascript" src="code/_captcha.js"></script>
+	<script language="javascript" src="code/_contact.js"></script>
+	<script language="javascript" src="code/_cookie.js"></script>
+	<script language="javascript" src="code/_filedrop.js"></script>
+	<script language="javascript" src="code/_gallery.js"></script>
+	<script language="javascript" src="code/_gallery.admin.js"></script>			-->
+	<script language="javascript" src="code/_global.js"></script>
+	<script language="javascript" src="code/_listbox.js"></script>
+	<script language="javascript" src="code/_login.js"></script>
+	<script language="javascript" src="code/_logout.js"></script>
+	<script language="javascript" src="code/_popup.js"></script>
+<!--	<script language="javascript" src="code/_search.js"></script>
+	<script language="javascript" src="code/_share.js"></script>				-->
+	<script language="javascript" src="code/_tabstrip.js"></script>
+	<script language="javascript" src="code/data.js"></script>
+	<script language="javascript" src="code/jobs.js"></script>
+	<script language="javascript" src="code/overview.js"></script>
+	<script language="javascript" src="code/status.js"></script>
+	<script language="javascript" src="code/default.js"></script>
+	<script language="javascript" src="code/jQuery_3.4.1.js"></script>
+	<script language="javascript" src="code/jQuery.ui_1.13.1.js"></script>
+	<script language="javascript" src="code/jQuery.filedrop_2014.12.19.js"></script>
+	<script language="javascript" src="code/jQuery.FileTree_1.01.js"></script>
+	<script language="javascript" src="data/config.js"></script>				<!-- WARNING: this MUST come below _cookie.js -->
+
+	<!-- ANALYTICS -->
+	<!-- add this in for your own site -->
+
+	<script language="javascript">
+	<!--
+
+	var Orientation='';							// used to indicate the mobile devices orientation: portrait, landscape
+	var Rotated=0;								// indicates that the orientation has changed
+
+
+	function formLoad() {
+		//document.getElementById('hidSID').value = getCookie('SID');
+		//document.getElementById('hidUsername').value = getCookie('username');
+
+		// the below is for the _gallery.admin.js
+		//adjGallery('init','divGallery');
+
+		isMobile();
+		formLayout();
+		parseURI();							// WARNING: this MUST come after the 'reset' of values above so the proper products are filtered in the results listing
+
+		adjButtons(0);							// makes changes to the form to reflect the first tab being clicked
+
+		$('#cmbIncludeList').droppable({ drop: Drop });			// define the function to call when the 'drop' event is activated
+		$('#cmbExcludeList').droppable({ drop: Drop });
+
+		Logs('load','scheduled','divSchJobs');
+		Logs('load','completed','divComJobs');
+		Logs('load','errors','divErrJobs');
+
+		Jobs('init');							// populate the combobox with all the saved jobs
+return true;
+		if (! getCookie('balloons_tracker')) {								// if the cookie doesn't exist, then...
+			setCookie('balloons_tracker', '1', new Date('January 1, 2025 00:01:00'), '/');		// create the cookie if it doesn't exist!	WARNING: this prevented a bug if the default.html balloons didn't get clicked through to create a cookie before other screens/siders were opened
+			showBalloons(1);									//    we need to show all the current balloons!
+		} else {											// otherwise at least some balloons have been shown, but there could be more!
+			var iBalloons = parseInt(getCookie('balloons_tracker'));
+			if (iBalloons < 8) { showBalloons(iBalloons+1); }
+		}
+
+		if ((! isFirefox && ! isChrome && ! isOpera) || isEdge)	// if you're using Apple Safari or Microsoft browsers, then...
+			{ setTimeout('alert("WARNING: To cover as many users as possible, only the top 3 browsers built to run on Apple, Linux, and Windows devices are supported and include Mozilla Firefox, Google Chrome, and Opera Browser. Unfortunately this browser is either unknown -or- known to only work with one operating system. Although this project should (mostly) work, we suggest using one of the listed alternatives to get the best experience possible. Please contact your support staff with any questions you may have.");',100); }
+	}
+
+
+	function formLayout() {
+return true;
+		if (Mobile) {
+			document.getElementById('liSocialToggle').innerHTML = '';	// removed the Social link (which should only be shown on desktops)
+			document.getElementById('liModuleClose').innerHTML = '';	// removes the 'X' from showing in the 'Status' bar (which should only be shown on desktops)
+			document.getElementById('ulSidebar').style.width = (parseInt($(window).height()) - 2) + 'px';
+			return true;							// no reason to process the below background image manipulation since it's hidden now!
+		}
+
+		// set the background image size below
+		var iWinHeight = $(window).height();
+		var iWinWidth = $(window).width();
+		var iDocHeight = $(document).height();
+		var iDocWidth = $(document).width();
+
+		if (iDocHeight > iWinWidth) {						// we're in a portrait view
+			var iTop = parseInt((iWinHeight - iWinWidth) / 2)+'px';
+			var iLeft = '0px';
+
+			if (iWinHeight > iWinWidth) { var iSize = iWinHeight+'px'; }
+			else if (iDocHeight > iWinWidth) { var iSize = iWinWidth-20+'px'; }
+		} else {								// we're in a landscape view
+			var iSize = iDocHeight+'px';
+			var iTop = '0px';
+			var iLeft = parseInt((iWinWidth - iDocHeight) / 2)+'px';
+		}
+
+		document.getElementById('imgPage').style.height = iSize;
+		document.getElementById('imgPage').style.width = iSize;			// to maintain 4:1
+		document.getElementById('imgPage').style.top = iTop;
+		document.getElementById('imgPage').style.left = iLeft;
+	}
+
+
+	function processURI() {
+		// a supplemental function for parseURI() so that the proper tab can be clicked
+	}
+
+	//-->
+	</script>
+</head>
+
+
+<body onLoad="formLoad();" onResize="formLayout();" onBeforeUnload="alert('calling shutdown'); Status('shutdown');">
+	<input type="hidden" id="hidSID" value='' />					<!-- used to validate user submissions -->
+	<input type="hidden" id="hidUsername" value='siege' />				<!-- used to store the logged in username -->
+<!-- LEFT OFF - replace the above value with an actual login -->
+
+	<img class='background' src='home/${UN}/imgs/background.jpg' />
+	<div id="divBalloon" onClick="$(this).fadeOut('slow');"></div>
+	<div id="divOverlay" class="overlay"></div>					<!-- this is to "blackout" the background for "popups" -->
+	<div id="divPopup"></div>
+
+	<input type="hidden" id="hidTemp" value="" />					<!-- used to store values temporarily -->
+	<input type="hidden" id="hidJobFile" value="" />				<!-- the execution script path and name that's currently loaded in the 'Jobs' tab -->
+	<input type="hidden" id="hidLogFile" value="" />				<!-- the log that's currently loaded in the 'Log' tab -->
+
+	<div id='divHeader'>
+		<img id="imgTab" src="home/${UN}/imgs/backup.png" />
+		<div id="divTab">
+			<ul>
+				<li><a href="#" id="tab0" onClick="adjTabs2('aTabSel','tab','scn',0,'adjButtons(0)');" class="aTabSel">Overview</a></li>
+				<li><a href="#" id="tab1" onClick="adjTabs2('aTabSel','tab','scn',1,'adjButtons(1)');">Jobs</a></li>
+				<li><a href="#" id="tab2" onClick="adjTabs2('aTabSel','tab','scn',2,'adjButtons(2)');">Data</a></li>
+				<li><a href="#" id="tab3" onClick="adjTabs2('aTabSel','tab','scn',3,'adjButtons(3)');">Log</a></li>
+				<li><a href="#" id="tab4" onClick="adjTabs2('aTabSel','tab','scn',4,'adjButtons(4)');">Status</a></li>
+				<li><a href="#" id="tab5" onClick="adjTabs2('aTabSel','tab','scn',5,'adjButtons(5)');">About</a></li>
+			</ul>
+		</div>
+		<div id="divTitle"><a href='default.sh' class='selected' onClick='return false'>Backup</a><a href='default.sh?p=restore.html'>Restore</a></div>
+		<div id="divBtn">&nbsp;</div>
+	</div>
+	
+
+	<div id="divContent">
+		<div id="scn0" class='divScreen'>
+<!-- DEV NOTE
+		these sections just show the jobs entered in the /etc/cron.d/backup file (for 'scheduled jobs'), a /var/log/backup/completed.log (which will have the job name & date/time stamp outputted to this file each time one
+		is run), and finally the output from /var/log/issues.log (which will output issues redirected from the cron like "backup.sh ... >/var/log/backup.log 2>|tee ..."); see the following links:
+			https://www.systutorials.com/241650/how-to-make-tee-catch-the-stderr-only-in-linux/
+			https://stackoverflow.com/questions/692000/how-do-i-write-stderr-to-a-file-while-using-tee-with-a-pipe
+
+			see the t.sh and w(rapper).sh files in this directory (taken from the two links above) for logging
+			see the tarp.sh script that does all the logging, cataloging, error control, etc
+
+		jobs(cheduler).sh	the script responsible for the scheduling via cron for the various saved jobs		NOTE: @cli level, all of these have configurable switches ONLY, no walk-throughs; of course there is this GUI also
+		backup.sh		the script responsible for tar-based backups
+		synchronize.sh		the script responsible for rsync/unison duplication
+		restore.sh		the script responsible for restoring selected data from archives
+
+		pre/post		scripts to execute locally before and after backup/sync job
+		pre-mount/post-mount	scripts to execute (in location of SOURCE [e.g. ssh, sshfs = remote; cifs, nfs, local = local]) before and after backup/sync job	< this will enable us to mount server share in DPIES/NetBUD *before* executing the sync job (since that share is not mounted otherwise)
+
+		https://www.iconfinder.com/iconsets/DarkGlass_Reworked
+		https://www.iconfinder.com/icons/31352/download_folder_icon
+		https://www.iconfinder.com/icons/54477/backup_icon
+		https://www.iconfinder.com/iconsets/imod
+		https://www.iconfinder.com/icons/79878/backup_folder_icon
+-->
+			<ul class='ulLogsBackup'>
+				<li>Scheduled jobs</li>
+				<li><div id="divSchJobs"></div></li>
+				<li>Completed jobs</li>
+				<li><div id="divComJobs"></div></li>
+				<li>Issues that need attention</li>
+				<li><div id="divErrJobs"></div></li>
+			</ul>
+		</div>
+
+
+		<div id="scn1" class='divScreen'>
+			<form method="post" id="formJob">
+			<ul class='fright'>
+				<li><span>Source backup path</span><input type="text" id="txtSource" maxlength="128" class="textbox OFTextbox" title="@ssh:/dir, %sshfs:/dir, \\\\Windows\\share, //Linux/share, /local/dir" />
+<!-- DEV NOTE - the below textbox allows custom mount parameters if needed (e.g. vers=2.1,sec=ntlmv2,... for cifs,nfs; -P 2290 for ssh(fs)) -->
+				<li class="liSub"><span>Mount parameters</span><input type="text" id="txtSourceParm" maxlength="256" class="textbox OFTextbox" title="Additional parameters to use when mounting" />
+				<li class="liSub"><span>Connect as...</span><input type="text" id="txtSourceUser" placeholder="Username" maxlength="64" class="textbox OHTextbox" title="Applicable network share username" /><input type="password" id="txtSourcePass" placeholder="Password" maxlength="32" class="textbox OHTextbox Space" title="Applicable network share password" />
+				<li class="liSub"><span><input type="button" id="btnExchangeSource" value="Exchange Keys" class="button" onClick="Keys('exchange','Source');" title="Exchange ssh keys with this device for password-less interaction" /></span><input type="text" id="txtSourceDomn" placeholder="Domain" maxlength="128" class="textbox OFTextbox" title="Applicable network share domain name" />
+				<li>&nbsp;
+				<li><span>Target storage path</span><input type="text" id="txtTarget" maxlength="128" class="textbox OFTextbox" title="@ssh:/dir, %sshfs:/dir, \\\\Windows\\share, //Linux/share, /local/dir" />
+				<li class="liSub"><span>Mount parameters</span><input type="text" id="txtTargetParm" maxlength="256" class="textbox OFTextbox" title="Additional parameters to use when mounting" />
+				<li class="liSub"><span>Connect as...</span><input type="text" id="txtTargetUser" placeholder="Username" maxlength="64" class="textbox OHTextbox" title="Applicable network share username" /><input type="password" id="txtTargetPass" placeholder="Password" maxlength="32" class="textbox OHTextbox Space" title="Applicable network share password" />
+				<li class="liSub"><span><input type="button" id="btnExchangeTarget" value="Exchange Keys" class="button" onClick="Keys('exchange','Target');" title="Exchange ssh keys with this device for password-less interaction" /></span><input type="text" id="txtTargetDomn" placeholder="Domain" maxlength="128" class="textbox OFTextbox" title="Applicable network share domain name" />
+<!-- DEV NOTE: this is like 'server' that gets appended onto the 'target storage path' -->
+				<li class="liSub"><span>Directory tag</span><input type="text" id="txtTargetDir" maxlength="64" class="textbox OFTextbox" />
+				<li>&nbsp;
+				<li><span>Job Tags</span><input type="text" id="txtTag1" maxlength="64" class="textbox OHTextbox" placeholder="Tag 1" title="Additional information that can be included in follow-up alerts" /><input type="text" id="txtTag2" maxlength="64" class="textbox OHTextbox Space" placeholder="Tag 2" title="Additional information that can be included in follow-up alerts" />
+				<li><input type="text" id="txtTag3" maxlength="64" class="textbox OHTextbox" placeholder="Tag 3" title="Additional information that can be included in follow-up alerts" /><input type="text" id="txtTag4" maxlength="64" class="textbox OHTextbox Space" placeholder="Tag 4" title="Additional information that can be included in follow-up alerts" />
+			</ul>
+
+			<ul>
+				<li><span>Saved jobs</span><select id="cmbJobList" size="1" class="listbox OFCombobox" onChange="if(this.value!=''){Jobs('load');}"></select>
+				<li><span>Job status</span><select id="cmbStatus" size="1" class="listbox OHListbox" onChange="if(document.getElementById('txtSchDate').value=='' || document.getElementById('txtSchTime').value=='' || document.getElementById('txtSchFreq').value==''){alert('Before enabling a scheduled task, you must enter a start date, time, and frequency.'); this.selectedIndex=1;}">
+					<option value="enabled">Enabled</option>
+					<option value="disabled">Disabled</option>
+				    </select><input type="button" id="btnRunNow" value="Run Now" class="button OHButton Space" onClick="Jobs('run');" />
+				<li><span>Type &amp; Compression</span><select id="cmbType" size="1" class="listbox OHListbox" onChange="if(this.selectedIndex==0){alert('Be careful with this option as invalid syntax can break the functionality of this software.');}">
+				    <optgroup label='Backup'>
+					<option value="custom">Custom</option>
+					<option value="daily">Daily</option>
+					<option value="incremental" selected>Incremental</option>
+					<option value="full">Full</option>
+				    </optgroup>
+				    <optgroup label='Synchronize'>
+					<option value="sync">Unidirectional</option>
+<!-- VER2				<option value="unison">Bidirectional</option>	-->
+				    </optgroup>
+				</select><select id="cmbCompression" size="1" class="listbox OHListbox Space">
+					<option value="none">None</option>
+					<option value="gzip">GZip</option>
+					<option value="bzip">BZip</option>
+				    </select>
+				<li><span>Job execution</span><input type="textbox" id="txtHour" maxlength="2" placeholder="HH" class="textbox" title="The hour to start the job" /><input type="text" id="txtMinute" maxlength="2" placeholder="MM" class="textbox Space" title="The minute to start the job" /><select id="cmbAMPM" size="1" class="listbox Space"><option value='am'>am</option><option value='pm'>pm</option></select><select id="cmbFrequency" size="1" class="listbox Space" onChange="document.getElementById('txtSchedule').value='';"><option value='daily'>Daily</option><option value='monthly'>Monthly</option><option value='interval'>Interval</option></select>
+				<li class="liSub"><span>Schedule</span><input type="text" id="txtSchedule" maxlength="64" class="textbox OFTextbox" title="Shows the job schedule: 1 day, 7 hours, 1,2,3,4, or Mo,Tu,We" onClick="Shedule('show');" />
+				<li><span>Cron &amp; Sudo</span><select id="cmbCron" size="1" class="listbox OHListbox" title="Additional flags for scheduling jobs">
+					<option value="">No cron flags</option>
+					<option value="name">Add name field</option>
+					<option value="cron">Add to crontab</option>
+					<option value="both">Use both name field and crontab</option>
+				    </select><select id="cmbSudo" size="1" class="listbox OHListbox Space" title="Use sudo when mounting the source and/or target">
+					<option value="false">No</option>
+					<option value="true">Yes</option>
+				    </select>
+				<li><span>Data storage</span><div class='OFListbox'><input type="radio" name="radStoretype" id="radStoretype0" value="0" class="radio" checked /><label for="radStoretype0">keep</label> <input type="text" id="txtStoreAmt" value="7" maxlength="2" class="textbox" /> <label for="radStoretype0">prior backups</label></div>
+				<li><div class='OFListbox'><input type="radio" name="radStoretype" id="radStoretype1" value="1" class="radio" /><label for="radStoretype1">keep</label> <input type="text" id="txtStoreQuota" value="1000" maxlength="6" class="textbox" /> <label for="radStoretype1">MB of backups</label></div>
+				<li><div class='OFListbox'><input type="radio" name="radStoretype" id="radStoretype2" value="2" class="radio" /><label for="radStoretype2">Manually manage job backups</label></div>
+<!-- VER2
+				<li><span>Miscellaneous</span><div><input type="checkbox" id="chkVerify" class="checkbox" /><label for="chkVerify">Verify data in backup archive</label></div>
+				<li><div><input type="checkbox" id="chkBatteries" class="checkbox" disabled /><label for="chkBatteries">Backup when using batteries</label></div>
+-->
+				<li><span>Pre-script</span><input type="text" id="txtPrescript" maxlength="128" class="textbox OFTextbox" title="The script to run prior the backup occurring" />
+				<li><span>Post-script</span><input type="text" id="txtPostscript" maxlength="128" class="textbox OFTextbox" title="Teh script to run after the backup has occurred" />
+				<li><span>Follow-up alert</span><select id="cmbAlert" size="1" class="listbox OFListbox">
+					<option value='none'>Do not alert at all</option>
+					<option value='failure'>Alert only upon failure</option>
+					<option value='success'>Alert only upon success</option>
+					<option value='always'>Alert upon success or failure</option>
+				    </select>
+				<li class="liSub"><span>Contact Execution</span><input type="text" id="txtAlertExec" maxlength="256" class="textbox OFTextbox" title="This value can be a local script or URL to execute" />
+			</ul>
+
+			<ul class='full ulJobsBackup'>
+				<li>&nbsp;
+<!-- LEFT OFF - the custom parameters listed only apply to backups, not syncs. if 'sync' is selected in the list, change placeholder below to '--one-file-system' -->
+
+<!-- DEV NOTE: the below line is for tar, rsync, or unison -->
+				<li><span>Custom job parameters</span><input type="text" id="txtParameters" maxlength="256" class="textbox" placeholder="Default: -P --one-file-system --ignore-failed-read --ignore-case" />
+<!-- WIKI: be sure to state that multi-lined entries are not retained due to the urlgetopt script -->
+				<li><span>Job notes</span><textarea id="txtNotes" rows="2" class="textbox"></textarea>
+			</ul>
+			</form>
+		</div>
+
+
+		<div id="scn2" class='divScreen'>
+			<form method="post" id="formData">
+			<div id="divFolders"></div>
+			<ul>
+<!-- LEFT OFF - be sure to write include/exclude files differently depending on syncing or backing up -->
+				<li><div class="divData"><label>Included Data</label><input type="text" id="txtInclude" placeholder="Manual entry point for wildcard statements" maxlength="128" class="textbox" /><input type="button" id="btnAddInclude" value="+" class="button" onClick="Data('add','cmbIncludeList',document.getElementById('txtInclude'));" /><input type="button" id="btnDelInclude" value="&minus;" class="button" onClick="Data('delete','cmbIncludeList','include');" /></div>
+<!-- DEV NOTE: multiple entries can be selected at once (when deleting) -->
+				<li><select id="cmbIncludeList" size="2" multiple><option value='.'>-ALL DATA-</option></select>
+			</ul>
+			<ul>
+				<li><div class="divData"><label>Excluded Data</label><input type="text" id="txtExclude" placeholder="Manual entry point for wildcard statements" maxlength="128" class="textbox" /><input type="button" id="btnAddExclude" value="+" class="button" onClick="Data('add','cmbExcludeList',document.getElementById('txtExclude'));" /><input type="button" id="btnDelExclude" value="&minus;" class="button" onClick="Data('delete','cmbExcludeList','exclude');" /></div>
+				<li><select id="cmbExcludeList" size="2" multiple></select>
+			</ul>
+			</form>
+		</div>
+
+
+		<div id="scn3" class='divScreen'>
+		</div>
+
+
+		<div id="scn4" class='divScreen'>
+		</div>
+
+
+		<div id="scn5" class='divScreen'>
+			<table align="center">
+				<tr><th colspan="2" class="thManufacturer">Cliquesoft</th></tr>
+				<tr><td colspan="2" class="thWebsite"><a href="https://www.cliquesoft.org" taget="_new">www.cliquesoft.org</a></td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Version</th><td>2022.05.24.0</td></tr>
+				<tr><th class="thCol">License</th><td><a href="https://www.cliquesoft.org/#Licenses" target="_new">CPLv2</a></td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Created by</th><td>Dave Henderson (<a href='mailto:support@cliquesoft.org'>support@cliquesoft.org</a>)</td></tr>
+				<tr><th class="thCol">Created on</th><td>2007/01/20</td></tr>
+				<tr><th class="thCol">Updated by</th><td>Dave Henderson (<a href='mailto:support@cliquesoft.org'>support@cliquesoft.org</a>)</td></tr>
+				<tr><th class="thCol">Updated on</th><td>2022/05/24</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+<!--
+				<tr><th class="thCol">Icons</th><td>Alessandro Rei (<a href='http://www.kde-look.org/usermanager/search.php?username=mentalrey' target='_new'>website</a>)</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+-->
+<!-- LEFT OFF - pull this info from the script itself -->
+				<tr><th class="thCol" valign="top">Dependencies</th><td>[, at, awk, cat, chmod, crontab, cut, date, echo, egrep, grep, head, ls, mknod, ps, rm, sed, sleep, tail, tar, tr, uniq, wc</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Copyright</th><td>2012-<script>document.write(new Date().getFullYear());</script> all rights reserved</td></tr>
+			</table>
+<!--
+			<ul class="ulAboutLinks">
+<!- - LEFT OFF - update these - ->
+				<li><a href="http://www.cliquesoft.org/share.php?soft=backup.lite&mod=backup" target="_new">Share with Friend</a> |</li>
+				<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=submit_bug" target="_new">Report a Bug</a> |</li>
+				<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=request_features" target="_new">Request Feature</a> |</li>
+				<li><a href="http://repo.cliquesoft.org/check.php?soft=backup.lite&mod=backup&ver=2019.08.14.0" target="_new">Check for Updates</a> |</li>
+				<li><a href="http://wiki.cliquesoft.org/index.php?title=backup.lite#Backup_OPTION.27s" target="_new">Help</a></li>
+			</ul>
+-->
+		</div>
+	</div>
+</body>
+</html>
+

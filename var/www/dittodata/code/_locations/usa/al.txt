@@ -1,0 +1,621 @@
+abbeville
+abernant
+addison
+adger
+akron
+alabaster
+alberta
+albertville
+alexander city
+alexandria
+aliceville
+allen
+allgood
+alma
+alpine
+alton
+altoona
+andalusia
+anderson
+annemanie
+anniston
+arab
+ariton
+arley
+arlington
+ashford
+ashland
+ashville
+athens
+atmore
+attalla
+auburn
+autaugaville
+axis
+baileyton
+banks
+bankston
+batre
+bay minette
+bayou la batre
+bear creek
+beatrice
+beaverton
+belk
+bellamy
+belle mina
+bellwood
+benton
+berry
+bessemer
+billingsley
+birmingham
+black
+blountsville
+blue mountain
+bluff park
+boaz
+boligee
+bon air
+bon secour
+booth
+boykin
+boys ranch
+brantley
+bremen
+brent
+brewton
+bridgeport
+brierfield
+brilliant
+brooklyn
+brookside
+brookwood
+brownsboro
+brundidge
+bryant
+bucks
+buhl
+burnt corn
+burnwell
+butler
+bynum
+cahaba heights
+calera
+calvert
+camden
+camp hill
+campbell
+capshaw
+carbon hill
+cardiff
+carlton
+carrollton
+castleberry
+catherine
+cedar bluff
+center point
+centre
+centreville
+chancellor
+chapman
+chatom
+chelsea
+cherokee
+chickasaw
+childersburg
+choccolocco
+chunchula
+citronelle
+clanton
+clay
+clayton
+cleveland
+clinton
+clio
+clopton
+cloverdale
+coaling
+coden
+coffee springs
+coffeeville
+coker
+collinsville
+columbia
+columbiana
+cook springs
+coosa pines
+coosada
+cordova
+cottondale
+cottonton
+cottonwood
+courtland
+cowarts
+coy
+cragford
+crane hill
+creola
+crestline heights
+cromwell
+cropwell
+crossville
+cuba
+cullman
+cusseta
+dadeville
+daleville
+danville
+daphne
+dauphin island
+daviston
+dawson
+dayton
+de armanville
+deatsville
+decatur
+deer park
+delmar
+delta
+demopolis
+detroit
+dickinson
+dixons mills
+docena
+dolomite
+dora
+dothan
+double springs
+douglas
+dozier
+duncanville
+dutton
+east brewton
+east tallassee
+eastaboga
+echola
+eclectic
+edwardsville
+eight mile
+elba
+elberta
+eldridge
+elkmont
+elmore
+elrod
+emelle
+empire
+enterprise
+epes
+equality
+estillfork
+ethelsville
+eufaula
+eutaw
+eva
+evergreen
+excel fackler
+fairfield
+fairhope
+falkville
+faunsdale
+fayette
+fitzpatrick
+five points
+flat rock
+flomaton
+florala
+florence
+foley
+forest home
+forkland
+fort davis
+fort deposit
+fort mcclellan
+fort mitchell
+fort payne
+fort rucker
+fosters
+franklin
+frankville
+frisco city
+fruitdale
+fruithurst
+fulton
+fultondale
+furman
+fyffe
+gadsden
+gainestown
+gainesville
+gallant
+gallion
+gantt
+garden city
+gardendale
+gaylesville
+geneva
+georgiana
+geraldine
+gilbertown
+glen allen
+glencoe
+glenwood
+goodsprings
+goodwater
+goodway
+gordo
+gordon
+goshen
+grady
+graham
+grand bay
+grant
+graysville
+green pond
+greensboro
+greenville
+grove hill
+groveoak
+guin
+gulf shores
+gunter afs
+guntersville
+gurley
+hackleburg
+haleyville
+hamilton
+hanceville
+hardaway
+harpersville
+hartford
+hartselle
+harvest
+hatchechubbee
+hayden
+hayneville
+hazel green
+headland
+heflin
+helena
+henagar
+higdon
+highland
+hillsboro
+hodges
+hokes bluff
+hollins
+holly pond
+hollytree
+hollywood
+holy trinity
+home
+homewood
+honoraville
+hoover
+hope
+horton
+houston
+hueytown
+hull
+huntsville
+hurtsboro
+huxford
+ider
+indian springs
+irondale
+irvington
+jachin
+jack
+jackson
+jacksons gap
+jacksonville
+jasper
+jefferson
+jemison
+jones
+joppa
+kansas
+kellerman
+kellyton
+kennedy
+kent
+killen
+kimberly
+kinston
+knoxville
+lacey's spring
+lafayette
+lake guntersville
+lanett
+langston
+lapine
+lawley
+leeds
+leesburg
+leighton
+lenox
+leroy
+lester
+letohatchee
+lexington
+lillian
+lincoln
+linden
+lineville
+lisman
+little river
+livingston
+loachapoka
+lockhart
+locust fork
+logan
+louisville
+lower peach tree
+lowndesboro
+loxley
+luverne
+lynn
+madison
+magnolia
+magnolia springs
+malcolm
+malvern
+maplesville
+marbury
+margaret
+marion
+marion junction
+mathews
+maxwell afb
+maylene
+mc calla
+mcintosh
+mckenzie
+mcshan
+mcwilliams
+megargel
+meigs
+melvin
+mentone
+meridianville
+mexia
+midfield
+midland city
+midway
+millbrook
+millers ferry
+millerville
+millport
+millry
+minter
+mobile
+monroeville
+montevallo
+montgomery
+montrose
+moody
+mooresville
+morris
+morvin
+moulton
+moundville
+mount
+mount hope
+mount olive
+mount vernon
+mountain brook
+mulga
+munford
+muscadine
+muscle shoals
+myrtlewood
+nanafalia
+napier field
+natural bridge
+nauvoo
+needham
+new brockton
+new castle
+new hope
+new market
+newbern
+newell
+newton
+newville
+normal
+northport
+notasulga
+oak hill
+oakman
+odenville
+ohatchee
+oneonta
+opelika
+opp
+orange beach
+orrville
+owens cross roads
+oxford
+oxford twp
+ozark
+paint rock
+palmerdale
+panola
+pansey
+parrish
+pelham
+pell city
+pennington
+perdido
+perdue hill
+perote
+peterman
+peterson
+petrey
+phenix city
+phil campbell
+piedmont
+pike road
+pinckard
+pine apple
+pine hill
+pine level
+pinson
+pisgah
+pittsview
+plantersville
+pleasant grove
+point clear
+pollard
+prattville
+prichard
+princeton
+quinton
+ragland
+rainbow city
+rainsville
+ralph
+ramer
+ranburne
+randolph
+range
+red bay
+red level
+redstone arsenal
+reform
+remlap
+repton
+river falls
+riverchase
+riverside
+roanoke
+robertsdale
+rock mills
+rockford
+rogersville
+russellville
+rutledge
+ryland
+safford
+saginaw
+saint elmo
+saint stephens
+salem
+salitpa
+samantha
+samson
+sand mountain
+saraland
+sardis
+satsuma
+sawyerville
+sayre
+scottsboro
+seale
+section
+selma
+semmes
+shannon
+sheffield
+shelby
+shorter
+shorterville
+silas
+siluria
+silverhill
+sipsey
+skipperville
+slocomb
+smiths
+snead
+snow hill
+somerville
+southside
+spanish fort
+spring garden
+springville
+sprott
+spruce pine
+stanton
+stapleton
+steele
+sterrett
+stevenson
+stockton
+sulligent
+sumiton
+summerdale
+sunflower
+sweet water
+sycamore
+sylacauga
+sylvania
+talladega
+tallassee
+tanner
+tarrant
+theodore
+thomaston
+thomasville
+thorsby
+tibbie
+titus
+toney
+town creek
+townley
+toxey
+trafford
+trenton
+trinity
+troy
+trussville
+tuscaloosa
+tuscumbia
+tuskegee
+tyler union grove
+union springs
+uniontown
+uriah
+valhermoso springs
+valley
+valley head
+vance
+vandiver
+verbena
+vernon
+vestavia hills
+vina
+vincent
+vinegar bend
+vinemont
+vredenburgh
+wadley
+wagarville
+walker springs
+walnut grove
+ward
+warrior
+waterloo
+watson
+wattsville
+waverly
+weaver
+webb
+wedowee
+wellington
+weogufka
+west blocton
+west greene
+westover
+wetumpka
+whatley
+wilmer
+wilsonville
+wilton
+winfield
+wing
+woodland
+woodstock
+woodville
+york

@@ -1,0 +1,79 @@
+adamsville
+albion
+ashaway
+barrington
+block island
+bradford
+bristol
+burrillville
+carolina
+central falls
+charlestown
+chepachet
+clayville
+coventry
+cranston
+cumberland
+east greenwich
+east providence
+exeter
+fiskeville
+forestdale
+foster
+glendale
+glocester
+greene
+greenville
+harmony
+harrisville
+hope
+hope valley
+hopkinton
+jamestown
+johnston
+kenyon
+kingston
+lincoln
+little compton
+manville
+mapleville
+middletown
+misquamicut
+narragansett
+newport
+newport ns
+north kingstown
+north providence
+north scituate
+north smithfield
+pascoag
+pawtucket
+peace dale
+portsmouth
+providence
+prudence island
+richmond
+riverside
+rockville
+rumford
+saunderstown
+scituate
+shannock
+slatersville
+slocum
+smithfield
+south kingstown
+tiverton
+valley falls
+wakefield
+warren
+warwick
+watch hill
+west greenwich
+west kingston
+west warwick
+westerly
+wickford
+wood river junction
+woonsocket
+wyoming

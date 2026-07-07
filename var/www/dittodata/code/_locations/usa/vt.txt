@@ -1,0 +1,309 @@
+adamant
+addison
+albany
+alburg
+arlington
+ascutney
+averill
+bakersfield
+barnard
+barnet
+barre
+barton
+beebe plain
+beecher falls
+bellows falls
+belmont
+belvidere center
+bennington
+benson
+bethel
+bolton
+bolton valley
+bomoseen
+bondville
+bradford
+braintree
+brandon
+brattleboro
+bread loaf
+bridgewater
+bridgewater corners
+bridport
+bristol
+brookfield
+brookline
+brownsville
+burlington
+cabot
+calais
+cambridge
+cambridgeport
+canaan
+castleton
+cavendish
+center rutland
+champlain islands
+charlotte
+chelsea
+chester
+chester depot
+chittenden
+colchester
+common
+concord
+corinth
+coventry
+craftsbury
+cuttingsville
+danby
+danville
+derby
+derby line
+dorset
+dover
+dummerston
+east arlington
+east barre
+east berkshire
+east burke
+east calais
+east charleston
+east corinth
+east dorset
+east dover
+east fairfield
+east hardwick
+east haven [essex county]
+east haven [rutland county]
+east middlebury
+east montpelier
+east poultney
+east randolph
+east ryegate
+east saint johnsbury
+east thetford
+east wallingford
+eden
+eden mills
+enosburgfalls
+essex
+essex junction
+evansville
+fair haven
+fairfax
+fairfield
+fairlee
+ferrisburg
+florence
+forest dale
+franklin
+gaysville
+gilman
+glover
+grafton
+granby
+grand isle
+graniteville
+granville
+greensboro
+greensboro bend
+groton
+guildhall
+hancock
+hardwick
+hartford
+hartland
+hartland four corners
+highgate center
+highgate springs
+hinesburg
+huntington
+hyde park
+hydeville
+irasburg
+island pond
+isle la motte
+jacksonville
+jamaica
+jay
+jay peak
+jeffersonville
+jericho
+jericho center
+johnson
+jonesville
+killington
+kirby
+lake elmore
+londonderry
+lowell
+lower waterford
+ludlow
+lunenburg
+lyndon
+lyndon center
+lyndonville
+manchester
+marlboro
+marshfield
+mcindoe falls
+mendon
+middletown springs
+milton
+monkton
+montgomery
+montgomery center
+montpelier
+moretown
+morgan
+morrisville
+moscow
+mount holly
+mount snow
+mount tabor
+new haven
+newbury
+newfane
+newport
+newport center
+north bennington
+north clarendon
+north concord
+north ferrisburg
+north hartland
+north hero
+north hyde park
+north montpelier
+north pomfret
+north pownal
+north springfield
+north thetford
+north troy
+northfield
+northfield falls
+norton
+norwich
+orleans
+orwell
+passumpsic
+pawlet
+peacham
+perkinsville
+peru
+pittsfield
+pittsford
+plainfield
+plymouth
+post mills
+poultny
+pownal
+proctor
+proctorsville
+putney
+quechee
+randolph
+randolph center
+reading
+readsboro
+richford
+richmond
+ripton
+rochester
+roxbury
+rupert
+rutland
+ryegate
+saint albans
+saint albans bay
+saint johnsbury
+saint johnsbury center
+salisbury
+saxtons river
+shaftsbury
+sharon
+sheffield
+shelburne
+sheldon
+shoreham
+shrewsbury
+smugglers notch
+south barre
+south burlington
+south hero
+south londonderry
+south newfane
+south pomfret
+south royalton
+south ryegate
+south strafford
+south woodstock
+springfield
+springs
+stamford
+starksboro
+stockbridge
+stowe
+strafford
+stratton mountain
+sugarbush valley
+sutton
+swanton
+taftsville
+thetford
+thetford center
+townshend
+troy
+tunbridge
+underhill
+underhill center
+vergennes
+vernon
+vershire
+waitsfield
+walden
+wallingford
+wardsboro
+warren
+washington
+waterbury
+waterbury center
+waterville
+websterville
+wells
+wells river
+west brattleboro
+west burke
+west charleston
+west danville
+west dover
+west dummerston
+west fairlee
+west glover
+west halifax
+west hartford
+west newbury
+west pawlet
+west rupert
+west rutland
+west topsham
+west townshend
+west wardsboro
+westfield
+westford
+westminster
+westminster station
+weston
+white river junction
+whiting
+whitingham
+wilder
+williamstown
+williamsville
+williston
+wilmington
+windsor
+winooski
+wolcott
+woodstock
+worcester

@@ -1,0 +1,947 @@
+ackley
+ackworth
+adair
+adel
+afton
+agency
+ainsworth
+akron
+albert city
+albia
+albion
+alburnett
+alden
+alexander
+algona
+alleman
+allendorf
+allerton
+allison
+alpha
+alta
+alta vista
+alton
+altoona
+alvord
+amana
+ames
+anamosa
+andover
+andrew
+anita
+ankeny
+anthon
+aplington
+arcadia
+archer
+aredale
+argyle
+arion
+arispe
+arlington
+armstrong
+arnolds park
+arthur
+ashton
+aspinwall
+atalissa
+atkins
+atlantic
+auburn
+audubon
+aurelia
+aurora
+austinville
+avoca
+ayrshire
+badger
+bagley
+baldwin
+bancroft
+barnes city
+barnum
+batavia
+battle creek
+baxter
+bayard
+beacon
+beaman
+beaver
+bedford
+belle plaine
+bellevue
+belmond
+bennett
+benton
+bentonsport
+bernard
+berwick
+bettendorf
+bevington
+birmingham
+blairsburg
+blairstown
+blakesburg
+blanchard
+blencoe
+blockton
+bloomfield
+blue grass
+bode
+bonaparte
+bondurant
+boone
+booneville
+bouton
+boxholm
+boyden
+braddyville
+bradford
+bradgate
+brandon
+brayton
+breda
+bridgewater
+brighton
+bristow
+britt
+bronson
+brooklyn
+brunsville
+bryant
+buckeye
+buckingham
+buffalo
+buffalo center
+burlington
+burnside
+burr oak
+burt
+bussey
+calamus
+callender
+calmar
+calumet
+camanche
+cambridge
+cantril
+carbon
+carlisle
+carnarvon
+carpenter
+carroll
+carson
+carter lake
+cascade
+castana
+cedar
+cedar falls
+cedar rapids
+center junction
+center point
+centerville
+central city
+chapin
+chariton
+charles city
+charlotte
+charter oak
+chatsworth
+chelsea
+cherokee
+chester
+chillicothe
+churdan
+cincinnati
+clare
+clarence
+clarinda
+clarion
+clarksville
+clear lake
+clearfield
+cleghorn
+clemons
+clermont
+climbing hill
+clinton
+clio
+clive
+clutier
+coggon
+coin
+colesburg
+colfax
+college springs
+collins
+colo
+columbia
+columbus city
+columbus junction
+colwell
+conesville
+conrad
+conroy
+coon rapids
+cooper
+coralville
+corning
+correctionville
+corwith
+corydon
+coulter
+council bluffs
+craig
+crawfordsville
+crescent
+cresco
+creston
+cromwell
+crystal lake
+cumberland
+cumming
+curlew
+cushing
+cylinder
+dakota city
+dallas
+dallas center
+dana
+danbury
+danville
+davenport
+davis city
+dawson
+dayton
+de soto
+decatur
+decorah
+dedham
+deep river
+defiance
+delaware
+delhi
+delmar
+deloit
+delta
+denison
+denmark
+denver
+derby
+des moines
+dewar
+dewitt
+dexter
+diagonal
+dickens
+dike
+dixon
+dolliver
+donahue
+donnellson
+doon
+dorchester
+douds
+dougherty
+dow city
+dows
+drakesville
+dubuque
+dumont
+duncombe
+dundee
+dunkerton
+dunlap
+durango
+durant
+dyersville
+dysart
+eagle grove
+earlham
+earling
+earlville
+early
+eddyville
+edgewood
+elberon
+eldon
+eldora
+eldorado
+eldridge
+elgin
+elk horn
+elkader
+elkhart
+elkport
+elliott
+ellston
+ellsworth
+elma
+elwood
+ely
+emerson
+emmetsburg
+epworth
+essex
+estherville
+evansdale
+everly
+exira
+exline
+fairbank
+fairfax
+fairfield
+farley
+farmersburg
+farmington
+farnhamville
+farragut
+fayette
+fenton
+ferguson
+fertile
+floyd
+fonda
+forest city
+fort atkinson
+fort dodge
+fort madison
+fostoria
+fredericksburg
+frederika
+fremont
+fruitland
+galt
+galva
+garber
+garden city
+garden grove
+garnavillo
+garner
+garrison
+garwin
+geneva
+george
+gibson
+gifford
+gilbert
+gilbertville
+gillett grove
+gilman
+gilmore city
+gladbrook
+glenwood
+glidden
+goldfield
+goodell
+goose lake
+gowrie
+graettinger
+grafton
+grand junction
+grand mound
+grand river
+grandview
+granger
+grant
+granville
+gravity
+gray
+greeley
+greene
+greenfield
+greenville
+grimes
+grinnell
+griswold
+grundy center
+gruver
+guernsey
+guthrie center
+guttenberg
+halbur
+hale
+hamburg
+hamilton
+hamlin
+hampton
+hancock
+hanlontown
+harcourt
+hardy
+harlan
+harper
+harpers ferry
+harris
+hartford
+hartley
+hartwick
+harvey
+hastings
+havelock
+haverhill
+hawarden
+hawkeye
+hayesville
+hazleton
+hedrick
+henderson
+hiawatha
+highland center
+highlandville
+hills
+hillsboro
+hinton
+holland
+holstein
+holy cross
+homestead
+hopkinton
+hornick
+hospers
+houghton
+hubbard
+hudson
+hull
+humboldt
+humeston
+huxley
+ida grove
+imogene
+independence
+indianola
+inwood
+ionia
+iowa city
+iowa falls
+ira
+ireton
+irwin
+jamaica
+janesville
+jefferson
+jesup
+jewell
+johnston
+joice
+jolley
+kalona
+kamrar
+kanawha
+kellerton
+kelley
+kellogg
+kensett
+keokuk
+keosauqua
+keota
+kesley
+keswick
+keystone
+killduff
+kimballton
+kingsley
+kinross
+kirkman
+kirkville
+kiron
+klemme
+knierim
+knoxville
+la motte
+la porte city
+lacona
+ladora
+lake city
+lake mills
+lake park
+lake view
+lakota
+lamoni
+lamont
+lanesboro
+langworthy
+lansing
+larchwood
+larrabee
+latimer
+laurel
+laurens
+lawler
+lawton
+le grand
+leclaire
+ledyard
+lehigh
+leighton
+leland
+lemars
+lenox
+leon
+lester
+letts
+lewis
+liberty center
+libertyville
+lidderdale
+lime springs
+lincoln
+linden
+lineville
+linn grove
+lisbon
+liscomb
+little cedar
+little rock
+little sioux
+littleport
+livermore
+lockridge
+logan
+lohrville
+lone rock
+lone tree
+long grove
+lorimor
+lost nation
+lovilia
+low moor
+lowden
+lu verne
+luana
+lucas
+luther
+luxemburg
+lynnville
+lytton
+macedonia
+macksburg
+madrid
+magnolia
+malcom
+mallard
+malvern
+manchester
+manilla
+manly
+manning
+manson
+mapleton
+maquoketa
+marathon
+marble rock
+marcus
+marengo
+marion
+marne
+marquette
+marshalltown
+martelle
+martensdale
+martinsburg
+mason city
+masonville
+massena
+matlock
+maurice
+maxwell
+may city
+maynard
+mc callsburg
+mc causland
+mc clelland
+mc intire
+mcgregor
+mechanicsville
+mediapolis
+melbourne
+melcher
+melrose
+melvin
+menlo
+meriden
+merrill
+meservey
+middle amana
+middletown
+miles
+milford
+millersburg
+millerton
+milo
+milton
+minburn
+minden
+mineola
+mingo
+missouri valley
+mitchellville
+modale
+mondamin
+monmouth
+monona
+monroe
+montezuma
+monticello
+montour
+montpelier
+montrose
+moorhead
+moorland
+moravia
+morley
+morning sun
+morrison
+moscow
+moulton
+mount auburn
+mount ayr
+mount pleasant
+mount sterling
+mount union
+mount vernon
+moville
+murray
+muscatine
+mystic
+nashua
+nemaha
+neola
+nevada
+new albin
+new hampton
+new hartford
+new liberty
+new london
+new market
+new providence
+new sharon
+new vienna
+new virginia
+newell
+newhall
+newton
+nichols
+nodaway
+nora springs
+north buena vista
+north english
+north liberty
+north washington
+northboro
+northwood
+norwalk
+norway
+oakdale
+oakland
+oakville
+ocheyedan
+odebolt
+oelwein
+ogden
+okoboji
+olds
+olin
+ollie
+onawa
+onslow
+oran
+orange city
+orchard
+orient
+osage
+osceola
+oskaloosa
+ossian
+otho
+otley
+oto
+ottosen
+ottumwa
+oxford
+oxford junction
+oyens
+pacific junction
+packwood
+palmer
+palo
+panama
+panora
+parkersburg
+parnell
+paton
+patterson
+paullina
+pella
+peosta
+percival
+perry
+persia
+peru
+peterson
+pierson
+pilot grove
+pilot mound
+pisgah
+plainfield
+plano
+pleasant hill
+pleasant valley
+pleasanton
+pleasantville
+plover
+plymouth
+pocahontas
+polk city
+pomeroy
+popejoy
+portsmouth
+postville
+prairie city
+prairieburg
+prescott
+preston
+primghar
+princeton
+prole
+promise city
+protivin
+pulaski
+quasqueton
+quimby
+radcliffe
+rake
+ralston
+randalia
+randall
+randolph
+raymond
+readlyn
+reasnor
+red oak
+redding
+redfield
+reinbeck
+rembrandt
+remsen
+renwick
+rhodes
+riceville
+richland
+ricketts
+ridgeway
+rinard
+ringsted
+rippey
+riverside
+riverton
+rock falls
+rock rapids
+rock valley
+rockford
+rockwell
+rockwell city
+rodney
+roland
+rolfe
+rome
+rose hill
+rowan
+rowley
+royal
+rudd
+runnells
+russell
+ruthven
+rutland
+ryan
+sabula
+sac city
+saint ansgar
+saint anthony
+saint charles
+saint donatus
+saint lucas
+saint marys
+saint olaf
+saint paul
+salem
+salix
+sanborn
+scarville
+schaller
+schleswig
+scotch grove
+scranton
+searsboro
+sergeant bluff
+seymour
+shambaugh
+shannon city
+sharpsburg
+sheffield
+shelby
+sheldahl
+sheldon
+shell rock
+shellsburg
+shenandoah
+sherrill
+sibley
+sidney
+sigourney
+silver city
+sioux center
+sioux city
+sioux rapids
+slater
+sloan
+smithland
+soldier
+solon
+somers
+south amana
+south english
+spencer
+sperry
+spillville
+spirit lake
+spragueville
+springbrook
+springville
+stacyville
+stanhope
+stanley
+stanton
+stanwood
+state center
+steamboat rock
+stockport
+stockton
+storm lake
+story city
+stout
+stratford
+strawberry point
+struble
+stuart
+sully
+sumner
+superior
+sutherland
+swaledale
+swan
+swea city
+swedesburg
+swisher
+tabor
+tama
+teeds grove
+templeton
+tennant
+terril
+thayer
+thompson
+thor
+thornburg
+thornton
+thurman
+tiffin
+tingley
+tipton
+titonka
+toeterville
+toledo
+tracy
+traer
+treynor
+tripoli
+troy mills
+truesdale
+truro
+turin
+udell
+underwood
+union
+unionville
+university park
+urbana
+urbandale
+ute
+vail
+van horne
+van meter
+van wert
+varina
+ventura
+victor
+villisca
+vincent
+vining
+vinton
+viola
+volga
+wadena
+walcott
+walford
+walker
+wall lake
+wallingford
+walnut
+wapello
+washburn
+washington
+washta
+waterloo
+waterville
+watkins
+waucoma
+waukee
+waukon
+waverly
+webb
+webster
+webster city
+weldon
+welton
+wesley
+west bend
+west branch
+west burlington
+west chester
+west des moines
+west grove
+west liberty
+west point
+west union
+westfield
+westgate
+westphalia
+westside
+wever
+what cheer
+wheatland
+whiting
+whittemore
+whitten
+williams
+williamsburg
+williamson
+wilton
+windsor heights
+winfield
+winterset
+winthrop
+wiota
+woden
+woodbine
+woodburn
+woodward
+woolstock
+worthington
+wyoming
+yale
+yarmouth
+yorktown
+zearing
+zwingle

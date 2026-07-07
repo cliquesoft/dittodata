@@ -1,0 +1,385 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<title>DittoData [Restore]</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="author" content="Dave Henderson">
+	<meta name="description" content="DittoData [Restore]">
+	<meta name="keywords" content="" />
+	<!-- http://stackoverflow.com/questions/49547/making-sure-a-web-page-is-not-cached-across-all-browsers -->
+	<!--
+	<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
+	<meta http-equiv='Pragma' content='no-cache' />
+	<meta http-equiv='Expires' content='0' />
+	-->
+	<!-- http://stackoverflow.com/questions/21738675/why-wont-my-viewport-tag-properly-use-device-width-no-zoom-on-most-mobile-dev -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- https://www.favicon-generator.org/ -->
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="home/${UN}/imgs/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link rel="manifest" href="home/${UN}/imgs/manifest.json">
+	<link rel="apple-touch-icon" sizes="57x57" href="home/${UN}/imgs/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="home/${UN}/imgs/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="home/${UN}/imgs/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="home/${UN}/imgs/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="home/${UN}/imgs/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="home/${UN}/imgs/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="home/${UN}/imgs/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="home/${UN}/imgs/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="home/${UN}/imgs/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="home/${UN}/imgs/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="home/${UN}/imgs/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="home/${UN}/imgs/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="home/${UN}/imgs/favicon-16x16.png">
+	<link rel="shortcut icon" type="image/x-icon" href="home/${UN}/imgs/favicon.ico" />
+
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_global.css?v=1.0">	<!-- WARNING: these two MUST come first!!! -->
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_module.css?v=1.0">
+<!--	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_calendar.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_contact.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_filedrop.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_gallery.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_login.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_popup.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/_share.css?v=1.0">		-->
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/about.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/data.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/jobs.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/log.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/overview.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/status.css?v=1.0">
+	<link rel="stylesheet" type="text/css" href="home/${UN}/look/default.css?v=1.0">
+
+	<script language="javascript" src="code/_ajax.js"></script>
+<!--	<script language="javascript" src="code/_browser.js"></script>
+	<script language="javascript" src="code/_calendar.js"></script>
+	<script language="javascript" src="code/_captcha.js"></script>
+	<script language="javascript" src="code/_contact.js"></script>
+	<script language="javascript" src="code/_cookie.js"></script>
+	<script language="javascript" src="code/_filedrop.js"></script>
+	<script language="javascript" src="code/_gallery.js"></script>
+	<script language="javascript" src="code/_gallery.admin.js"></script>			-->
+	<script language="javascript" src="code/_global.js"></script>
+	<script language="javascript" src="code/_listbox.js"></script>
+	<script language="javascript" src="code/_login.js"></script>
+	<script language="javascript" src="code/_logout.js"></script>
+	<script language="javascript" src="code/_popup.js"></script>
+<!--	<script language="javascript" src="code/_search.js"></script>
+	<script language="javascript" src="code/_share.js"></script>				-->
+	<script language="javascript" src="code/_tabstrip.js"></script>
+	<script language="javascript" src="code/default.js"></script>
+	<script language="javascript" src="code/jQuery_3.4.1.js"></script>
+	<script language="javascript" src="code/jQuery.filedrop_2014.12.19.js"></script>
+	<script language="javascript" src="data/config.js"></script>				<!-- WARNING: this MUST come below _cookie.js -->
+
+	<!-- ANALYTICS -->
+	<!-- add this in for your own site -->
+
+	<script language="javascript">
+	<!--
+
+	var Orientation='';							// used to indicate the mobile devices orientation: portrait, landscape
+	var Rotated=0;								// indicates that the orientation has changed
+
+
+	function formLoad() {
+alert('hello world');
+		document.getElementById('hidSID').value = getCookie('SID');
+		document.getElementById('hidUsername').value = getCookie('username');
+
+		// the below is for the _gallery.admin.js
+		//adjGallery('init','divGallery');
+
+		isMobile();
+		formLayout();
+		parseURI();							// WARNING: this MUST come after the 'reset' of values above so the proper products are filtered in the results listing
+
+		if (! getCookie('balloons_tracker')) {								// if the cookie doesn't exist, then...
+			setCookie('balloons_tracker', '1', new Date('January 1, 2025 00:01:00'), '/');		// create the cookie if it doesn't exist!	WARNING: this prevented a bug if the default.html balloons didn't get clicked through to create a cookie before other screens/siders were opened
+			showBalloons(1);									//    we need to show all the current balloons!
+		} else {											// otherwise at least some balloons have been shown, but there could be more!
+			var iBalloons = parseInt(getCookie('balloons_tracker'));
+			if (iBalloons < 8) { showBalloons(iBalloons+1); }
+		}
+
+		if ((! isFirefox && ! isChrome && ! isOpera) || isEdge)	// if you're using Apple Safari or Microsoft browsers, then...
+			{ setTimeout('alert("WARNING: To cover as many users as possible, only the top 3 browsers built to run on Apple, Linux, and Windows devices are supported and include Mozilla Firefox, Google Chrome, and Opera Browser. Unfortunately this browser is either unknown -or- known to only work with one operating system. Although this project should (mostly) work, we suggest using one of the listed alternatives to get the best experience possible. Please contact your support staff with any questions you may have.");',100); }
+	}
+
+
+	function formLayout() {
+		if (Mobile) {
+			document.getElementById('liSocialToggle').innerHTML = '';	// removed the Social link (which should only be shown on desktops)
+			document.getElementById('liModuleClose').innerHTML = '';	// removes the 'X' from showing in the 'Status' bar (which should only be shown on desktops)
+			document.getElementById('ulSidebar').style.width = (parseInt($(window).height()) - 2) + 'px';
+			return true;							// no reason to process the below background image manipulation since it's hidden now!
+		}
+
+		// set the background image size below
+		var iWinHeight = $(window).height();
+		var iWinWidth = $(window).width();
+		var iDocHeight = $(document).height();
+		var iDocWidth = $(document).width();
+
+		if (iDocHeight > iWinWidth) {						// we're in a portrait view
+			var iTop = parseInt((iWinHeight - iWinWidth) / 2)+'px';
+			var iLeft = '0px';
+
+			if (iWinHeight > iWinWidth) { var iSize = iWinHeight+'px'; }
+			else if (iDocHeight > iWinWidth) { var iSize = iWinWidth-20+'px'; }
+		} else {								// we're in a landscape view
+			var iSize = iDocHeight+'px';
+			var iTop = '0px';
+			var iLeft = parseInt((iWinWidth - iDocHeight) / 2)+'px';
+		}
+
+		document.getElementById('imgPage').style.height = iSize;
+		document.getElementById('imgPage').style.width = iSize;			// to maintain 4:1
+		document.getElementById('imgPage').style.top = iTop;
+		document.getElementById('imgPage').style.left = iLeft;
+	}
+
+
+	function processURI() {
+		// a supplemental function for parseURI() so that the proper tab can be clicked
+	}
+
+
+	function showBalloons(intStep) {
+	// controls if the 'welcome' balloons should be shown to a new user
+		if (Mobile == 1 || getCookie('noballoons')) { return true; }		// don't process any popups on mobile devices -OR- if the user selected not to show any balloons
+
+		var balloon = document.getElementById('divBalloon');
+
+		if (intStep == -1) {
+			balloon.style.display='none';														// hide the next balloon from appearing
+			setCookie('noballoons', '1', new Date('January 1, 2025 00:01:00'), '/');								// indicate the user does not want to show the balloons
+			showBalloons(0);															// set the cookie value as if they had all been displayed
+			return true;
+
+		} else if (intStep == 0) {			// blank out all the prior config parameters
+			balloon.className='';
+			balloon.style.left = 'auto';
+			balloon.style.right = 'auto';
+			balloon.style.top = 'auto';
+			balloon.style.bottom = 'auto';
+			balloon.style.marginLeft = 0;
+			balloon.style.marginTop = 0;
+			balloon.innerHTML = "";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow');");
+
+			setCookie('balloons_tracker', '8', null, '/');		// prevent the initial balloons from showing any longer by setting a cookie
+			return true;
+		} else if (intStep == 1) {
+			balloon.className='balloonTL';
+			balloon.style.left = '50px';
+			balloon.style.top = '95px';
+			balloon.innerHTML = "First we would like to thank you for trying Tracker! These balloons will popup throughout your journey to provide you with relevant information about the interface, and simply clicking anywhere on it will make it disappear. We will begin the tutorial with these tabs. Use them to navigate the various screens of the focused module as they will always be exposed and accessible at any time. The \"?\" tab in particular is found in every module and can be used in the event that any help may be required. Clicking it will load the online documentation for the currently opened module so you can read about any fields that may be difficult to understand at first glance.<br /><br /><center><input type='button' value=\"I've Read Them\" class='button TQButton' onClick=\"showBalloons(-1);\" /></center><br />";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(2)});");
+		} else if (intStep == 2) {
+			balloon.className='balloonTL';
+			balloon.style.left = '150px';
+			balloon.style.right = 'auto';
+			balloon.style.top = '33px';
+			balloon.style.bottom = 'auto';
+			balloon.innerHTML = "Clicking the username here will enable you to create an account if you do not already have one, or it will enable you to adjust various values associated with your account such as your password, alias, and security questions.";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(3)});");
+		} else if (intStep == 3) {
+			balloon.className='balloonTL';
+			balloon.style.left = '50%';
+			balloon.style.top = '64px';
+			balloon.innerHTML = "This listbox contains all of the projects that have been added on the administration screen. By selecting a project from this listing, all of the issues associated with it will be displayed in the table below.";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(4)});");
+		} else if (intStep == 4) {
+			balloon.className='balloonTL';
+			balloon.style.left = '50%';
+			balloon.style.top = '125px';
+			balloon.innerHTML = "After selecting a project from the listbox above, this area will contain all of the outstanding issues associated with it. Clicking on any line will open a new window that contains its history changes, discussion, engineering, and the resolution to the problem. After issues have been added, you will also notice an icon to the far right that can be used to stay notified when an issue has received any updates.";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(5)});");
+		} else if (intStep == 5) {
+			balloon.className='balloonTR';
+			balloon.style.left = 'auto';
+			balloon.style.right = '80px';
+			balloon.style.top = '48px';
+			balloon.innerHTML = "This area contains several objects to interact with the software, the first of which is a listbox above that allows you to login and out. And after logging in, a button will be shown to allow you to create a new issue for the selected project in the listbox to the left. You will also see an 'X' which will close any opened modules. More on this in a moment...";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(6)});");
+		} else if (intStep == 6) {
+			balloon.className='balloonBL';
+			balloon.style.left = '50%';
+			balloon.style.top = 'auto';
+			balloon.style.bottom = '96px';
+			balloon.innerHTML = "Picking up where we left off, these buttons in the taskbar will enable you to switch to different modules if your account has acccess to any. Clicking on any of them will bring that particular module into focus so it can be interacted with.";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(7)});");
+		} else if (intStep == 7) {
+			balloon.className='balloonBR';
+			balloon.style.left = 'auto';
+			balloon.style.right = 'calc(50% + 164px)';
+			balloon.style.top = 'auto';
+			balloon.style.bottom = '28px';
+			balloon.innerHTML = "Finally, use these icons to install additional modules to tailor the software to your needs, share this project, or file a bug or feature request. Also keep in mind that hovering your mouse over these icons and other objects on the form will provide helpful tips!";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(8)});");
+		} else if (intStep == 8) {
+			balloon.className='balloon';
+			balloon.style.left = '50%';
+			balloon.style.right = 'auto';
+			balloon.style.top = '50%';
+			balloon.style.bottom = 'auto';
+			balloon.style.marginLeft = '-140px';
+			balloon.style.marginTop = '-93px';
+			balloon.innerHTML = "We hope that you not only enjoy this software, but continue to use it regularly! Also if you know others that could benefit from using this project as well, please share it with them. And although this software is no longer in beta, if you do come across a bug, we would love to hear from you to get it resolved within the next release or two. So remember to use the footer icons and provide as much feedback as possible!";
+//			balloon.innerHTML = "Please remember that this software is currently in beta which means the software works as designed, but may have a few small bug fixes while adding polish to the application so that your experience will be as enjoyable as possible. This also means that we are currently not adding any new features, although we would still like your submissions for the next release. So remember to use the footer icons and provide as much feedback as possible!";
+			balloon.setAttribute("onclick", "$(this).fadeOut('slow',function(){showBalloons(0)});");
+		}
+
+		balloon.style.display = 'block';
+	}
+
+	//-->
+	</script>
+</head>
+
+
+<body onLoad="formLoad();" onResize="formLayout();">
+	<input type="hidden" id="hidSID" value='' />					<!-- used to validate user submissions -->
+	<input type="hidden" id="hidUsername" value='' />				<!-- used to store the logged in username -->
+
+	<img class='background' src='home/${UN}/imgs/background.jpg' />
+	<div id="divBalloon" onClick="$(this).fadeOut('slow');"></div>
+	<div id="divOverlay" class="overlay"></div>					<!-- this is to "blackout" the background for "popups" -->
+	<div id="divPopup"></div>
+
+
+	<div id='divHeader'>
+		<img id="imgTab" src="home/${UN}/imgs/backup.png" />
+		<div id="divTab">
+			<ul>
+				<li><a href="#" id="tab0" onClick="adjTabs2('aTabSel','tab','scn',0,'adjButtons(0)');" class="aTabSel">Overview</a></li>
+				<li><a href="#" id="tab1" onClick="adjTabs2('aTabSel','tab','scn',1,'adjButtons(1)');">Jobs</a></li>
+				<li><a href="#" id="tab2" onClick="adjTabs2('aTabSel','tab','scn',2,'adjButtons(2)');">Data</a></li>
+				<li><a href="#" id="tab3" onClick="adjTabs2('aTabSel','tab','scn',3,'adjButtons(3)');">Log</a></li>
+				<li><a href="#" id="tab4" onClick="adjTabs2('aTabSel','tab','scn',4,'adjButtons(4)');">Status</a></li>
+				<li><a href="#" id="tab5" onClick="adjTabs2('aTabSel','tab','scn',5,'adjButtons(5)');">About</a></li>
+			</ul>
+		</div>
+		<div id="divTitle"><a href='default.sh'>Backup</a><a href='default.sh?p=restore.html' class='selected' onClick='return false'>Restore</a></div>
+		<div id="divBtn">&nbsp;</div>
+	</div>
+	
+
+	<div id="divContent">
+		<div id="scn0" class='divScreen'>
+			<ul class='ulLogsRestore'>
+				<li>Completed jobs</li>
+				<li><div id="divComJobs"></div></li>
+				<li>Issues that need attention</li>
+				<li><div id="divErrJobs"></div></li>
+			</ul>
+		</div>
+
+
+		<div id="scn1" class='divScreen'>
+			<form method="post" id="formJob">
+			<ul class='fright'>
+				<li><span>Source backup path</span><input type="text" id="txtSource" maxlength="128" class="textbox" title="@ssh:/dir, %sshfs:/dir, \\Windows\share, //Linux/share, /local/dir" />
+				<li class="liSub"><span>Mount parameters</span><input type="text" id="txtSourceParams" maxlength="64" class="textbox" title="Additional parameters to use when mounting" />
+				<li class="liSub"><span>Connect as...</span><input type="text" id="txtSourceUser" placeholder="Username" maxlength="64" class="textbox" title="Applicable network share username" /><input type="password" id="txtSourcePass" placeholder="Password" maxlength="36" class="textbox" title="Applicable network share password" />
+				<li><input type="text" id="txtSourceDom" placeholder="Domain" maxlength="128" class="textbox" title="Applicable network share domain name" />
+				<li>&nbsp;
+				<li><span>Target storage path</span><input type="text" id="txtTarget" maxlength="128" class="textbox" title="@ssh:/dir, %sshfs:/dir, \\Windows\share, //Linux/share, /local/dir" />
+				<li class="liSub"><span>Mount parameters</span><input type="text" id="txtTargetParams" maxlength="64" class="textbox" title="Additional parameters to use when mounting" />
+				<li class="liSub"><span>Connect as...</span><input type="text" id="txtTargetUser" placeholder="Username" maxlength="64" class="textbox" title="Applicable network share username" /><input type="password" id="txtTargetPass" placeholder="Password" maxlength="36" class="textbox" title="Applicable network share password" />
+				<li><input type="text" id="txtTargetDom" placeholder="Domain" maxlength="128" class="textbox" title="Applicable network share domain name" />
+			</ul>
+
+			<ul>
+				<li><span>Saved jobs</span><select id="cmbJobList" size="1" class="listbox" onChange="if(this.value!=''){loadJob(ljReq,document.getElementById('cmbJobList').options[document.getElementById('cmbJobList').selectedIndex].text,'cmbJobList');}">
+					<option value=''>Select...</option>
+				    </select>
+				<li><span>Restore options</span><select id="cmbOverwrite" size="1" class="listbox">
+					<option value="none">Do NOT overwrite existing data</option>
+					<option value="all">Overwrite ALL existing data</option>
+					<option value="older">Overwrite OLDER existing data</option>
+				    </select>
+				<li><select id="cmbHierarchy" size="1" class="listbox">
+					<option value="">Retain directory structure</option>
+					<option value="collapse">Remove directory directory</option>
+				    </select>
+				<li><span>Associated archives</span><select id="cmbArchives" size="2" class="combobox" onChange="if(this.options[this.selectedIndex].text=='Obtaining archives...'){alert('Please wait until the list populates before attempting a restore.'); return false;} getContents();"></select>
+				<li>&nbsp;
+				<li>&nbsp;
+				<li>&nbsp;
+				<li>&nbsp;
+				<li>&nbsp;
+			</ul>
+
+			<ul class='full ulJobsRestore'>
+				<li>&nbsp;
+				<li><span>Custom job parameters</span><input type="text" id="txtParameters" maxlength="256" class="textbox" />
+				<li><span>
+					Binary configuration<br />
+					<input type="button" id="btnConfig" value="Upload Config" class="button" />
+				    </span><textarea id="txtConfig" rows="2" class="textbox"></textarea>
+			</ul>
+			</form>
+		</div>
+
+
+		<div id="scn2" class='divScreen'>
+			<div id="divFolders"></div>
+			<ul>
+				<li><div class="divData"><label>Included Data</label><input type="text" id="txtInclude" value="Manual entry point for wildcard statements" maxlength="128" class="textbox" onFocus="if(this.value=='Manual entry point for wildcard statements'){this.value='';}" onBlur="if(this.value==''){this.value='Manual entry point for wildcard statements';}" /><input type="button" id="btnAddInclude" value="+" class="button" onClick="if(! addInclude()){return false;}" /><input type="button" id="btnDelInclude" value="&minus;" class="button" onClick="ListRemove3(document.getElementById('cmbIncludeList'), false, true, true);" /></div>
+				<li><select id="cmbIncludeList" size="2" multiple></select>
+			</ul>
+			<ul>
+				<li><div class="divData"><label>Excluded Data</label><input type="text" id="txtExclude" value="Manual entry point for wildcard statements" maxlength="128" class="textbox" onFocus="if(this.value=='Manual entry point for wildcard statements'){this.value='';}" onBlur="if(this.value==''){this.value='Manual entry point for wildcard statements';}" /><input type="button" id="btnAddExclude" value="+" class="button" onClick="if(document.getElementById('txtExclude').value!='Manual entry point for wildcard statements'){Add2List(document.getElementById('txtExclude').value, document.getElementById('cmbExcludeList'), document.getElementById('txtExclude').value, 1, 1); document.getElementById('txtExclude').value='Manual entry point for wildcard statements';}" /><input type="button" id="btnDelExclude" value="&minus;" class="button" onClick="ListRemove3(document.getElementById('cmbExcludeList'), false, true, true);" /></div>
+				<li><select id="cmbExcludeList" size="2" multiple></select>
+			</ul>
+		</div>
+
+
+		<div id="scn3" class='divScreen'>
+		</div>
+
+
+		<div id="scn4" class='divScreen'>
+		</div>
+
+
+		<div id="scn5" class='divScreen'>
+			<table align="center">
+				<tr><th colspan="2" class="thManufacturer">Cliquesoft</th></tr>
+				<tr><td colspan="2" class="thWebsite"><a href="https://www.cliquesoft.org" taget="_new">www.cliquesoft.org</a></td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Version</th><td>2019.08.14.0</td></tr>
+				<tr><th class="thCol">License</th><td><a href="https://www.cliquesoft.org/#Licenses" target="_new">CPLv2</a></td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Created by</th><td>Dave Henderson (support@cliquesoft.org)</td></tr>
+				<tr><th class="thCol">Created on</th><td>2007/01/20</td></tr>
+				<tr><th class="thCol">Updated by</th><td>Dave Henderson (support@cliquesoft.org)</td></tr>
+				<tr><th class="thCol">Updated on</th><td>2020/04/20</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+
+				<tr><th class="thCol">Icons</th><td>Alessandro Rei (<a href='http://www.kde-look.org/usermanager/search.php?username=mentalrey' target='_new'>website</a>)</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+<!-- LEFT OFF - pull this info from the script itself -->
+				<tr><th class="thCol" valign="top">Dependencies</th><td>cat, cp, date, du, grep, head, ls, mv, ps, rm, rsync, sleep, stat, tail, tar, unison</td></tr>
+				<tr><td colspan="2">&nbsp;</td></tr>
+				<tr><th class="thCol">Copyright</th><td>2012-<script>document.write(new Date().getFullYear());</script> all rights reserved</td></tr>
+			</table>
+
+			<ul class="ulAboutLinks">
+<!-- LEFT OFF - update these -->
+				<li><a href="http://www.cliquesoft.org/share.php?soft=backup.lite&mod=backup" target="_new">Share with Friend</a> |</li>
+				<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=submit_bug" target="_new">Report a Bug</a> |</li>
+				<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=request_features" target="_new">Request Feature</a> |</li>
+				<li><a href="http://repo.cliquesoft.org/check.php?soft=backup.lite&mod=backup&ver=2019.08.14.0" target="_new">Check for Updates</a> |</li>
+				<li><a href="http://wiki.cliquesoft.org/index.php?title=backup.lite#Backup_OPTION.27s" target="_new">Help</a></li>
+			</ul>
+		</div>
+	</div>
+</body>
+</html>
+

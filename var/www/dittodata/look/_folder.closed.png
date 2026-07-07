@@ -1,0 +1,10 @@
+./dittodata/something
+./backup.lite/sync-klg-full.log
+./backup.lite/sync-fcs-full.log
+./backup.lite/sync-cai.log
+./backup.lite/sync-klg.log
+./backup.lite/sync-gss.log
+./backup.lite/sync-fcs.log
+./ntpd.log
+./cron.log
+./autologin

@@ -1,0 +1,16 @@
+#divPopup #formShare .textbox { width: 194px; }
+#divPopup #formShare #txtCaptcha { margin-right: 4px; width: 100px; text-align: center; }
+#divPopup #formShare #imgCaptcha { margin-right: 4px; padding: 2px; width: 20px; height: 19px; border: 1px solid rgba(0,0,0,0.2); border-radius: 0.3em; vertical-align: top; }
+#divPopup #formShare #imgCaptcha:hover { border: 1px solid rgba(0,0,0,0.4); cursor: pointer; }
+#divPopup #formShare #btnShare { width: 60px; }
+#divPopup #formShare #captcha {
+	border: 1px solid #8eb4f2;	/* #6FCEF4 */
+	border-radius: 0.3em;
+/*
+	box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+*/
+}
+

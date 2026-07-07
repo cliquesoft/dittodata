@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<head>
+<title>Restore</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="author" content="Dave Henderson" />
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+
+<!-- GLOBAL -->
+<link rel="stylesheet" href="styles/global.css" type="text/css">
+<link rel="stylesheet" href="styles/module.css" type="text/css">
+
+<!-- MODULE -->			<!-- jQuery related files -->
+<link rel="stylesheet" href="styles/jQuery.FileTree.css" type="text/css">
+				<!-- CSo related files -->
+<link rel="stylesheet" href="styles/_calendar.css" type="text/css">
+<link rel="stylesheet" href="styles/_mime.css" type="text/css">
+<link rel="stylesheet" href="styles/_popup.css" type="text/css">
+				<!-- Module related files -->
+<link rel="stylesheet" href="styles/overview.css" type="text/css">
+<link rel="stylesheet" href="styles/jobs.css" type="text/css">
+<link rel="stylesheet" href="styles/data.css" type="text/css">
+<link rel="stylesheet" href="styles/log.css" type="text/css">
+<link rel="stylesheet" href="styles/status.css" type="text/css">
+<link rel="stylesheet" href="styles/about.css" type="text/css">
+
+				<!-- jQuery related files -->
+<script language="javascript" src="libraries/jQuery_1.7.2.js"></script>
+<script language="javascript" src="libraries/jQuery.ui_1.8.20.js"></script>
+<script language="javascript" src="libraries/jQuery.easing_1.3.js"></script>
+<script language="javascript" src="libraries/jQuery.FileTree_1.01.js"></script>
+				<!-- CSo related files -->
+<script language="javascript" src="libraries/_ajax.js"></script>
+<script language="javascript" src="libraries/_calendar.js"></script>
+<script language="javascript" src="libraries/_listbox.js"></script>
+<script language="javascript" src="libraries/_popup.js"></script>
+<script language="javascript" src="libraries/_tabstrip.js"></script>
+				<!-- Module related files -->
+<script language="javascript" src="./overview.js"></script>
+<script language="javascript" src="./jobs.js"></script>
+<script language="javascript" src="./data.js"></script>
+<script language="javascript" src="./log.js"></script>
+<script language="javascript" src="./status.js"></script>
+<script language="javascript">
+<!--
+
+	var Mobile=0;								// used to indicate we're on a mobile device
+	var Orientation='';							// used to indicate the mobile devices orientation: portrait, landscape
+	var Rotated=0;								// indicates that the orientation has changed
+
+	if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(navigator.userAgent.toLowerCase())) {
+	// http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-handheld-device-in-jquery
+	// http://stackoverflow.com/questions/11381673/javascript-solution-to-detect-mobile-browser
+		jQuery.fx.off = true;						// globally toggle jQuery effects
+		Mobile=1;
+	}
+
+
+
+
+
+   var ljReq,rjReq,sjReq,prReq,poReq;					// these are the variable names used in the libbackup.js file
+   var slReq,clReq,elReq,mlReq,clrReq,archReq;				// these are the variable names used in the liblogs.js file
+   var ljsReq,delReq,renReq,cpyReq,addReq;				// these are the variable names used in the libjobs.js file
+   var sdReq,netReq;
+   var intJobPID=0;							// this variable is used to keep track of the job the user clicked on the "Status" tab
+
+
+	function formLoad() {
+	// this function makes object value adjustments during the loading of the page.
+		pageLoad = 1;							// indicate to the following line of code, that this is the initial page load so populate the backup job information as well
+
+		adjButtons(0);							// makes changes to the form to reflect the first tab being clicked
+
+		$('#cmbIncludeList').droppable({ drop: dropFolder });
+		$('#cmbExcludeList').droppable({ drop: dropFolder });
+	}
+
+
+	function formLayout() {
+	// this function changes object sizes for different widths and heights of a browser window.
+	}
+
+   function showCalendar(strObject,evtCoord,intPos) {
+   // shows the calendar on screen at the specified coordinates.  intPos is to display to the left (3) or right (1).
+	objCalTarget = strObject;			// this assigns the passed object value to the variable used in the _calendar.js file
+	if (evtCoord.clientX) {
+	   var intLeft = evtCoord.clientX;
+	   var intTop = evtCoord.clientY;
+	} else {
+	   var intLeft = evtCoord.pageX;
+	   var intTop = evtCoord.pageY;
+	}
+
+	if (intPos == 3) { intLeft -= 300; }		// if the calendar needs to be aligned on the left-hand side of the screen
+	document.getElementById('divCalendar').style.top = intTop + 'px';
+	document.getElementById('divCalendar').style.left = intLeft + 'px';
+	document.getElementById('divCalendar').style.display='block';
+	document.getElementById('cmbCalMonth').focus();
+
+	// NOTE: this function is responsible for all user i/o (e.g. handling null textboxes, invalid dates, etc)
+   }
+
+   function adjButtons(intNum) {
+   // this function changes which buttons are displayed in the "header" portion of the screen to indicate what the user can do per screen.
+	switch(intNum) {
+	   case 0:
+		document.getElementById('divBtn').innerHTML = "<input type='button' id='btnArchiveErr' value='Archive Issues' class='btnHeader curved' onClick=\"if(confirm('Are you sure you want to archive these logs?')==true){archiveErr(clReq,'scn0','btnArchiveErr');}\" />";
+// LEFT OFF - re-enable once the ajax has been restored
+//		loadSchLog(slReq,"schedule","divSchjobs","");			// each of these statements loads the log on the "General Info" tab
+//		loadComLog(clReq,"completed","divComjobs","");
+//		loadErrLog(elReq,"error","divErrjobs","");
+	//	document.getElementById('imgTab').src = "images/overview.jpg";
+		break;
+	   case 1:
+		document.getElementById('divBtn').innerHTML = "<input type='button' id='btnRunNow' value='Run now' class='btnHeader curved' onClick=\"if(document.getElementById('txtSource').value=='' || document.getElementById('txtTarget').value==''){alert('Before starting the job, you must enter a source and target value.'); return false;}  if(document.getElementById('cmbIncludeList').options.length==0){alert('You must specify which data needs to be backed up before continuing.'); return false;}  runJob(rjReq,document.getElementById('cmbJobList').options[document.getElementById('cmbJobList').selectedIndex].value,'btnRunNow');\" />";
+		if (document.getElementById('cmbJobList').options.length == 0) { document.getElementById('btnSave').disabled = true; }
+		break;
+	   case 2:
+		document.getElementById('divBtn').innerHTML = "<input type='button' id='btnDataSave' value='Save' class='btnHeader curved' onClick=\"saveData(sdReq,'"+document.getElementById('hidJobFile').value+"','cmbIncludeList','cmbExcludeList','btnDataSave');\" />";
+		if (document.getElementById('cmbJobList').options.length == -1) {return 1;}	// used to try to stop an error from happening if the user loads the weblication and goes directly to this tab (while the other ajax calls are being made)
+
+		// if the source is a network share, mount it temporarily to bring up its contents
+		if (/^\\\\/.test(document.getElementById('txtSource').value) || document.getElementById('txtSource').value.substr(0,2) == '//') {
+// WIKI: be sure to list the inability to accomplish this steps as a deficiency with the 'mount' command in Linux
+		   // LEFT OFF - upon finding a resolution to 'mount' running as root only, use the below commented out syntax
+		   //mntShare(netReq,document.getElementById('txtSource').value,document.getElementById('txtSourceUser').value,document.getElementById('txtSourcePass').value,document.getElementById('txtSourceDom').value,'');
+		   //alert("Since the source is a network share, it will temporarily be mounted so its contents can be shown.");
+		   alert("Unfortunately network shares can't be viewed here due to design problems with the 'mount' command.");
+		   return false;
+		}
+
+		// get the contents of the "source" value on the 'Jobs' tab...
+		$('#divFolders').fileTree({
+		   root: document.getElementById('txtSource').value+'/',	// root folder to display (INCLUDE trailing /)	/
+		   script: '../../libraries/bash/jQuery.FileTree.sh',		// location of serverside AJAX file to use	jqueryFileTree.php
+		   folderEvent: 'click',					// event to trigger expand/collapse		click
+		   expandSpeed: '500',						// Speed at which to expand branches (in milliseconds); use -1 for no animation		500
+		   collapseSpeed: '500',					// Speed at which to collapse branches (in milliseconds); use -1 for no animation	500
+		   //expandEasing: null,					// Easing function to use on expand		null
+		   //collapseEasing: 'easeOutBounce',				// Easing function to use on collapse		null
+		   multiFolder: 'true',						// Whether or not more than one folder can be expanded at the same time			true
+		   loadMessage: 'Loading...',					// Message to display while initial tree loads (can be HTML)				Loading…
+		   //callBack: "function(){ $('.dnd').draggable({ containment: 'document', helper: 'clone' }); }"
+		//}, function(file) { });					// action to perform when a file (not folder) is clicked				alert(file);
+		}, function(file) { }, function() {
+		   $(".dnd").draggable({					// used to apply JS draggability to the files and folders within 'divFolders'
+			containment: 'document',
+			helper: 'clone'
+		   });
+		});
+		break;
+	   case 3:
+		document.getElementById('divBtn').innerHTML = "<input type='button' id='btnArchiveLog' value='Archive' class='btnHeader curved' onClick=\"if(document.getElementById('hidLogFile').value==''){alert('Currently there is not a log loaded to archive, please use the links on the Overview tab before trying again.'); return false;} if(confirm('Are you sure you want to archive this log?')==true){alert('Please note that this may take a few minutes depending on the size of the log.'); archiveLog(archReq,'scn3','btnArchiveLog');}\" />";
+		break;
+	   case 4:
+		// VER 2 - "<input type='button' id='btnStop' value='Stop' class='btnHeader curved' onClick=\"if(intJobPID==0){alert('Please click on a job to stop before clicking this button.'); return false;} if(confirm('Are you sure you want to stop the job?')==true){stopJob(rjReq,'btnStop');}\" />&nbsp;" +
+		document.getElementById('divBtn').innerHTML = "<input type='button' id='btnClearCompleted' value='Clear Completed' class='btnHeader curved' onClick=\"clearJobs();\" />";
+		break;
+	   case 5:
+		document.getElementById('divBtn').innerHTML = "&nbsp;";
+		break;
+	}
+   }
+
+   function ajaxSumbitURI(strFormName,intLeadingAmp) {
+   // dynamically generates a GET request URI for an ajax form submission
+   // strFormName	the name of the form containing the list of objects to submit via an ajax submission using a GET request
+   // intLeadingAmp	whether or not a preceeding '&' should be returned
+   // if requested, replace the preceeding '&' with a '?' -OR- return the URI to be chained inline with a preceeding '&'
+	strFormName = typeof strFormName !== 'undefined' ? strFormName : 'main';	// defaults to 'main' if not passed
+	intLeadingAmp = typeof intLeadingAmp !== 'undefined' ? intLeadingAmp : 1;	// defaults to 'true' if not passed
+
+	var URI='';
+
+	// for each form object...
+	for(i=0; i<document[strFormName].elements.length; i++) {
+	   // for any form objects that aren't 'radio' or 'checkbox', then store that current value in the URI
+	   if (document[strFormName].elements[i].type == 'select-multiple') {
+		if (document[strFormName].elements[i].options.length == 0) { continue; }
+		URI+='&'+document[strFormName].elements[i].name+'='+escape(document[strFormName].elements[i].options[0].value);
+		for (j=1; j<document[strFormName].elements[i].options.length; j++) { URI+=escape('|'+document[strFormName].elements[i].options[j].value); }
+	   }
+
+	   // for any form objects that aren't 'radio' or 'checkbox', then store that current value in the URI
+	   else if (document[strFormName].elements[i].type != 'radio' && document[strFormName].elements[i].type != 'checkbox')
+		{ URI+='&'+document[strFormName].elements[i].name+'='+escape(document[strFormName].elements[i].value); }
+
+	   // if the form object is a 'radio' button, only add it to the URI if it's selected
+	   else if (document[strFormName].elements[i].type == 'radio' && document[strFormName].elements[i].checked)
+		{ URI+='&'+document[strFormName].elements[i].name+'='+escape(document[strFormName].elements[i].value); }
+
+	   // finally, add all checkbox checked values to the URI
+	   else if (document[strFormName].elements[i].type == 'checkbox')
+		{ URI+='&'+document[strFormName].elements[i].name+'='+escape(document[strFormName].elements[i].checked); }
+	}
+	// if requested, replace the preceeding '&' with a '?' -OR- return the URI to be chained inline with a preceeding '&'
+	if (intLeadingAmp) { return URI; } else { return URI.substring(1); }
+   }
+
+   function showMsg(boolChecked) {
+   // this function is informational only.  It lets the user know what the "tar parameters" textbox is used for depending on which backup type is selected.
+	if (boolChecked == true) {
+	   if (document.getElementById('cmbType').options[document.getElementById('cmbType').selectedIndex].value != "custom")
+		{ alert('Use this option with caution as invalid or out of sequence parameters will break the backup/sync functionality. The only options you can enter are additional tar/rsync parameters (no direction or piping is allowed).'); }
+	   else
+		{ alert("This option allows you to completely create the tar command line (excluding the word 'tar').  It is advised to run tests before trying it here.  Also refer to the documentation for variables that will be available for use."); }
+	}
+   }
+
+   function adjJob(strPrompt) {
+   // this function checks to make sure the user isn't duplicating a job when copying or adjusting
+	var jobname='';
+	while (jobname == '') {
+	   jobname = prompt(strPrompt);
+	   if (jobname == "" || jobname == null) {
+		alert("You must provide a name before completing this request, exiting.");
+		return false;
+	   }
+	   for (var i=0; i<document.getElementById('cmbJobList').options.length; i++) {
+		if (jobname == document.getElementById('cmbJobList').options[i].value) {
+		   alert("There is already a backup job named '" + jobname + "', please use another.");
+		   jobname='';				// remove the entered name
+		   break;				// used to break out of the 'for' loop
+		}
+	   }
+	}
+	document.getElementById('hidTemp').value = jobname;		// store the new name so its loaded after the ajax call is completed
+	return true;
+   }
+
+   function addInclude() {
+   // performs some checks when the user is manually adding an entry to the 'Included Data' box on the 'Data' tab
+	if (document.getElementById('cmbIncludeList').options.length > 0 && document.getElementById('cmbIncludeList').options[0].text == 'All data') {
+	   alert("All data within the source is already being backed up. Remove the 'All data' entry if you would like to specify particular files and/or folders that should be backed up.");
+	   document.getElementById('txtInclude').value='Manual entry point for wildcard statements';
+	   return false;
+	}
+
+	if (document.getElementById('txtInclude').value != 'Manual entry point for wildcard statements') {	// if the user isn't just pressing the '+' button without actually providing a value
+	   // if the user wants all the data on the share backed up, then...
+	   if (document.getElementById('txtInclude').value == '.' || document.getElementById('txtInclude').value.toLowerCase() == 'all data')
+		{ var sText='All data'; } else { var sText=document.getElementById('txtInclude').value; }
+
+	   Add2List(sText, document.getElementById('cmbIncludeList'), document.getElementById('txtInclude').value, 1, 1);
+	   document.getElementById('txtInclude').value='Manual entry point for wildcard statements';
+	}
+
+	return true;
+   }
+
+//-->
+</script>
+</head>
+<body onLoad="formLoad();" onResize="formLayout();" onContextMenu="return false;">
+
+
+<div id="divCalendar"><script type="text/javascript">writeCalendar(1,1);</script></div>
+<div id="divOverlay" class="overlay"></div>					<!-- this is to "blackout" the background for "popups" -->
+<div id="divPopup"></div>
+
+<input type="hidden" id="hidTemp" value="" />					<!-- used to store values temporarily -->
+<input type="hidden" id="hidJobFile" value="" />				<!-- the execution script path and name that's currently loaded in the 'Jobs' tab -->
+<input type="hidden" id="hidLogFile" value="" />				<!-- the log that's currently loaded in the 'Log' tab -->
+
+
+<div id='divHeader'>
+	<img id="imgTab" src="images/restore.png" />
+	<div id="divTab">
+		<ul>
+			<li><a href="#" id="tab0" onClick="adjTabs2('aTabSel','tab','scn',0,'adjButtons(0)');" class="aTabSel">Overview</a></li>
+			<li><a href="#" id="tab1" onClick="adjTabs2('aTabSel','tab','scn',1,'adjButtons(1)');">Jobs</a></li>
+			<li><a href="#" id="tab2" onClick="adjTabs2('aTabSel','tab','scn',2,'adjButtons(2)');">Data</a></li>
+			<li><a href="#" id="tab3" onClick="adjTabs2('aTabSel','tab','scn',3,'adjButtons(3)');">Log</a></li>
+			<li><a href="#" id="tab4" onClick="adjTabs2('aTabSel','tab','scn',4,'adjButtons(4)');">Status</a></li>
+			<li><a href="#" id="tab5" onClick="adjTabs2('aTabSel','tab','scn',5,'adjButtons(5)');">About</a></li>
+		</ul>
+	</div>
+	<div id="divTitle"><a href='default.html'>Backup</a><a href='restore.html' class='selected'>Restore</a></div>
+	<div id="divBtn">&nbsp;</div>
+</div>
+
+
+<div id="divContent">
+	<div id="scn0" class='divScreen'>
+		<ul class='ulLogsRestore'>
+		   <li>Completed jobs</li>
+		   <li><div id="divComJobs"></div></li>
+		   <li>Issues that need attention</li>
+		   <li><div id="divErrJobs"></div></li>
+		</ul>
+	</div>
+
+
+	<div id="scn1" class='divScreen'>
+		<form method="post" id="formJob">
+		<ul class='fright'>
+			<li><span>Source backup path</span><input type="text" id="txtSource" maxlength="128" class="textbox" title="@ssh:/dir, %sshfs:/dir, \\Windows\share, //Linux/share, /local/dir" />
+			<li class="liSub"><span>Mount parameters</span><input type="text" id="txtSourceParams" maxlength="64" class="textbox" title="Additional parameters to use when mounting" />
+			<li class="liSub"><span>Connect as...</span><input type="text" id="txtSourceUser" placeholder="Username" maxlength="64" class="textbox" title="Applicable network share username" /><input type="password" id="txtSourcePass" placeholder="Password" maxlength="36" class="textbox" title="Applicable network share password" />
+			<li><input type="text" id="txtSourceDom" placeholder="Domain" maxlength="128" class="textbox" title="Applicable network share domain name" />
+			<li>&nbsp;
+			<li><span>Target storage path</span><input type="text" id="txtTarget" maxlength="128" class="textbox" title="@ssh:/dir, %sshfs:/dir, \\Windows\share, //Linux/share, /local/dir" />
+			<li class="liSub"><span>Mount parameters</span><input type="text" id="txtTargetParams" maxlength="64" class="textbox" title="Additional parameters to use when mounting" />
+			<li class="liSub"><span>Connect as...</span><input type="text" id="txtTargetUser" placeholder="Username" maxlength="64" class="textbox" title="Applicable network share username" /><input type="password" id="txtTargetPass" placeholder="Password" maxlength="36" class="textbox" title="Applicable network share password" />
+			<li><input type="text" id="txtTargetDom" placeholder="Domain" maxlength="128" class="textbox" title="Applicable network share domain name" />
+		</ul>
+
+		<ul>
+			<li><span>Saved jobs</span><select id="cmbJobList" size="1" class="listbox" onChange="if(this.value!=''){loadJob(ljReq,document.getElementById('cmbJobList').options[document.getElementById('cmbJobList').selectedIndex].text,'cmbJobList');}">
+				<option value=''>Select...</option>
+			    </select>
+			<li><span>Restore options</span><select id="cmbOverwrite" size="1" class="listbox">
+				<option value="none">Do NOT overwrite existing data</option>
+				<option value="all">Overwrite ALL existing data</option>
+				<option value="older">Overwrite OLDER existing data</option>
+			    </select>
+			<li><select id="cmbHierarchy" size="1" class="listbox">
+				<option value="">Retain directory structure</option>
+				<option value="collapse">Remove directory directory</option>
+			    </select>
+			<li><span>Associated archives</span><select id="cmbArchives" size="2" class="combobox" onChange="if(this.options[this.selectedIndex].text=='Obtaining archives...'){alert('Please wait until the list populates before attempting a restore.'); return false;} getContents();"></select>
+			<li>&nbsp;
+			<li>&nbsp;
+			<li>&nbsp;
+			<li>&nbsp;
+			<li>&nbsp;
+		</ul>
+
+		<ul class='full ulJobsRestore'>
+			<li>&nbsp;
+			<li><span>Custom job parameters</span><input type="text" id="txtParameters" maxlength="256" class="textbox" />
+			<li><span>
+				Binary configuration<br />
+				<input type="button" id="btnConfig" value="Upload Config" class="button" />
+			    </span><textarea id="txtConfig" rows="2" class="textbox"></textarea>
+		</ul>
+		</form>
+	</div>
+
+
+	<div id="scn2" class='divScreen'>
+		<div id="divFolders"></div>
+		<ul>
+			<li><div class="divData"><label>Included Data</label><input type="text" id="txtInclude" value="Manual entry point for wildcard statements" maxlength="128" class="textbox" onFocus="if(this.value=='Manual entry point for wildcard statements'){this.value='';}" onBlur="if(this.value==''){this.value='Manual entry point for wildcard statements';}" /><input type="button" id="btnAddInclude" value="+" class="button" onClick="if(! addInclude()){return false;}" /><input type="button" id="btnDelInclude" value="&minus;" class="button" onClick="ListRemove3(document.getElementById('cmbIncludeList'), false, true, true);" /></div>
+			<li><select id="cmbIncludeList" size="2" multiple></select>
+		</ul>
+		<ul>
+			<li><div class="divData"><label>Excluded Data</label><input type="text" id="txtExclude" value="Manual entry point for wildcard statements" maxlength="128" class="textbox" onFocus="if(this.value=='Manual entry point for wildcard statements'){this.value='';}" onBlur="if(this.value==''){this.value='Manual entry point for wildcard statements';}" /><input type="button" id="btnAddExclude" value="+" class="button" onClick="if(document.getElementById('txtExclude').value!='Manual entry point for wildcard statements'){Add2List(document.getElementById('txtExclude').value, document.getElementById('cmbExcludeList'), document.getElementById('txtExclude').value, 1, 1); document.getElementById('txtExclude').value='Manual entry point for wildcard statements';}" /><input type="button" id="btnDelExclude" value="&minus;" class="button" onClick="ListRemove3(document.getElementById('cmbExcludeList'), false, true, true);" /></div>
+			<li><select id="cmbExcludeList" size="2" multiple></select>
+		</ul>
+	</div>
+
+
+	<div id="scn3" class='divScreen'>
+	</div>
+
+
+	<div id="scn4" class='divScreen'>
+	</div>
+
+
+	<div id="scn5" class='divScreen'>
+		<table align="center">
+			<tr><th colspan="2" class="thManufacturer">Cliquesoft</th></tr>
+			<tr><td colspan="2" class="thWebsite"><a href="https://www.cliquesoft.org" taget="_new">www.cliquesoft.org</a></td></tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr><th class="thCol">Version</th><td>2019.08.14.0</td></tr>
+			<tr><th class="thCol">License</th><td><a href="https://www.cliquesoft.org/#Licenses" target="_new">CPLv2</a></td></tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr><th class="thCol">Created by</th><td>Dave Henderson (dhenderson@cliquesoft.org or support@cliquesoft.org)</td></tr>
+			<tr><th class="thCol">Created on</th><td>2007/01/20</td></tr>
+			<tr><th class="thCol">Updated by</th><td>Dave Henderson (dhenderson@cliquesoft.org or support@cliquesoft.org)</td></tr>
+			<tr><th class="thCol">Updated on</th><td>2019/08/14</td></tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+
+			<tr><th class="thCol">Icons</th><td>Alessandro Rei (<a href='http://www.kde-look.org/usermanager/search.php?username=mentalrey' target='_new'>website</a>)</td></tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr><th class="thCol" valign="top">Dependencies</th><td>cat, cp, date, du, grep, head, ls, mv, ps, rm, rsync, sleep, stat, tail, tar, unison</td></tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr><th class="thCol">Copyright</th><td>2012-<script>document.write(new Date().getFullYear());</script> all rights reserved</td></tr>
+		</table>
+
+		<ul class="ulAboutLinks">
+			<li><a href="http://www.cliquesoft.org/share.php?soft=backup.lite&mod=backup" target="_new">Share with Friend</a> |</li>
+			<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=submit_bug" target="_new">Report a Bug</a> |</li>
+			<li><a href="http://www.cliquesoft.org/alert.php?soft=backup.lite&mod=backup&req=request_features" target="_new">Request Feature</a> |</li>
+			<li><a href="http://repo.cliquesoft.org/check.php?soft=backup.lite&mod=backup&ver=1.2.33.1" target="_new">Check for Updates</a> |</li>
+			<li><a href="http://wiki.cliquesoft.org/index.php?title=backup.lite#Backup_OPTION.27s" target="_new">Help</a></li>
+		</ul>
+	</div>
+</div>
+
+
+</body>
+</html>

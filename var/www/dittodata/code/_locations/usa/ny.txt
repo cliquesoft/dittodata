@@ -1,0 +1,1751 @@
+accord
+acra
+adams
+adams basin
+adams center
+addison
+adirondack
+afton
+akron
+alabama
+albany
+albertson
+albion
+alcove
+alden
+alden manor
+alder creek
+alexander
+alexandria bay
+alfred
+allegany
+allentown
+almond
+alpine
+alplaus
+altamont
+altmar
+alton
+altona
+amagansett
+amawalk
+amenia
+ames
+amherst
+amityville
+amsterdam
+ancram
+ancramdale
+andes
+andover
+angelica
+angola
+annandale
+annandale-on-hudson
+antwerp
+apalachin
+appleton
+apulia station
+aquebogue
+arcade
+arden
+ardsley
+ardsley on hudson
+argyle
+arkport
+arkville
+arlington
+armonk
+ashland
+ashville
+astoria
+athens
+athol
+athol springs
+atlanta
+atlantic beach
+attica
+au sable forks
+auburn
+auriesville
+aurora
+austerlitz
+ava
+averill park
+avoca
+avon
+babylon
+bainbridge
+baiting hollow
+bakers mills
+baldwin
+baldwin place
+baldwinsville
+ballston lake
+ballston spa
+bangall
+bangor
+bardonia
+barker
+barneveld
+barrytown
+barryville
+barton
+basom
+batavia
+bath
+bay shore
+bayberry
+bayport
+bayside
+bayville
+beacon
+bear mountain
+bearsville
+beaver dams
+beaver falls
+beaver river
+bedford
+bedford hills
+belfast
+belle harbor
+bellerose
+belleville
+bellmore
+bellona
+bellport
+bellvale
+belmont
+bemus point
+bergen
+berkshire
+berlin
+berne
+bernhards bay
+bethel
+bethlehem
+bethpage
+big flats
+big indian
+billings
+binghamton
+black creek
+black lake
+black river
+blasdell
+blauvelt
+bliss
+blodgett mills
+bloomfield
+blooming grove
+bloomingburg
+bloomingdale
+bloomington
+bloomville
+blossvale
+blue mountain lake
+blue point
+bohemia
+boiceville
+bolivar
+bolton landing
+bombay
+boonville
+boston
+bouckville
+bovina
+bowmansville
+bradford
+brainard
+brainardsville
+branchport
+brant
+brant lake
+brantingham
+brasher falls
+breesport
+breezy point
+brentwood
+brewerton
+brewster
+briarcliff manor
+bridgehampton
+bridgeport
+bridgewater
+brier hill
+brighton
+brightwaters
+broadalbin
+brockport
+brocton
+bronx
+bronxville
+brookfield
+brookhaven
+brooklyn
+brooktondale
+brookville
+brownville
+brushton
+brutus
+buchanan
+buffalo
+bullville
+burdett
+burke
+burlingham
+burlington flats
+burnt hills
+burt
+buskirk
+byron
+cadyville
+cairo
+calcium
+caledonia
+callicoon
+callicoon center
+calverton
+cambria heights
+cambridge
+camden
+cameron
+cameron mills
+camillus
+campbell
+campbell hall
+canaan
+canajoharie
+canandaigua
+canaseraga
+canastota
+candor
+caneadea
+canisteo
+canton
+cape vincent
+carle place
+carlisle
+carmel
+caroga lake
+caroline
+carthage
+cassadaga
+cassville
+castile
+castle creek
+castle point
+castleton on hudson
+castorland
+cato
+catskill
+cattaraugus
+cayuga heights
+cayuta
+cazenovia
+cedarhurst
+celoron
+center moriches
+centereach
+centerport
+centerville
+central bridge
+central islip
+central square
+central valley
+ceres
+chadwicks
+chaffee
+champlain
+chappaqua
+charlotteville
+chase mills
+chateaugay
+chatham
+chaumont
+chautauqua
+chazy
+cheektowaga
+chelsea
+chemung
+chenango bridge
+chenango forks
+cherry creek
+cherry grove
+cherry plain
+cherry valley
+chester
+chestertown
+chestnut ridge
+chichester
+childwold
+chili
+chippewa bay
+chittenango
+churchville
+churubusco
+cicero
+cincinnatus
+circleville
+city island
+clarence
+clarence center
+clarendon
+clark mills
+clarkson
+clarksville
+claryville
+claverack
+clay
+clayton
+clayville
+clemons
+cleveland
+cleverdale
+clifton park
+clifton springs
+climax
+clinton
+clinton corners
+clintondale
+clockville
+clyde
+clymer
+cobleskill
+cochecton
+cochecton center
+coeymans
+coeymans hollow
+cohocton
+cohoes
+cold brook
+cold spring
+cold spring harbor
+colden
+college point
+colliersville
+collins
+colonie
+colton
+columbiaville
+commack
+comstock
+conesus
+conewango valley
+congers
+conklin
+connelly
+constable
+constableville
+constantia
+coopers plains
+cooperstown
+copake
+copake falls
+copenhagen
+copiague
+coram
+corbettsville
+corfu
+corinth
+corning
+cornwall
+cornwall-on-hudson
+cornwallville
+corona
+cortland
+cossayuna
+cottekill
+cowlesville
+coxsackie
+cragsmoor
+cranberry lake
+craryville
+crittenden
+croghan
+crompond
+cropseyville
+cross river
+croton falls
+croton-on-hudson
+crown point
+crugers
+cuba
+cuddebackville
+cutchogue
+cuyler
+dale
+dalton
+danby
+dannemora
+dansville
+darien center
+davenport
+davenport center
+davis park
+dayton
+de kalb junction
+de lancey
+de peyster
+de ruyter
+deansboro
+deer park
+deer river
+deferiet
+delanson
+delevan
+delhi
+delmar
+delphi falls
+denmark
+denver
+depauville
+depew
+deposit
+derby
+dewitt
+dewittville
+dexter
+diamond point
+dickinson center
+dix hills
+dobbs ferry
+dolgeville
+douglaston
+dover plains
+downsville
+dresden
+dryden
+duanesburg
+dundee
+dunkirk
+durham
+durhamville
+eagle bay
+eagle bridge
+earlton
+earlville
+east amherst
+east aurora
+east berne
+east bethany
+east branch
+east chatham
+east concord
+east durham
+east elmhurst
+east fishkill
+east greenbush
+east hampton
+east hills
+east homer
+east islip
+east jewett
+east manhattan
+east marion
+east meadow
+east meredith
+east moriches
+east nassau
+east northport
+east norwich
+east otto
+east palmyra
+east patchogue
+east pembroke
+east pharsalia
+east quogue
+east randolph
+east rochester
+east rockaway
+east schodack
+east setauket
+east springfield
+east syracuse
+east white plains
+east williamson
+east worcester
+eastchester
+eastport
+eaton
+eden
+edgewood
+edinburg
+edmeston
+edwards
+eggertsville
+elba
+elbridge
+eldred
+elizabethtown
+elizaville
+elka park
+ellenburg
+ellenburg center
+ellenburg depot
+ellenville
+ellicott
+ellington
+ellisburg
+elma
+elmhurst
+elmira
+elmira heights
+elmont
+elmsford
+endicott
+endwell
+erieville
+erin
+esopus
+esperance
+essex
+etna
+evans
+fabius
+fair harbor
+fair haven
+fairport
+falconer
+fallsburg
+fancher
+far rockaway
+farmersville station
+farmingdale
+farmington
+farmingville
+farnham
+fayette
+fayetteville
+felts mills
+ferndale
+feura bush
+fillmore
+findley lake
+fine
+fineview
+fire island pines
+firms
+fishers
+fishers island
+fisher's landing
+fishkill
+fishs eddy
+fleischmanns
+floral park
+florida
+flushing
+fly creek
+fonda
+forest hills
+forestburgh
+forestport
+forestville
+fort ann
+fort covington
+fort drum
+fort edward
+fort hunter
+fort johnson
+fort montgomery
+fort plain
+fort salonga
+fort totten
+frankfort
+franklin
+franklin springs
+franklin square
+franklinville
+fredonia
+freedom
+freehold
+freeport
+freeville
+fremont center
+fresh meadows
+frewsburg
+friendship
+frontenac
+fulton
+fultonham
+fultonville
+gabriels
+gainesville
+gallupville
+galway
+gansevoort
+garden city
+gardiner
+garnerville
+garrattsville
+garrison
+gasport
+gates
+geneseo
+geneva
+genoa
+georgetown
+germantown
+gerry
+getzville
+ghent
+gilbertsville
+gilboa
+glasco
+glen aubrey
+glen cove
+glen head
+glen oaks
+glen spey
+glen wild
+glendale
+glenfield
+glenford
+glenham
+glenmont
+glens falls
+glenville
+glenwood
+glenwood landing
+gloversville
+godeffroy
+goldens bridge
+gorham
+goshen
+gouverneur
+gowanda
+grafton
+grahamsville
+grand gorge
+grand island
+granite springs
+granville
+great bend
+great neck
+great river
+great valley
+greece
+green island
+greenburgh
+greene
+greenfield center
+greenfield park
+greenhurst
+greenlawn
+greenport
+greenvale
+greenville
+greenwich
+greenwood
+greenwood lake
+greig
+grenell
+groton
+groveland
+guilderland
+guilderland center
+guilford
+hadley
+hagaman
+hague
+hailesboro
+haines falls
+halcottsville
+halesite
+hall
+hamburg
+hamden
+hamilton
+hamlin
+hammond
+hammondsport
+hampton
+hampton bays
+hancock
+hankins
+hannacroix
+hannawa falls
+hannibal
+harford
+harpersfield
+harpursville
+harriman
+harris
+harrison
+harrisville
+hartford
+hartsdale
+hartwick
+hastings
+hastings-on-hudson
+hauppauge
+haverstraw
+hawthorne
+heathcote
+hector
+helena
+hemlock
+hempstead
+henderson
+henderson harbor
+henrietta
+hensonville
+herkimer
+hermon
+heuvelton
+hewlett
+hewlett bay park
+hicksville
+high falls
+highland
+highland falls
+highland lake
+highland mills
+highmount
+hiler
+hillburn
+hillsdale
+hilton
+himrod
+hinckley
+hinsdale
+hobart
+hoffmeister
+hogansburg
+holbrook
+holcomb
+holland
+holland patent
+holley
+hollis
+hollowville
+holmes
+holtsville
+homer
+honeoye
+honeoye falls
+hoosick
+hoosick falls
+hopewell
+hopewell junction
+hornell
+horseheads
+hortonville
+houghton
+howard beach
+howells
+howes cave
+hubbardsville
+hudson
+hudson falls
+hughsonville
+huguenot
+huletts landing
+hume
+hunt
+hunter
+huntington
+huntington bay
+huntington station
+hurley
+hurleyville
+hyde park
+ilion
+indian lake
+industry
+inlet
+interlaken
+inwood
+ionia
+irondequoit
+irving
+irvington
+island park
+islandia
+islip
+ithaca
+ithaca college
+jackson heights
+jacksonville
+jamaica
+jamesport
+jamestown
+jamesville
+jasper
+java center
+java village
+jay
+jefferson
+jefferson valley
+jeffersonville
+jericho
+jewett
+johnsburg
+johnson
+johnson city
+johnsonville
+johnstown
+jordan
+jordanville
+kanona
+katonah
+kattskill bay
+kauneonga lake
+keene
+keene valley
+keeseville
+kendall
+kenmore
+kennedy
+kenoza lake
+kent
+kerhonkson
+keuka park
+kew gardens
+kiamesha lake
+kill buck
+killawog
+kinderhook
+king ferry
+kings park
+kings point
+kingston
+kirkville
+kirkwood
+kismet
+knowlesville
+knox
+knoxboro
+la fargeville
+lackawanna
+lacona
+lafayette
+lagrangeville
+lake clear
+lake george
+lake grove
+lake hill
+lake huntington
+lake katrine
+lake luzerne
+lake peekskill
+lake placid
+lake pleasant
+lake ronkonkoma
+lake success
+lake view
+lakemont
+lakeville
+lakewood
+lancaster
+lanesville
+lansing township
+lansing village
+larchmont
+latham
+laurel
+laurens
+lawrence
+lawrenceville
+lawtons
+le roy
+lee center
+leeds
+leicester
+leon
+leonardsville
+levittown
+lewis
+lewisboro
+lewiston
+lexington
+liberty
+lily dale
+lima
+limerick
+limestone
+lincolndale
+lindenhurst
+lindley
+lisbon
+lisle
+little falls
+little genesee
+little neck
+little valley
+little york
+liverpool
+livingston
+livingston manor
+livonia
+livonia center
+loch sheldrake
+locke
+lockport
+lockwood
+locust valley
+lodi
+long beach
+long eddy
+long island
+long lake
+lorraine
+loudonville
+lowman
+lowville
+lycoming
+lynbrook
+lyndonville
+lyon mountain
+lyons
+lyons falls
+macedon
+machias
+madison
+madrid
+mahopac
+mahopac falls
+maine
+malden bridge
+malden on hudson
+mallory
+malone
+malta
+malverne
+mamaroneck
+manchester
+manhasset
+manhattan
+manlius
+mannsville
+manorville
+maple springs
+maple view
+maplecrest
+marathon
+marcellus
+marcy
+margaretville
+marietta
+marilla
+marion
+marlboro
+martinsburg
+martville
+maryknoll
+maryland
+masonville
+maspeth
+massapequa
+massapequa park
+massawepie
+massena
+mastic
+mastic beach
+mattituck
+mattydale
+maybrook
+mayfield
+mayville
+mc connellsville
+mcdonough
+mcgraw
+mckownville
+mclean
+meacham
+mechanicville
+mecklenburg
+medford
+medina
+medusa
+mellenville
+melrose
+melville
+memphis
+menands
+mendon
+meridale
+meridian
+merrick
+mexico
+mid hudson
+middle falls
+middle granville
+middle grove
+middle hope
+middle island
+middle village
+middleburgh
+middleport
+middlesex
+middletown
+middleville
+milford
+mill neck
+millbrook
+miller place
+millerton
+millport
+millwood
+milton
+mineola
+minerva
+minetto
+mineville
+minoa
+model city
+modena
+mohawk
+mohegan lake
+mohonk lake
+moira
+mongaup valley
+monroe
+monsey
+montauk
+montezuma
+montgomery
+monticello
+montour falls
+montrose
+mooers
+mooers forks
+moravia
+moriah
+moriah center
+moriches
+morris
+morrisonville
+morristown
+morrisville
+morton
+mottville
+mount kisco
+mount marion
+mount morris
+mount sinai
+mount tremper
+mount upton
+mount vernon
+mount vision
+mountain dale
+mountainville
+mumford
+munnsville
+murray isle
+nanuet
+napanoch
+naples
+narrowsburg
+nassau
+natural bridge
+nedrow
+nelliston
+nesconset
+neversink
+new baltimore
+new berlin
+new castle
+new city
+new hampton
+new hartford
+new haven
+new hyde park
+new kingston
+new lebanon
+new lisbon
+new milford
+new paltz
+new rochelle
+new russia
+new suffolk
+new windsor
+new woodstock
+new york
+newark
+newark valley
+newburgh
+newcomb
+newfane
+newfield
+newport
+newton falls
+newtonville
+niagara falls
+nichols
+nicholville
+nineveh
+niobe
+niskayuna
+niverville
+norfolk
+north amityville
+north babylon
+north bangor
+north bay
+north bay shore
+north bellmore
+north blenheim
+north boston
+north branch
+north brookfield
+north castle
+north chatham
+north chili
+north clymer
+north collins
+north creek
+north evans
+north granville
+north greece
+north hempstead
+north hoosick
+north hudson
+north java
+north lawrence [nassau county]
+north lawrence [saint lawrence county]
+north massapequa
+north merrick
+north norwich
+north pitcher
+north pole
+north river
+north rose
+north salem
+north syracuse
+north tarrytown
+north tonawanda
+north white plains
+north woodmere
+northport
+northville
+norwich
+norwood
+nunda
+nyack
+oak beach
+oak hill
+oakdale
+oakfield
+oaks corners
+obernburg
+ocean beach
+oceanside
+odessa
+ogdensburg
+olcott
+old bethpage
+old brookville
+old field
+old forge
+old westbury
+olean
+olive
+olivebridge
+oliverea
+olmstedville
+oneida
+oneonta
+onondaga
+ontario
+ontario center
+orangetown
+orchard park
+orient
+oriskany
+oriskany falls
+orwell
+ossining
+oswegatchie
+oswego
+otego
+otisville
+otto
+ouaquaga
+ovid
+owego
+owls head
+oxbow
+oxford
+oyster bay
+ozone park
+painted post
+palatine bridge
+palenville
+palisades
+palmyra
+panama
+panorama
+paradox
+parish
+parishville
+parksville
+patchogue
+patterson
+pattersonville
+paul smiths
+pavilion
+pawling
+pearl river
+peconic
+peekskill
+pelham
+pelham manor
+penfield
+penn yan
+pennellville
+perinton
+perkinsville
+perry
+perrysburg
+peru
+peterboro
+petersburg
+phelps
+philadelphia
+phillipsport
+philmont
+phoenicia
+phoenix
+piercefield
+piermont
+pierrepont manor
+piffard
+pike
+pine bush
+pine city
+pine hill
+pine island
+pine plains
+pine valley
+piseco
+pitcher
+pittsford
+plainview
+plainville
+plandome
+plattekill
+plattsburgh
+pleasant valley
+pleasantville
+plessis
+plymouth
+pocantico hills
+poestenkill
+point lookout
+poland
+pomona
+pompey
+pond eddy
+poplar ridge
+port byron
+port chester
+port crane
+port ewen
+port gibson
+port henry
+port jefferson
+port jervis
+port kent
+port leyden
+port washington
+portageville
+porter corners
+portland
+portlandville
+portville
+potsdam
+pottersville
+poughkeepsie
+poughquag
+pound ridge
+prattsburgh
+prattsville
+preble
+preston hollow
+princetown
+prospect
+pulaski
+pulteney
+pultneyville
+purchase
+purdys
+purling
+putnam station
+putnam valley
+pyrites
+quaker street
+queens
+queensbury
+quogue
+rainbow lake
+randolph
+ransomville
+raquette lake
+ravena
+ray brook
+raymondville
+reading center
+red creek
+red hook
+redfield
+redford
+redwood
+rego park
+remsen
+remsenburg
+rensselaer
+rensselaer falls
+rensselaerville
+retsof
+rexford
+rexville
+rhinebeck
+rhinecliff
+richburg
+richfield springs
+richford
+richland
+richmond hill
+richmondville
+richville
+ridge
+ridgemont
+ridgewood
+rifton
+riparius
+ripley
+riverdale
+riverhead
+rochester
+rock city falls
+rock hill
+rock stream
+rock tavern
+rockaway park
+rockville centre
+rocky point
+rodman
+roessleville
+rome
+romulus
+ronkonkoma
+roosevelt
+rooseveltown
+roscoe
+rose
+roseboom
+rosedale
+rosendale
+roslyn
+roslyn heights
+rossburg
+rotterdam junction
+round lake
+round top
+rouses point
+roxbury
+ruby
+rush
+rushford
+rushville
+russell
+rye
+rye brook
+sabael
+sackets harbor
+sag harbor
+sagaponack
+saint albans
+saint bonaventure
+saint james
+saint johnsville
+saint regis falls
+salamanca
+salem
+salina
+salisbury center
+salisbury mills
+salt point
+saltaire
+samsonville
+sanborn
+sand lake
+sandy creek
+sangerfield
+saranac
+saranac lake
+saratoga springs
+sardinia
+saugerties
+sauquoit
+savannah
+savona
+sawkill
+sayville
+scarborough
+scarsdale
+schaghticoke
+schenectady
+schenevus
+schodack landing
+schoharie
+schroon lake
+schuyler falls
+schuyler lake
+schuylerville
+scio
+scipio center
+scotchtown
+scotia
+scottsburg
+scottsville
+sea cliff
+seaford
+selden
+selkirk
+seneca castle
+seneca falls
+sennett
+setauket
+severance
+shandaken
+sharon springs
+shelter island
+shelter island heights
+shenorock
+sherburne
+sheridan
+sherman
+sherrill
+shinhopple
+shirley
+shokan
+shoreham
+shortsville
+shrub oak
+shushan
+sidney
+sidney center
+siena
+silver bay
+silver creek
+silver lake
+silver springs
+sinclairville
+skaneateles
+skaneateles falls
+slate hill
+slaterville springs
+sleep hollow
+slingerlands
+sloansville
+sloatsburg
+smallwood
+smithboro
+smithtown
+smithville flats
+smyrna
+snyder square
+sodus
+sodus point
+solsville
+solvay
+somers
+sonyea
+sound beach
+south bethlehem
+south butler
+south byron
+south cairo
+south colton
+south dayton
+south fallsburg
+south farmingdale
+south glens falls
+south jamesport
+south kortright
+south lima
+south new berlin
+south otselic
+south plymouth
+south rutland
+south salem
+south schodack
+south wales
+southampton
+southeast
+southfields
+southold
+sparkill
+sparrow bush
+speculator
+spencer
+spencerport
+spencertown
+speonk
+sprakers
+spring brook
+spring glen
+spring valley
+springfield center
+springville
+springwater
+staatsburg
+stafford
+stamford
+stanfordville
+stanley
+star lake
+staten island
+steamburg
+stella niagara
+stephentown
+sterling
+sterling forest
+stillwater
+stittville
+stockton
+stone ridge
+stony brook
+stony creek
+stony point
+stormville
+stottville
+stow
+stratford
+strykersville
+stuyvesant
+stuyvesant falls
+suffern
+sugar loaf
+summit
+summitville
+sundown
+surprise
+swain
+swan lake
+sylvan beach
+syosset
+syracuse
+taberg
+taconic lake
+tahawus
+tallman
+tannersville
+tappan
+tarrytown
+thendara
+theresa
+thiells
+thompson ridge
+thompsonville
+thornwood
+thousand island park
+three mile bay
+ticonderoga
+tillson
+tioga center
+tivoli
+tomkins cove
+tonawanda city
+tonawanda town
+tottenville
+treadwell
+tribes hill
+troupsburg
+trout creek
+troy
+trumansburg
+truxton
+tuckahoe
+tully
+tunnel
+tupper lake
+turin
+tuxedo
+tyrone
+ulster park
+ulysses
+unadilla
+union
+union hill
+union springs
+uniondale
+unionville
+upper jay
+upper saint regis
+upton
+usmma
+utica
+vails gate
+valatie
+valhalla
+valley cottage
+valley falls
+valley stream
+valois
+van buren point
+van etten
+van hornesville
+varysburg
+verbank
+vermontville
+vernon
+vernon center
+verona
+verona beach
+verplanck
+versailles
+vestal
+victor
+victory mills
+vista
+voorheesville
+waccabuc
+waddington
+wading river
+wainscott
+walden
+wales center
+walker valley
+wallace
+wallkill
+walton
+walworth
+wampsville
+wanakena
+wantagh
+wappinger
+wappingers falls
+warners
+warnerville
+warrensburg
+warsaw
+warwick
+washington mills
+washingtonville
+wassaic
+water mill
+waterford
+waterloo
+waterport
+watertown
+waterville
+watervliet arsenal
+watkins glen
+waverly
+wawarsing
+wayland
+wayne
+webster
+webster crossing
+weedsport
+wellesley island
+wells
+wells bridge
+wellsburg
+wellsville
+west babylon
+west bloomfield
+west brentwood
+west burlington
+west camp
+west chazy
+west clarksville
+west copake
+west coxsackie
+west davenport
+west eaton
+west edmeston
+west falls
+west fulton
+west harrison
+west haverstraw
+west hempstead
+west henrietta
+west hurley
+west islip
+west kill
+west lebanon
+west leyden
+west monroe
+west nyack
+west oneonta
+west park
+west point usma
+west sand lake
+west sayville
+west seneca
+west shokan
+west stockholm
+west valley
+west winfield
+westbrookville
+westbury
+westchester
+westdale
+westerlo
+westernville
+westfield
+westford
+westgate
+westhampton
+westhampton beach
+westmoreland
+westons mills
+westport
+westtown
+wevertown
+wheatland
+whippleville
+white creek
+white lake
+white plains
+white sulphur springs
+whitehall
+whitesboro
+whitestone
+whitesville
+whitney point
+willard
+willet
+williamson
+williamstown
+williamsville
+williston park
+willow
+willsboro
+willseyville
+wilmington
+wilson
+wilton
+windham
+windsor
+wingdale
+winthrop
+wolcott
+woodbourne
+woodbury
+woodgate
+woodhaven
+woodhull
+woodmere
+woodridge
+woodside
+woodstock
+worcester
+wurtsboro
+wyandanch
+wynantskill
+wyoming
+yaphank
+yonkers
+york
+yorkshire
+yorktown
+yorktown heights
+yorkville
+youngstown
+youngsville
+yulan

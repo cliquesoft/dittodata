@@ -1,0 +1,15 @@
+#divContact #ulContact { width: 312px; }
+#divContact #ulContact .button { width: 70px; }
+#divContact #ulContact .textbox { width: 300px; }
+#divContact #ulContact .listbox { width: 308px; }
+#divContact #ulContact .textarea { width: 306px; }
+#divContact #ulContact li { margin: 7px 0; text-align: right; }
+#divContact #ulContact li label { float: left; font-weight: bold; }
+#divContact #ulContact li label span { font-size: 10px; cursor: pointer; }
+#divContact #ulContact li:last-child label { display: inline-block; width: 300px; text-align: left; }
+#divContact #ulContact #txtCaptcha1 { margin-right: 8px; width: 188px; }
+#divContact #ulContact #imgCaptcha1 { display: inline-block; margin-right: 8px; padding: 2px; width: 20px; height: 20px; cursor: pointer; vertical-align: top; background-color: rgba(0,0,0,0.2); border: 1px solid #396AA4; }
+#divContact #divList { float: right; margin-left: 20px; width: 232px; }
+#divContact #divList ul { margin: 0 0 12px; padding: 0 10px; width: 212px; text-align: center; }
+#divContact #formMail #captcha1 { margin: 0 0 0 14px; width: 206px; height: 70px; border: 1px solid #396AA4; }
+

@@ -1,0 +1,1738 @@
+#!/bin/sh
+# backup	This script is a full version of our backup solution that was
+#		originally created to work on the stock firmware of a WD My Book
+#		Live NAS since it didn't have the necessary up-to-date versions
+#		of software (e.g. bash, tar, etc) to support the alternative
+#		edition.  It has since been developed into the client edition of
+#		our backup software for the XiniX OS.
+#
+# Unless a valid Cliquesoft Private License (CPLv1) has been purchased for your
+# device, this software is licensed under the Cliquesoft Public License (CPLv2)
+# as found on the Cliquesoft website at www.cliquesoft.org.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the appropriate Cliquesoft License for details.
+#
+# Created	2011-12-07 by Dave Henderson (support@cliquesoft.org)
+# Rebuilt	2022-02-03 by Dave Henderson (support@cliquesoft.org)
+# Updated	2022-06-15 by Dave Henderson (support@cliquesoft.org)
+#
+# Requirements:		Works With:
+#	[		busybox/coreutils
+#	awk		busybox
+#	cat		busybox/coreutils
+#	cut		busybox/coreutils
+#	date		busybox/coreutils
+#	du		coreutils (due to busybox not having -b)
+#	echo		busybox/coreutils
+#	egrep		busybox/grep
+#	find (gnu)	findutils
+#	grep		busybox/grep
+#	head		busybox/coreutils
+#	[id]		busybox/coreutils
+#	ls		busybox/coreutils
+#	ln		busybox/coreutils
+#	mkdir		busybox/coreutils
+#	mkfifo		busybox/coreutils
+#	mount		busybox/mount
+#	mv		busybox/coreutils
+#	numfmt		coreutils
+#	pkill		busybox/procps
+#	pv		pv
+#	rm		busybox/coreutils
+#	rmdir		busybox/coreutils
+#	[rsync]		rsync
+#	sed		busybox/sed
+#	[setsid]	util-linux
+#	[scp]		openssh(-client)
+#	[ssh]		openssh(-client)
+#	[sshfs]		sshfs
+#	[sshpass]	sshpass
+#	stat		busybox/coreutils
+#	[sudo]		sudo
+#	tail		busybox/coreutils
+#	tar (gnu)	tar
+#	tee		busybox/coreutils
+#	test		busybox/coreutils
+#	touch		busybox/coreutils
+#	tr		busybox/coreutils
+#	umount		busybox/mount
+#	wc		busybox/coreutils
+
+
+
+
+
+
+
+
+# GLOBAL VARIABLES
+
+# --- SYSTEM ---
+export DATETIME="$(date +"%Y-%m-%d %H:%M:%S")"				# sets a default epoch so in the event of failure, a full backup should be performed via this date for safety
+export RJN=$(( $RANDOM + 2 + $RANDOM ))
+
+# --- GLOBAL ---
+DIRCONF='/etc/dittodata'					# directory for global and specific job settings
+					# DEV NOTE: in the /etc/dittodata/global.cfg file for global settings; /etc/dittodata/JOB_NAME.cfg for specific job settings; ${HOME}/${DIRCONF}/JOB_NAME.cfg for private job settings
+					#	we can create a config file for various Linux flavors (e.g. debian, tinycore, xinix, slackware, etc) and just symlink global.cfg to one of those files
+DIRHOME="${HOME}/.dittodata"					# directory for private job settings
+DIRTEMP='/tmp'
+DIRMNTS='/mnt'
+DIRLOGS='/var/log'
+DIRSSH="${HOME}/.ssh"
+JOBLOG="dittodata/${RJN}.log"
+ERRLOG="dittodata/${RJN}.err"
+SYSLOG='dittodata.log'
+FIFO="${DIRTEMP}/backup_${RJN}"
+
+# --- JOBCFG ---
+export NAME=''
+TYPE=''
+COMPRESSION='none'
+INCLUDE=''
+EXCLUDE=''
+LIMIT=''
+PRESCRIPT=''
+POSTSCRIPT=''
+ALERT='none'
+ALERTEXEC=''				# DEV NOTE: list the parameters that can be passed (e.g. backup size, name, RJN, etc)
+CUSTOMPARM=''
+DIRTAG=''
+SOURCE=''
+TARGET=''
+SOURCEUSER=''
+SOURCEPASS=''
+SOURCEDOMN=''
+SOURCEPARM=''				# DEV NOTE: if you are adding any -o parameters, you can just list them in the beginning (e.g. somekey=somevalue) followed by any other switches (e.g. -P 2290) -OR- you can just pass switches (e.g. -P 2290)
+TARGETUSER=''
+TARGETPASS=''
+TARGETDOMN=''
+TARGETPARM=''
+TAG1=''								# these are extra values that can be used in the communication (e.g. to designate a client or device name)
+TAG2=''
+TAG3=''
+TAG4=''
+
+# -- INTERNAL --
+VERBOSE='/dev/null'						# used to show output or not
+					# DEV NOTE: verbose can be passed to your ALERTEXEC value via '${VERBOSE}' (e.g. verbose=${VERBOSE}); value=yes/no
+STATUS=''							# used to store the status of the job: success, failure
+SOURCESSH=''							# adds the ssh(pass) syntax to the ssh(fs) calls
+TARGETSSH=''
+					# DEV NOTE: if an ssh IdentityFile for the job is present (@ "${DIRSSH}/${HOST}"), then use that identity file instead of password file
+TARPREFIX=''							# used to change directories before executing tar (when using --include or --exclude)
+SSETSID=''							# whether or not the use of 'setsid' should be used when calling ssh (e.g. when using indentity files)
+TSETSID=''
+SLOGIN=''							# these two are used by sshfs and ssh to store the entire "login" (e.g. user@host)
+TLOGIN=''
+SHOST=''							# used to keep track of the ssh hostname (for RSA key purposes)
+THOST=''
+DELAY=0
+SUDO=''
+TEMP=''
+PID=''
+TOS=''								# used to keep track of the target OS when performing the 'find'
+
+
+
+
+# ----- DO NOT EDIT BELOW THIS LINE -----
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR EXPORT
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR INTERNAL USE
+
+# Usage syntax: exitGraceful [iSuccess]
+# calls all the exit routines for each used module to perform cleanup
+# iSuccess	(optional) parameter indicating whether this function was called for: 1+=failure, 0=success (default)
+exitGraceful() {
+	[ $# -gt 0 ] && local iSUCCESS=$1 || local iSUCCESS=0			# if a success/failure value was passed, store it, other assume success by default
+	[ $iSUCCESS -eq 0 ] && STATUS='success' || STATUS='failure'		# now set the STATUS value based on iSUCCESS
+
+	# determine which log to write to (depending on how far we've made it into the process)
+	[ -e "${DIRLOGS}/${JOBLOG}" ] && TEMP="${DIRLOGS}/${JOBLOG}" || TEMP="${DIRLOGS}/${SYSLOG}"
+	echo "Cleaning up..." | tee -a "${TEMP}" >${VERBOSE}
+
+	# remove the SOURCE "mount point"
+	echo -n "Removing the --source location:" | tee -a "${TEMP}" >${VERBOSE}
+mount | grep -q "${DIRMNTS}/${RJN}.s" && echo "its mounted" >/tmp/debug.txt || echo "its NOT mounted" >/tmp/debug.txt
+echo "mount | grep -q \"${DIRMNTS}/${RJN}.s\"" >>/tmp/debug.txt
+pwd >>/tmp/debug.txt
+	if ( mount | grep -q "${DIRMNTS}/${RJN}.s" ); then			# if the SOURCE is mounted, then umount and delete the RJN mount point directory
+		echo -n " [umounting]" | tee -a "${TEMP}" >${VERBOSE}
+echo "umounting! |umount \"${DIRMNTS}/${RJN}.s\" && rmdir \"${DIRMNTS}/${RJN}.s\"|" >>/tmp/debug.txt
+		${SUDO}umount "${DIRMNTS}/${RJN}.s" 2>>"$TEMP" && rmdir "${DIRMNTS}/${RJN}.s" 2>>"$TEMP"
+	elif [ -e "${DIRMNTS}/${RJN}.s" ]; then					# otherwise, if it was a symlink -OR- the job failed before mounting occurred but the RJN was created, then delete it
+		echo -n " [deleting]" | tee -a "${TEMP}" >${VERBOSE}
+		# WARNING: these tests must be in this 'if' structure -AND- in this order!!!
+		if ( test -h "${DIRMNTS}/${RJN}.s" ); then
+echo "symlink" >>/tmp/debug.txt
+			rm "${DIRMNTS}/${RJN}.s" 2>>"$TEMP"
+		elif ( test -d "${DIRMNTS}/${RJN}.s" ); then
+echo "directory" >>/tmp/debug.txt
+			rmdir "${DIRMNTS}/${RJN}.s" 2>>"$TEMP"
+		fi
+	fi
+	echo " [done]" | tee -a "${TEMP}" >${VERBOSE}
+
+	# remove the TARGET "mount point"
+	echo -n "Removing the --target location:" | tee -a "${TEMP}" >${VERBOSE}
+	if ( mount | grep -q "${DIRMNTS}/${RJN}.t" ); then
+		echo -n " [umounting]" | tee -a "${TEMP}" >${VERBOSE}
+		cd - >/dev/null 2>&1						# have to do this step beforehand since we changed into the job directory (which is in the target dir)
+		${SUDO}umount "${DIRMNTS}/${RJN}.t" 2>>"$TEMP" && rmdir "${DIRMNTS}/${RJN}.t" 2>>"$TEMP"
+	elif [ -e "${DIRMNTS}/${RJN}.t" ]; then
+		echo -n " [deleting]" | tee -a "${TEMP}" >${VERBOSE}
+		# WARNING: these tests must be in this structure -AND- in this order!!!
+		if ( test -h "${DIRMNTS}/${RJN}.t" ); then
+			rm "${DIRMNTS}/${RJN}.t" 2>>"$TEMP"
+		elif ( test -d "${DIRMNTS}/${RJN}.t" ); then
+			rmdir "${DIRMNTS}/${RJN}.t" 2>>"$TEMP"
+		fi
+	fi
+	echo " [done]" | tee -a "${TEMP}" >${VERBOSE}
+
+	echo -n "Removing dynamically created files:" | tee -a "${TEMP}" >${VERBOSE}
+# [X] LEFT OFF - if the target is WINDOWS and SSH, then we need to remove the list there as well
+echo "TOS|SOURCE |$TOS|$SOURCE|"
+	if [ "$TOS" == 'windows' ] && [ "${SOURCE:0:1}" == '@' ]; then		# remove any remote files listing on a Windows device
+echo 'deleting list file from windows device'
+echo "${SOURCESSH}\"IF EXIST \\\"%HOMEPATH%\\${RJN}.list\\\" ( del \\\"%HOMEPATH%\\${RJN}.list\\\" )\""
+		eval "${SOURCESSH}\"IF EXIST \\\"%HOMEPATH%\\${RJN}.list\\\" ( del \\\"%HOMEPATH%\\${RJN}.list\\\" )\"" 2>>"${TEMP}"
+	fi
+	[ -e "${DIRTEMP}/${RJN}_s.sh" ] && rm "${DIRTEMP}/${RJN}_s.sh"		# remove any ssh password file (for SOURCE)
+	[ -e "${DIRTEMP}/${RJN}_s.pw" ] && rm "${DIRTEMP}/${RJN}_s.pw"		# remove any sshpass password file (for SOURCE)
+	[ -e "${DIRTEMP}/${RJN}_t.sh" ] && rm "${DIRTEMP}/${RJN}_t.sh"		# these two are the same as above but for TARGET
+	[ -e "${DIRTEMP}/${RJN}_t.pw" ] && rm "${DIRTEMP}/${RJN}_t.pw"
+	[ -e "${DIRTEMP}/${RJN}.list" ] && rm "${DIRTEMP}/${RJN}.list"		# remove any files listing
+	[ -e "${DIRTEMP}/${RJN}.sh" ] && rm "${DIRTEMP}/${RJN}.sh"		# remove any sinc script
+	echo " [done]" | tee -a "${TEMP}" >${VERBOSE}
+
+	# Send the backup report
+	echo -n "Processing the backup report:" | tee -a "${TEMP}" >${VERBOSE}
+	# if the .err file is 0 bytes -and- the ALERT value is 'success' or 'always' -OR- the .err file is larger than 0 bytes -and- the ALERT value is 'failure' or 'always', then...
+	if ( [ ! -s "${DIRLOGS}/${ERRLOG}" ] && [ "$ALERT" != 'none' ] && [ "$ALERT" != 'failure' ] ) || ( [ -s "${DIRLOGS}/${ERRLOG}" ] && [ "$ALERT" != 'none' ] && [ "$ALERT" != 'success' ] ); then
+		# substitute the ${VERBOSE} (or $VERBOSE) value into a true/false value
+		if ( echo "$ALERTEXEC" | grep -q '\$[{]*VERBOSE[}]*' ); then
+			# NOTE: we can't use 'sed -E' since it's not available in all flavors of 'sed'
+			[ "$VERBOSE" == '/dev/null' ] && ALERTEXEC="$(echo "$ALERTEXEC"|awk '{sub(/\$\{?VERBOSE\}?/, "false")} 1')"
+			[ "$VERBOSE" != '/dev/null' ] && ALERTEXEC="$(echo "$ALERTEXEC"|awk '{sub(/\$\{?VERBOSE\}?/, "true")} 1')"
+		fi
+
+		# now execute any supplied ALERTEXEC
+		if ( echo "$ALERTEXEC" | grep -q ^'http' ); then
+			echo -n " [url]" | tee -a "${TEMP}" >${VERBOSE}
+			eval "curl -s -S --connect-timeout 60 \"$ALERTEXEC\"" >>"${TEMP}" 2>&1 || {		# unfortunately we can't display stdout since curl outputs HTML errors no matter what
+				echo " [failure]" | tee -a "${TEMP}" >${VERBOSE}
+				echo "${DATETIME}	ERROR: curl can not send the progress report due to encountering an error." >>"${TEMP}"
+			} | tee -a "${TEMP}" >/dev/null
+		elif ( echo "$ALERTEXEC" 2>>"${TEMP}" | grep -q ^'/' ); then
+			echo -n " [file]" | tee -a "${TEMP}" >${VERBOSE}
+			eval "$ALERTEXEC" 2>>"${TEMP}" || {
+				echo " [failure]" | tee -a "${TEMP}" >${VERBOSE}
+				echo "${DATETIME}	ERROR: the restore alert executable can not process the progress report due to encountering an error." >>"${TEMP}"
+			} | tee -a "${TEMP}" >/dev/null
+		fi
+	fi
+	echo " [done]" | tee -a "${TEMP}" >${VERBOSE}
+
+	[ $iSUCCESS -eq 0 ] && echo -n "The $( ( [ "${TYPE}" == 'sync' ] || [ "${TYPE}" == 'sinc' ] ) && echo -n sync || echo -n backup) job has completed successfully: " | tee -a "${TEMP}" >${VERBOSE}
+	[ $iSUCCESS -gt 0 ] && echo -n "The $( ( [ "${TYPE}" == 'sync' ] || [ "${TYPE}" == 'sinc' ] ) && echo -n sync || echo -n backup) job has stopped due to failure: " | tee -a "${TEMP}" >${VERBOSE}
+	date | tee -a "${TEMP}" >${VERBOSE}
+
+	# kill the backgrounded processes using the FIFO	https://aweirdimagination.net/2020/06/28/kill-child-jobs-on-script-exit/
+	[ "$PID" != '' ] && pkill -P $PID
+
+	exit $iSUCCESS						# exit with the passed error number (for debugging)
+}
+
+
+# Usage syntax: sizeConvert sSize sUnit
+# converts the passed size into the passed unit			1 Byte = 8 Bits
+# sSize		the size to convert and must include a suffix: B(ytes), K(ilobyte 1000), Ki(bibyte 1024), M(egabyte), Mi(bibyte), 
+# sUnit		the unit to convert the passed size to: B, b, KB, Ki, kb, MB, MiB, mb, etc
+# NOTES:
+#	kibibytes = 1024 (decimal) memory (--from=si) KiB
+#	kilobytes = 1000 (binary) storage (--from-iec) KB
+#	bits are indicated via lower case (e.g. kb); numfmt does NOT do conversion between bytes and bits
+#	http://www.pixelbeat.org/docs/numfmt.html
+#	https://www.man7.org/linux/man-pages/man1/numfmt.1.html
+#	https://physics.nist.gov/cuu/Units/binary.html
+#	https://stackoverflow.com/questions/19059944/convert-kb-to-mb-using-bash
+#	https://hexus.net/tech/tech-explained/storage/1376-gigabytes-gibibytes-what-need-know/
+#	https://unix.stackexchange.com/questions/346902/need-to-convert-bytes-to-gb-mb-kb-in-normal-decimal-format
+sizeConvert() {
+	local sSIZE=$1
+	local sUNIT=$2
+	local iPRE=''						# number portion of string
+	local sSUF=''						# unit portion of string
+
+	# validate sSIZE suffix
+	iPRE=$(echo ${sSIZE}|sed 's/[a-zA-Z]*//g')		# number
+	sSUF=$(echo ${sSIZE}|sed 's/[0-9]*//g')			# unit
+	case $sSUF in
+		'B') sSIZE=$iPRE ;;				# if we are dealing in bytes, we have to remove the 'B' suffix or numfmt will error
+		'K'|'Ki'|'M'|'Mi'|'G'|'Gi'|'T'|'Ti'|'P'|'Pi'|'E'|'Ei') ;;
+		*) echo "ERROR: The sizeConvert() function was passed an invalid value [sSIZE], exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		   exitGraceful 1				# NOTE: this also picks up no value for sSUF
+			;;
+	esac
+
+	# validate sUNIT
+	case $sUNIT in
+		'B'|'K'|'Ki'|'M'|'Mi'|'G'|'Gi'|'T'|'Ti'|'P'|'Pi'|'E'|'Ei') ;;
+		*) echo "ERROR: The sizeConvert() function was passed an invalid value [sUNIT], exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		   exitGraceful 1
+			;;
+	esac
+
+	numfmt --round=towards-zero --from=auto --to-unit=1${sUNIT} --grouping ${sSIZE}		# 'towards-zero' is basically truncation instead of rounding	https://askubuntu.com/questions/1169138/cutting-numbers-into-a-specific-decimals
+	return 0
+}
+
+
+
+
+# EXIT IF APPROPRIATE
+
+
+
+
+# VARIABLE PROCESSING
+
+# process stored variables first
+[ -e "${DIRCONF}/global.cfg" ] && . "${DIRCONF}/global.cfg"	# read the global config first
+
+for i in "$@"; do						# process each of the passed parameters (looking for the --name value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--name=' ); then		# find the job name to look for specific job configurations
+		NAME="${i##*=}"
+		[ -e "${DIRCONF}/${NAME}.cfg" ] && . "${DIRCONF}/${NAME}.cfg"	# read in specific job values (via the job name)
+		[ -e "${DIRHOME}/${NAME}.cfg" ] && . "${DIRHOME}/${NAME}.cfg"	# read in private job values (via the job name)
+	fi
+done
+
+# NOTE: this MUST to come after the job config file above (since the user may want to use alternate values from the saved job config)
+for i in "$@"; do						# process each of the passed parameters (looking for the --config value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--config=' ); then		# read in the passed config file
+		TEMP="${i##*=}"
+		[ -e "${TEMP}" ] && . "${TEMP}"			# read in the stored values for this script if it exists
+	fi
+done
+
+# process passed variables last (since they will have presidence)
+for i in "$@"; do						# process each of the passed parameters (after setting default values above)
+	if [ "${i}" == "--version" ] || [ "${i}" == "-v" ]; then
+		head -25 "$0" | grep "Updated	" | sed 's/.*\t//;s/ by .*//;s/-/./g'
+		exit 0
+
+	elif [ "${i}" == "--help" ] || [ "${i}" == '/?' ]; then
+		echo
+		echo "The syntax for this script is:"
+		echo "   ${0##*/} [ACTION] [--OPTION=\"VALUE\" ...] [--config filename]"
+	        echo
+		echo "Full documentation located at:"
+		echo "   http://wiki.cliquesoft.org/index.php?title=dittodata"
+		echo
+		echo "The short project description:"
+		echo "   This script performs the specified  action using the passed options and their"
+		echo "   respective values (which need to be enclosed in double quotes).  A backup can"
+		echo "   also be run with no command line parameters IF they are all defined in a bash"
+		echo "   style config file (as identified via the --config parameter).  Another option"
+		echo "   is to pass job specific options via  the command line in conjunction with the"
+		echo "   --config parameter so any \"general\" options are used too. All the ACTIONS are"
+		echo "   listed below with each modules' individual options following."
+		echo
+		echo "   [ACTIONS]"
+		echo
+		echo " --help		this screen"
+		echo " --version	shows the version of this script"
+		echo
+		echo "   [OPTIONS]"
+		echo
+		echo " --verbose	display verbose output"
+		echo " --config	specifies a pre-built configuration via a text file.  The syntax"
+		echo "		should contain a list of \"OPTION=VALUE\" pairs (one per line) for"
+		echo "		anything that could be passed on the command line."
+		echo "		NOTE: capitalize all OPTION's; enclose string VALUE's in quotes."
+		echo " --delay	the number of seconds to delay the execution of the script"
+		echo "		NOTE: this was added for the GUI, but can be used for any reason."
+		echo " --sudo		use sudo to (u)mount the shares"
+		echo
+		echo "   {JOB}"
+		echo
+		echo " --name		the name of the backup job (enclose in quotes)"
+		echo " --type		what type of backup job to start:"
+# VER2 - archive (old data via date)|clone (ntfsclone)|bit (dd)|BMR (bare metal restore - fat32|ntfs|ext support only - gets data and mbr)"
+#	NOTE: the restore module will mount BMR 'images' to restore from (ntfs, fat32, ext, and dd)
+# for achive date: https://stackoverflow.com/questions/67409358/why-does-find-command-in-if-return-paths-must-precede-expression-error
+#	NOTE: make sure to document that 'sinc' will store archives locally with the DIRTAG value becoming the local storage location (in it's entirety)
+		echo "			daily|full|incremental|custom|sync|sinc"
+		echo " --compression	any compression to apply to the backup:"
+		echo "			none|gzip|bzip"
+		echo " --include	the file containing the file(s) and/or dir(s) to backup"
+		echo " --exclude	the file containing the file(s) and/or dir(s) to exclude"
+		echo " --limit	the number to limit the backup archives (count/size) to: #[MB]"		# a trailing 'MB' will limit via free megabytes instead of archive count; no values = manually manage
+		echo " --prescript	pre-script to run prior to the backup job (enclose in quotes)"
+		echo " --postscript	post-script to run after the backup job (enclose in quotes)"
+# VER 2
+#		echo " --minsize	minimum size (in KB) that an archive should be or a failed job"
+#		echo "		completion status will be triggered."
+#		echo " --zerocat	specifying this option will check that the jobs' catalog file"
+#		echo "		has actual contents, otherwise a failed job completion status"
+#		echo "		will be triggered: 0=off (default)|1=on|2=warn"
+#		echo " --verify	verify the data in the archive"
+#		echo " --limitbw	limit the bandwidth of the data transfer (backup & sync)"
+#		echo " --match	make the files on the target match the files on the source (via deleting them)"
+		echo " --alert	if an email alert should be sent upon the following action:"
+		echo "			none|success|failure|always"
+		echo " --alertExec	the file/URL to call to send the alert; variables can be passed"
+		echo " --customParm	custom parameters to pass to the underlying binary (tar/rsync)"
+		echo
+		echo "   {LOCATIONS}"
+		echo
+		echo " --dirTag	tag used in the directory structure instead of the job name"
+		echo " --source	path -OR- device to backup"
+		echo "		      absolute path example:	/local/dir               [local]"
+# VER2
+#		echo "		      device file example:	/dev/sda1               [device]"
+		echo "		      network share examples:	//server:/share/dir      [Linux]"
+		echo "						\\\\server\\share\\dir     [Windows]"
+		echo "						%host:/dir               [sshfs]"
+		echo "						@host:/dir                 [ssh]"
+# VER2
+#		echo "						#domain.com/dir/file   [http(s)]"		# NOTE: this will require an upload script on the server	https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
+#		echo "						!domain.com/dir/file    [ftp(s)]"		# 	these both use curl
+		echo "		NOTE: escape all backslashes if not enclosed in SINGLE quotes."
+		echo " --target	path -OR- device to store backups (defaults to /var/backups)"
+		echo "		      absolute path example:	/local/dir               [local]"
+# VER2
+#		echo "		      device file example:	/dev/sdb2               [device]"
+		echo "		      network share examples:	//server:/share/dir      [Linux]"
+		echo "						\\\\server\\share\\dir     [Windows]"
+		echo "						%host:/dir               [sshfs]"
+		echo "						@host:/dir                 [ssh]"
+# VER2
+#		echo "						#domain.com/dir/file   [http(s)]"
+#		echo "						!domain.com/dir/file    [ftp(s)]"
+		echo "		NOTE: escape all backslashes if not enclosed in SINGLE quotes."
+		echo " --sourceUser	mount credentials for --source network shares: username"
+		echo " --sourcePass	mount credentials for --source network shares: password"
+		echo " --sourceDomn	mount credentials for --source network shares: Windows domain"
+		echo " --sourceParm	additional mount parameters to the pass when mounting source"
+		echo " --targetUser	same as above, but for --target network shares"
+		echo " --targetPass"
+		echo " --targetDomn"
+		echo " --targetParm"
+		echo
+		echo "   {MISCELLANEOUS}"
+		echo
+		echo " --tag1		user-defined values that can be passed to job alerts"
+		echo " --tag2"
+		echo " --tag3"
+		echo " --tag4"
+		echo
+		exit 0
+
+	elif ( echo "${i}" | grep -q ^'--verbose' ); then
+		VERBOSE='/dev/stdout'
+	elif ( echo "${i}" | grep -q ^'--config' ); then
+		continue				# so that this doesn't trigger an invalid parameter prompt
+	elif ( echo "${i}" | grep -q ^'--delay' ); then
+		DELAY="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--sudo' ); then
+		SUDO='sudo '
+
+	elif ( echo "${i}" | grep -q ^'--name=' ); then
+		NAME="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--type=' ); then
+		TYPE="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--compression=' ); then
+		COMPRESSION="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--include=' ); then
+		INCLUDE="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--exclude=' ); then
+		EXCLUDE="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--limit=' ); then
+		LIMIT="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--prescript=' ); then
+		PRESCRIPT="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--postscript=' ); then
+		POSTSCRIPT="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--alert=' ); then
+		ALERT="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--alertExec=' ); then
+		ALERTEXEC="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--customParm=' ); then
+		CUSTOMPARM="${i#*=}"
+
+	elif ( echo "${i}" | grep -q ^'--dirTag=' ); then
+		DIRTAG="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--source=' ); then
+		SOURCE="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--target=' ); then
+		TARGET="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--sourceUser=' ); then
+		SOURCEUSER="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--sourcePass=' ); then
+		SOURCEPASS="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--sourceDomn=' ); then
+		SOURCEDOMN="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--sourceParm=' ); then
+		SOURCEPARM="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--targetUser=' ); then
+		TARGETUSER="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--targetPass=' ); then
+		TARGETPASS="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--targetDomn=' ); then
+		TARGETDOMN="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--targetParm=' ); then
+		TARGETPARM="${i#*=}"
+
+	elif ( echo "${i}" | grep -q ^'--tag1=' ); then
+		TAG1="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--tag2=' ); then
+		TAG2="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--tag3=' ); then
+		TAG3="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--tag4=' ); then
+		TAG4="${i#*=}"
+
+	else
+		echo "ERROR: This script was called with an invalid parameter (${i})." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exit 1
+	fi
+done
+
+[ $DELAY -gt 0 ] && sleep $DELAY
+
+
+
+
+# VALIDATE INFORMATION
+
+# variable values
+echo -n "Checking for necessary variable values:" >${VERBOSE}
+echo -n " [name]" >${VERBOSE}
+[ "${NAME}" == '' ] && {				# checks that the '--name' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The backup job was called WITHOUT the '--name' parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo -n " [type]" >${VERBOSE}
+[ "${TYPE}" == '' ] && {				# checks that the '--type' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The backup job was called WITHOUT the '--type' parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+[ "${TYPE}" == 'sinc' ] && [ "${DIRTAG}" == '' ] && {
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The backup job must include the '--dirTag' value when using the 'sinc' value, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo -n " [source]" >${VERBOSE}
+[ "${SOURCE}" == '' ] && {				# checks that the '--source' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The backup job was called WITHOUT the '--source' parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+if [ "${SOURCE:0:1}" == '@' ]; then
+	if ( ! echo "$SOURCE" | grep -q ':' ); then	# if the path wasn't included in the SOURCE parameter, then...	NOTE: we need to test for ':' since 'host:' would be the users home directory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The backup job was called WITHOUT a directory in the SOURCE parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	fi
+fi
+# if we aren't dealing with an ssh SOURCE -OR- we are using ssh -and- the last character isn't a ':' (since 'host:' is valid), then append '/' to the path now so the directory structures below will be correct
+if [ "${SOURCE:0:1}" != '@' ] || ( [ "${SOURCE:0:1}" == '@' ] && [ "$(echo ${SOURCE}|cut -c ${#SOURCE})" != ':' ]); then
+	[ "$(echo ${SOURCE}|cut -c ${#SOURCE})" != '/' ] && SOURCE="${SOURCE}/"	# if we aren't dealing with an ssh SOURCE (since 'host:' is valid) -AND- the last character isn't a '/', then add it now so the directory structures below will be correct
+fi
+echo -n " [target]" >${VERBOSE}
+[ "${TARGET}" == '' ] && {				# checks that the '--target' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The backup job was called WITHOUT the '--target' parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+if [ "${TARGET:0:1}" == '@' ]; then
+	if ( ! echo "$TARGET" | grep -q ':' ); then	# if the path wasn't included in the TARGET parameter, then...	NOTE: we need to test for ':' since 'host:' would be the users home directory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The backup job was called WITHOUT a directory in the TARGET parameter, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	fi
+fi
+# if we aren't dealing with an ssh TARGET -OR- we are using ssh -and- the last character isn't a ':' (since 'host:' is valid), then append '/' to the path now so the directory structures below will be correct
+if [ "${TARGET:0:1}" != '@' ] || ( [ "${TARGET:0:1}" == '@' ] && [ "$(echo ${TARGET}|cut -c ${#TARGET})" != ':' ]); then
+	[ "$(echo ${TARGET}|cut -c ${#TARGET})" != '/' ] && TARGET="${TARGET}/"	# if we aren't dealing with an ssh TARGET (since 'host:' is valid) -AND- the last character isn't a '/', then add it now so the directory structures below will be correct
+fi
+if [ "$TYPE" == 'sync' ] && [ "${SOURCE:0:1}" == '@' ] && [ "${TARGET:0:1}" == '@' ]; then			# if we are sync'ing and both SOURCE and TARGET are ssh hosts, then...
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The sync job was called with the '--source' AND '--target' parameters as ssh, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+fi
+echo " [done]" >${VERBOSE}
+
+
+echo -n "Checking for malicious activity in variable values:" >${VERBOSE}
+echo -n " [source]" >${VERBOSE}
+( echo $SOURCEPARM | egrep -q '(;|&&|\|\|)' ) && {				# checks that the '--files' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The --sourceParm value contains an invalid parameter (;, &&, ||), exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo -n " [target]" >${VERBOSE}
+( echo $TARGETPARM | egrep -q '(;|&&|\|\|)' ) && {				# checks that the '--files' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The --targetParm value contains an invalid parameter (;, &&, ||), exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo -n " [custom]" >${VERBOSE}
+( echo $CUSTOMPARM | egrep -q '(;|&&|\|\|)' ) && {				# checks that the '--files' parameter was passed to this script since it's mandatory
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The --customParm value contains an invalid parameter (;, &&, ||), exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo " [done]" >${VERBOSE}
+
+
+
+
+# variable value alterations
+echo -n "Making variable value alterations:" >${VERBOSE}
+echo -n " [dirTag]" >${VERBOSE}
+[ "${TYPE}" != 'sinc' ] && [ "${DIRTAG}" == '' ] && DIRTAG="${NAME}"			# if we're NOT sinc'ing -AND- no value was passed, then use the job name
+
+echo -n " [customParm]" >${VERBOSE}
+( [ "${TYPE}" != 'sync' ] && [ "${CUSTOMPARM}" == '' ] ) && CUSTOMPARM='-P --one-file-system --ignore-failed-read --ignore-case'	# if we backing up (not sync'ing) -AND- no custom params were passed, then set defaults
+( [ "${TYPE}" == 'sync' ] && [ "${CUSTOMPARM}" == '' ] ) && CUSTOMPARM='-rulHpEogDtzv --progress --partial-dir=InProgress --no-checksum --blocking-io --one-file-system'		# ditto, but for sync'ing
+
+echo -n " [source]" >${VERBOSE}
+if [ "${SOURCE:0:2}" == '//' ]; then				# if we're mounting a Linux NFS share, then...		https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+	echo -n " [nfs]" >${VERBOSE}
+	[ "${SOURCEPARM}" != '' ] && {
+		[ "${SOURCEPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		SOURCEPARM="${TEMP}${SOURCEPARM}"							# if we've made it here and this variable has a value, prepend a ',' so the mount syntax below works correctly
+	}
+# VER2 - secure nfs via ssh; read https://stackoverflow.com/questions/53604706/mount-network-share-with-nfs-with-username-password
+	# REMOVED 2022/10/20 - credentials are not part of NFS mounting (the client device institutes the security of the network share)	https://stackoverflow.com/questions/53604706/mount-network-share-with-nfs-with-username-password
+	#[ "${SOURCEUSER}" != '' ] && SOURCEPARM="${SOURCEPARM} -O user=${SOURCEUSER}"			# same with a passed username		https://unix.stackexchange.com/questions/341854/failed-to-pass-credentials-to-nfs-mount
+	#[ "${SOURCEPASS}" != '' ] && SOURCEPARM="${SOURCEPARM} -O pass='${SOURCEPASS}'"		# same with a passed password
+elif [ "${SOURCE:0:2}" == '\\' ]; then
+	echo -n " [cifs]" >${VERBOSE}
+	TEMP=''
+	[ "${SOURCEUSER}" != '' ] && TEMP="${TEMP},user=${SOURCEUSER}"
+	[ "${SOURCEPASS}" != '' ] && TEMP="${TEMP},pass='${SOURCEPASS}'"
+	[ "${SOURCEDOMN}" != '' ] && TEMP="${TEMP},dom=${SOURCEDOMN}"
+	if [ "${SOURCEPARM}" != '' ]; then
+		[ "${SOURCEPARM:0:1}" == '-' ] && TEMP="${TEMP} ${SOURCEPARM}" || TEMP="${TEMP},${SOURCEPARM}"
+	fi
+	SOURCEPARM="$TEMP"
+elif [ "${SOURCE:0:1}" == '%' ]; then
+	echo -n " [sshfs]" >${VERBOSE}
+
+	SHOST=$(echo "$SOURCE"|sed 's/^%//;s/:.*//')
+	SLOGIN="@${SOURCE:1}"						# NOTE: we MUST replace the preceeding '%' character with an '@' character in the SOURCE to work correctly
+	[ "${SOURCEUSER}" != '' ] && SLOGIN="${SOURCEUSER}${SLOGIN}" || SLOGIN="${USER}${SLOGIN}"					# add the correct username to connect to the remote device with to the SOURCE value
+
+	# WARNING: the below lines MUST come in the order they currently are
+	[ "${SOURCEPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ -e "${DIRSSH}/${SHOST}" ] && {
+		SOURCEPARM="IdentityFile=\"${DIRSSH}/${SHOST}\"${TEMP}${SOURCEPARM}"
+		SSETSID='setsid '
+	}
+	[ "${SOURCEPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ "${SOURCEPARM}" == '' ] && TEMP=''								# if the value is blank, then ultimately do nothing
+	( [ "${SOURCEUSER}" != '' ] && [ "${USER}" == "${SOURCEUSER}" ] ) && SOURCEPARM="allow_other,uid=$(id -u ${SOURCEUSER}),gid=$(id -g)${TEMP}${SOURCEPARM}" || SOURCEPARM="allow_other,uid=$(id -u),gid=$(id -g)${TEMP}${SOURCEPARM}"
+	[ "${SOURCEPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ "${SOURCEPARM}" != '' ] && [ "${SOURCEPARM:0:1}" != ',' ] && SOURCEPARM="${TEMP}${SOURCEPARM}"
+	[ "${SOURCEPARM}" == '' ] && TEMP=',' || TEMP=' -o '						# since this is post-pended, always make it the LAST parameter called (with it's own '-o')
+	[ "${SOURCEPASS}" != '' ] && {
+		SOURCESSH="echo '${SOURCEPASS}' | ${SUDO}sshfs"
+		SOURCEPARM="${SOURCEPARM}${TEMP}password_stdin"						# https://unix.stackexchange.com/questions/337465/username-and-password-in-command-line-with-sshfs
+	}
+elif [ "${SOURCE:0:1}" == '@' ]; then
+	echo -n " [ssh]" >${VERBOSE}
+
+	SHOST=$(echo "$SOURCE"|sed 's/^@//;s/:.*//')
+	[ "${SOURCEUSER}" != '' ] && SLOGIN="${SOURCEUSER}${SOURCE}" || SLOGIN="${USER}${SOURCE}"					# add the correct username to connect to the remote device with to the SOURCE value
+
+	[ "${SOURCEPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ -e "${DIRSSH}/${SHOST}" ] && {
+		SOURCEPARM="-o IdentityFile=\"${DIRSSH}/${SHOST}\"${TEMP}${SOURCEPARM}"
+		SSETSID='setsid '
+	}
+
+	# add the ssh syntax to the command
+	if [ "$TYPE" != 'sync' ]; then
+		TEMP=''
+		SOURCESSH="${SSETSID}ssh ${SLOGIN%%:*} ${SOURCEPARM}"
+	else
+		TEMP='| '			# this is show we can split the command into two if we are sync'ing
+		SOURCESSH="-e \"${SSETSID}ssh ${SOURCEPARM}\" \"${SLOGIN}\""
+	fi
+	# setup password-less processing if no RSA keys have been exchanged
+	if [ ! -e "${DIRSSH}/${SHOST}" ]; then				# if there isn't an IdentityFile for the connection to prevent password prompts, then...
+		if [ "$(which sshpass)" != '' ]; then			# if 'sshpass' exists, then...
+			SOURCESSH="sshpass -f \"${DIRTEMP}/${RJN}_s.pw\" ${TEMP}${SOURCESSH}"	# setup the syntax to use sshpass
+			echo "${SOURCEPASS}" >"${DIRTEMP}/${RJN}_s.pw"			# create the password file
+		else
+			export DISPLAY=none:0.0						# export these variables so when 'setsid ssh ...' is called it can use the script to get the password
+			export SSH_ASKPASS="${DIRTEMP}/${RJN}_s.sh"
+			echo '#!/bin/sh' >"${DIRTEMP}/${RJN}_s.sh"			# now create the script to give the password to ssh
+			echo "echo ${SOURCEPASS}" >>"${DIRTEMP}/${RJN}_s.sh"
+			chmod 700 "${DIRTEMP}/${RJN}_s.sh"
+		fi
+	fi
+elif [ "${SOURCE:0:1}" == '/' ]; then			# no adjustments are neccessary with local directories
+	echo -n " [local]" >${VERBOSE}
+fi
+
+echo -n " [target]" >${VERBOSE}
+if [ "${TARGET:0:2}" == '//' ]; then			# if we're mounting a Linux NFS share, then...		https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+	echo -n " [nfs]" >${VERBOSE}
+	[ "${TARGETPARM}" != '' ] && {
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		TARGETPARM="${TEMP}${TARGETPARM}"							# if we've made it here and this variable has a value, prepend a ',' so the mount syntax below works correctly
+	}
+# VER2 - secure nfs via ssh; read https://stackoverflow.com/questions/53604706/mount-network-share-with-nfs-with-username-password
+	[ "${TARGETUSER}" != '' ] && TARGETPARM="${TARGETPARM} -O user=${TARGETUSER}"			# same with a passed username	https://unix.stackexchange.com/questions/341854/failed-to-pass-credentials-to-nfs-mount
+	[ "${TARGETPASS}" != '' ] && TARGETPARM="${TARGETPARM} -O pass='${TARGETPASS}'"			# same with a passed password
+elif [ "${TARGET:0:2}" == '\\' ]; then
+	echo -n " [cifs]" >${VERBOSE}
+	TEMP=''
+	[ "${TARGETUSER}" != '' ] && TEMP="${TEMP},user=${TARGETUSER}"
+	[ "${TARGETPASS}" != '' ] && TEMP="${TEMP},pass='${TARGETPASS}'"
+	[ "${TARGETDOMN}" != '' ] && TEMP="${TEMP},dom=${TARGETDOMN}"
+	if [ "${TARGETPARM}" != '' ]; then
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP="${TEMP} ${TARGETPARM}" || TEMP="${TEMP},${TARGETPARM}"
+	fi
+	TARGETPARM="$TEMP"
+elif [ "${TARGET:0:1}" == '%' ]; then
+	echo -n " [sshfs]" >${VERBOSE}
+
+	THOST=$(echo "$TARGET"|sed 's/^%//;s/:.*//')
+	TLOGIN="@${TARGET:1}"					# NOTE: we MUST replace the preceeding '%' character with an '@' character in the TARGET to work correctly
+	[ "${TARGETUSER}" != '' ] && TLOGIN="${TARGETUSER}${TLOGIN}" || TLOGIN="${USER}${TLOGIN}"					# add the correct username to connect to the remote device with to the TARGET value
+
+	# WARNING: the below lines MUST come in the order they currently are
+	[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ -e "${DIRSSH}/${THOST}" ] && {
+		TARGETPARM="IdentityFile=\"${DIRSSH}/${THOST}\"${TEMP}${TARGETPARM}"
+		TSETSID='setsid '
+	}
+	[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ "${TARGETPARM}" == '' ] && TEMP=''								# if the value is blank, then ultimately do nothing
+	( [ "${TARGETUSER}" != '' ] && [ "${USER}" == "${TARGETUSER}" ] ) && TARGETPARM="allow_other,uid=$(id -u ${TARGETUSER}),gid=$(id -g)${TEMP}${TARGETPARM}" || TARGETPARM="allow_other,uid=$(id -u),gid=$(id -g)${TEMP}${TARGETPARM}"
+	[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ "${TARGETPARM}" != '' ] && [ "${TARGETPARM:0:1}" != ',' ] && TARGETPARM="${TEMP}${TARGETPARM}"
+	[ "${TARGETPARM}" == '' ] && TEMP=',' || TEMP=' -o '						# since this is post-pended, always make it the LAST parameter called (with it's own '-o')
+	[ "${TARGETPASS}" != '' ] && {
+		TARGETSSH="echo '${TARGETPASS}' | ${SUDO}sshfs"
+		TARGETPARM="${TARGETPARM}${TEMP}password_stdin"						# https://unix.stackexchange.com/questions/337465/username-and-password-in-command-line-with-sshfs
+	}
+elif [ "${TARGET:0:1}" == '@' ]; then
+	echo -n " [ssh]" >${VERBOSE}
+
+	THOST=$(echo "$TARGET"|sed 's/^@//;s/:.*//')
+	[ "${TARGETUSER}" != '' ] && TLOGIN="${TARGETUSER}${TARGET}" || TLOGIN="${USER}${TARGET}"					# add the correct username to connect to the remote device with to the TARGET value
+
+	[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+	[ -e "${DIRSSH}/${THOST}" ] && {
+		TARGETPARM="-o IdentityFile=\"${DIRSSH}/${THOST}\"${TEMP}${TARGETPARM}"
+		TSETSID='setsid '
+	}
+
+	# add the ssh syntax to the command
+	if [ "$TYPE" != 'sync' ]; then
+		TEMP=''
+		TARGETSSH="${TSETSID}ssh ${TLOGIN%%:*} ${TARGETPARM}"
+	else
+		TEMP='| '			# this is show we can split the command into two if we are sync'ing
+		TARGETSSH="-e \"${SSETSID}ssh ${TARGETPARM}\" \"${TLOGIN}\""
+	fi
+
+	# setup password-less processing if no RSA keys have been exchanged
+	if [ ! -e "${DIRSSH}/${THOST}" ]; then				# if there isn't an IdentityFile for the connection to prevent password prompts, then...
+		if [ "$(which sshpass)" != '' ]; then			# if 'sshpass' exists, then...
+			TARGETSSH="sshpass -f \"${DIRTEMP}/${RJN}_t.pw\" ${TEMP}${TARGETSSH}"	# setup the syntax to use sshpass
+			echo "${TARGETPASS}" >"${DIRTEMP}/${RJN}_t.pw"			# create the password file
+		else
+			export DISPLAY=none:0.0						# export these variables so when 'setsid ssh ...' is called it can use the script to get the password
+			export SSH_ASKPASS="${DIRTEMP}/${RJN}_t.sh"
+			echo '#!/bin/sh' >"${DIRTEMP}/${RJN}_t.sh"			# now create the script to give the password to ssh
+			echo "echo ${TARGETPASS}" >>"${DIRTEMP}/${RJN}_t.sh"
+			chmod 700 "${DIRTEMP}/${RJN}_t.sh"
+		fi
+	fi
+elif [ "${TARGET:0:1}" == '/' ]; then				# no adjustments are neccessary with local directories
+	echo -n " [local]" >${VERBOSE}
+fi
+
+if [ "${TYPE}" == 'sinc' ]; then				# if we are "sinc'ing", then we need to replace the TARGET value with DIRTAG (since we have to save the data locally first)
+	echo -n " [type]" >${VERBOSE}
+	TARGET="$DIRTAG"
+	DIRTAG=''						# also erase this value so it is not used
+fi
+echo " [done]" >${VERBOSE}
+
+
+
+
+# directory existence
+# NOTE: this comes below the variable checking since we have to make sure SOURCE and TARGET are populated first (plus no job-specific logging is done yet)
+echo -n "Checking for necessary directories:" >${VERBOSE}
+echo -n " [logs]" >${VERBOSE}
+[ ! -e "${DIRLOGS}/${JOBLOG%/*}" ] && {				# must make sure the log directory is created	NOTE: the JOBLOG statement is added in so that a directory can be added to individual logs
+	echo -n " [creating]" >${VERBOSE}
+	mkdir -p "${DIRLOGS}/${JOBLOG%/*}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The logs directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+}
+echo -n " [rjn]" >${VERBOSE}
+if [ ! -e "${DIRMNTS}/${RJN}" ]; then
+	echo -n " [creating]" >${VERBOSE}
+	# if we're NOT using an ssh connection -AND- the SOURCE value is a local directory or mount point (e.g. starting with a '/' followed by an alphanumeric, underscore, or dot character), then...
+	if [ "${SOURCE:0:1}" != '@' ] && ( ! echo "$SOURCE" | grep -q ^"/[a-zA-Z0-9_\.]" ); then
+		mkdir -p "${DIRMNTS}/${RJN}.s" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job --source mount point directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	fi
+	# if we're NOT using an ssh connection -AND- the TARGET value is a local directory or mount point (e.g. starting with a '/' followed by an alphanumeric, underscore, or dot character), then...
+	if [ "${TARGET:0:1}" != '@' ] && ( ! echo "$TARGET" | grep -q ^"/[a-zA-Z0-9_\.]" ); then
+		mkdir -p "${DIRMNTS}/${RJN}.t" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job --target mount point directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	fi
+fi
+echo -n " [source]" >${VERBOSE}
+( echo "$SOURCE" | grep -q ^"/[a-zA-Z0-9_\.]" ) && [ ! -e "${SOURCE}" ] && {		# if the value is a local (and job) directory -AND- it does NOT exist, then...
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: The --source directory does NOT exist, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+echo -n " [target]" >${VERBOSE}
+( echo "$TARGET" | grep -q ^"/[a-zA-Z0-9_\.]" ) && [ ! -e "${TARGET}" ] && {
+	# if the target directory doesn't exist (e.g. first run of the software), then try to create it
+	mkdir -p "$TARGET" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --target directory does NOT exist and can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+}
+echo " [done]" >${VERBOSE}
+
+
+
+
+# file existence
+echo -n "Checking for stated files:" >${VERBOSE}
+echo -n " [config]" >${VERBOSE}
+for i in "$@"; do						# process each of the passed parameters (looking for the --config value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--config=' ); then		# read in the passed config file
+		TEMP="${i##*=}"
+		[ ! -e "${TEMP}" ] && {			# read in the stored values for this script if it exists
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The passed config file can NOT be found, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	fi
+done
+if [ "$INCLUDE" != '' ]; then
+	echo -n " [include]" >${VERBOSE}
+	[ ! -e "${INCLUDE}" ] && {			# read in the stored values for this script if it exists
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The passed include file can NOT be found, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+if [ "$EXCLUDE" != '' ]; then
+	echo -n " [exclude]" >${VERBOSE}
+	[ ! -e "${EXCLUDE}" ] && {			# read in the stored values for this script if it exists
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The passed exclude file can NOT be found, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+echo " [done]" >${VERBOSE}
+
+
+
+
+# Grab the Ctrl-C signal and cleanup the environment
+trap "exitGraceful 1" SIGINT
+
+
+
+
+# START THE BACKUP JOB
+
+echo >${VERBOSE}
+echo -e "Starting the \"${NAME}\" $( ( [ "${TYPE}" == 'sync' ] || [ "${TYPE}" == 'sinc' ] ) && echo -n sync || echo -n backup) job: ${DATETIME}" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+# process the SOURCE location
+echo -n "Processing the --source location:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+if [ "${SOURCE:0:2}" == '//' ]; then				# if we're mounting a Linux NFS share, then...
+	echo -n " [nfs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	eval "${SUDO}mount -t nfs -o ro${SOURCEPARM} \"${SOURCE:2}\" \"${DIRMNTS}/${RJN}.s\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --source can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ${SUDO}mount -t nfs -o ro$(echo "${SOURCEPARM}"|sed "s/-O pass='[^']*'/-O pass='********'/") \"${SOURCE:2}\" \"${DIRMNTS}/${RJN}.s\"" >>"${DIRLOGS}/${ERRLOG}"					# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${SOURCE:0:2}" == '\\' ]; then
+	echo -n " [cifs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	SOURCE="$(echo ${SOURCE} | tr '\\' '/')"			# NOTE: we MUST replace the '\' characters with '/' characters in the SOURCE to work correctly
+	eval "${SUDO}mount -t cifs -o ro,uid=$(id -n -u),gid=$(id -n -g)${SOURCEPARM} \"${SOURCE}\" \"${DIRMNTS}/${RJN}.s\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-cifs-windows-share-on-linux/
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --source can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ${SUDO}mount -t cifs -o ro,uid=$(id -n -u),gid=$(id -n -g)$(echo "${SOURCEPARM}"|sed "s/,pass='[^']*'/,pass='********'/") \"${SOURCE}\" \"${DIRMNTS}/${RJN}.s\"" >>"${DIRLOGS}/${ERRLOG}"	# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${SOURCE:0:1}" == '%' ]; then
+	echo -n " [sshfs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	eval "${SOURCESSH} \"${SLOGIN}\" \"${DIRMNTS}/${RJN}.s\" -o ro${SOURCEPARM}" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {				# NOTE: this is after the RSA keys have already been exchanged with the server	www.beginninglinux.com/home/server-administration/openssh-keys-certificates-authentication-pem-pub-crt
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --source can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: $(echo "${SOURCESSH}"|sed "s/'[^']*'/'********'/") \"${SLOGIN}\" \"${DIRMNTS}/${RJN}.s\" -o ro${SOURCEPARM}" >>"${DIRLOGS}/${ERRLOG}"								# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${SOURCE:0:1}" == '@' ]; then
+	echo -n " [ssh]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	# NOTE: these connections are made on-the-fly, so nothing to do here
+elif [ "${SOURCE:0:1}" == '/' ]; then					# create a symlink to the source so the below code can always access the same location to backup the source
+	echo -n " [local]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	ln -s "${SOURCE}" "${DIRMNTS}/${RJN}.s" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --source can NOT be symlinked, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ln -s \"${SOURCE}\" \"${DIRMNTS}/${RJN}.s\"" >>"${DIRLOGS}/${ERRLOG}"
+		exitGraceful 1
+	}
+fi
+echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+
+# process the TARGET location
+echo -n "Processing the --target location:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+if [ "${TARGET:0:2}" == '//' ]; then				# if we're mounting a Linux NFS share, then...
+	echo -n " [nfs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	eval "${SUDO}mount -t nfs -o rw${TARGETPARM} \"${TARGET:2}\" \"${DIRMNTS}/${RJN}.t\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ${SUDO}mount -t nfs -o rw$(echo "${TARGETPARM}"|sed "s/-O pass='[^']*'/-O pass='********'/") \"${TARGET:2}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"					# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${TARGET:0:2}" == '\\' ]; then
+	echo -n " [cifs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	TARGET="$(echo ${TARGET} | tr '\\' '/')"			# NOTE: we MUST replace the '\' characters with '/' characters in the TARGET to work correctly
+	eval "${SUDO}mount -t cifs -o rw,uid=$(id -n -u),gid=$(id -n -g)${TARGETPARM} \"${TARGET}\" \"${DIRMNTS}/${RJN}.t\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-cifs-windows-share-on-linux/
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ${SUDO}mount -t cifs -o rw,uid=$(id -n -u),gid=$(id -n -g)$(echo "${TARGETPARM}"|sed "s/,pass='[^']*'/,pass='********'/") \"${TARGET}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"	# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${TARGET:0:1}" == '%' ]; then
+	echo -n " [sshfs]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	eval "${TARGETSSH} \"${TLOGIN}\" \"${DIRMNTS}/${RJN}.t\" -o rw${TARGETPARM}" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {				# NOTE: this is after the RSA keys have already been exchanged with the server	www.beginninglinux.com/home/server-administration/openssh-keys-certificates-authentication-pem-pub-crt
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: $(echo "${TARGETSSH}"|sed "s/'[^']*'/'********'/") \"${TLOGIN}\" \"${DIRMNTS}/${RJN}.t\" -o rw${TARGETPARM}" >>"${DIRLOGS}/${ERRLOG}"								# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		exitGraceful 1
+	}
+elif [ "${TARGET:0:1}" == '@' ]; then
+	echo -n " [ssh]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	# NOTE: these connections are made on-the-fly, so nothing to do here
+elif [ "${TARGET:0:1}" == '/' ]; then				# we don't do any processing for local values
+	echo -n " [local]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	ln -s "${TARGET}" "${DIRMNTS}/${RJN}.t" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The job --target can NOT be symlinked, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ln -s \"${TARGET}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"
+		exitGraceful 1
+	}
+fi
+echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+
+
+
+# check for the job directory
+# NOTE: the below checks can only be done after the TARGET has been processed
+if [ "${TYPE}" != 'sync' ] && [ "${TYPE}" != 'sinc' ]; then				# NOTE: we only do these checks for backups, not syncs
+	echo -n "Checking for job directory:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	echo -n " [${RJN}]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	if [ "${TARGET:0:1}" != '@' ]; then				# if we are NOT using an ssh connection, then...
+		[ ! -e "${DIRMNTS}/${RJN}.t/${DIRTAG}" ] && {
+			echo -n " [creating]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			mkdir -p "${DIRMNTS}/${RJN}.t/${DIRTAG}" 2>>"${DIRLOGS}/${ERRLOG}" >${VERBOSE} || {
+				echo " [failure]" >${VERBOSE}
+				echo "ERROR: The job storage directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: mkdir -p \"${DIRMNTS}/${RJN}.t/${DIRTAG}\"" >>"${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			}
+		}
+	else
+		# NOTE: when DEBUGGING, add the '--foreground' switch to 'timeout' so you can interact with SSH if necessary
+		# WARNING: - we can ONLY do 'timeout' calls for a connection, NOT TRANSFERS since the timeout call would abrupt the complete transfer
+		eval timeout --preserve-status -k 10s --foreground 30s ${TARGETSSH} "[ -e \\\"${TARGET#*:}${DIRTAG}\\\" ]" 2>>"${DIRLOGS}/${ERRLOG}" >${VERBOSE} || {
+			echo -n " [creating]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			eval timeout --preserve-status -k 10s --foreground 30s ${TARGETSSH} "mkdir -p \\\"${TARGET#*:}${DIRTAG}\\\"" 2>>"${DIRLOGS}/${ERRLOG}" >${VERBOSE}
+		}
+		# NOTE: this will catch any failure with either of the ssh calls above!
+		[ $? -ne 0 ] && {
+			echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			echo "ERROR: The job storage directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"mkdir -p \\\"${TARGET#*:}${DIRTAG}\\\"\"" >>"${DIRLOGS}/${ERRLOG}"									# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+			exitGraceful 1
+		}
+	fi
+	echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+fi
+
+
+
+
+# execute the prescript now
+echo -n "Pre-script status:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+if [ "$PRESCRIPT" == "" ]; then
+	echo " [none]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+elif [ ! -e "$PRESCRIPT" ]; then
+	echo " [missing]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+else
+	echo -n " [running]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	$PRESCRIPT | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	if [ $? -eq 0 ]; then
+		echo " [success] [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	else
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		exitGraceful 1
+	fi
+fi
+
+
+
+
+# make some variable value adjustments
+if [ "${TYPE}" == 'sync' ]; then
+	# NOTE: these are separate 'if' statements so that both --include and --exclude can be used simulatenously
+	if [ "${EXCLUDE}" != '' ]; then
+		CUSTOMPARM="$CUSTOMPARM --exclude-from=\"${EXCLUDE}\""
+	fi
+	if [ "${INCLUDE}" != '' ]; then
+		CUSTOMPARM="$CUSTOMPARM --include=\"*/\" --include-from=\"${INCLUDE}\" --exclude=\"*\""
+	fi
+else
+	case "${TYPE}" in
+		"daily")
+			EXT='.d.t'
+			CUSTOMPARM="--newer-mtime \"$(date +'%Y-%m-%d') 00:00:00\" $CUSTOMPARM"
+			echo "Backing up files for: [$(date +'%Y-%m-%d')]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			;;
+		"full")
+			EXT='.f.t'
+			;;
+		"incremental" | "sinc")
+			EXT='.i.t'							# define the file extension to use for this type of backup
+			TEMP=''
+			if [ "${TARGET:0:1}" != '@' ]; then
+				TEMP=$(ls -t1 "${DIRMNTS}/${RJN}.t/${DIRTAG}"|grep "${EXT//./\\.}..$"|head -1)			# stores the last created file in the directory to use as the epoch for the files to now be backed up
+				[ "$TEMP" != '' ] && TEMP=$(date -r "${DIRMNTS}/${RJN}.t/${DIRTAG}/${TEMP}" +"%Y-%m-%d %H:%M:%S")	# if we have at least 1 prior backup, then store the date of that file
+			else
+				TEMP=$(eval "${TARGETSSH} \"ls -t1 \\\"${TLOGIN#*:}${DIRTAG}\\\"|grep \\\"${EXT//./\\.}..\$\\\"|head -1\"")
+				[ "$TEMP" != '' ] && TEMP=$(eval "${TARGETSSH} \"date -r \\\"${TLOGIN#*:}${DIRTAG}/${TEMP}\\\" +'%Y-%m-%d %H:%M:%S'\"")
+			fi
+# [X] LEFT OFF - continue to implement 'sinc'
+			[ "$TEMP" == '' ] && TEMP="$(date +'%Y-%m-%d') 00:00:00"				# if no date was obtained above (e.g. no backups exist yet), then use the start of today as the date
+			[ "$TYPE" == 'sinc' ] && TEMP="$(echo "$TEMP" | sed 's/:.*//'):00:00"			# if we are doing 'el cheapo' syncing, then keep just the hour that the prior job started (in case some files were adjusted while the backup was running: 14:00:00 vs 14:22:53 where a file could be manipulated in those 22:53 minutes)
+			CUSTOMPARM="--newer-mtime '${TEMP}' $CUSTOMPARM"		# https://www.gnu.org/software/tar/manual/html_section/after.html
+			echo "Backing up files after: [${TEMP}]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			;;
+		"custom")
+			EXT='.c.t'
+			;;
+		"sync")
+			;;
+	esac
+
+	if [ "${INCLUDE}" == '' ] && [ "${EXCLUDE}" == '' ]; then
+		if [ "${SOURCE:0:1}" == '@' ]; then
+			CUSTOMPARM="$CUSTOMPARM -C \\\"${SLOGIN#*:}\\\" ."
+		else				# NOTE: the below needs to execute regardless if TARGET is ssh or not (if the above didn't get triggered)
+			CUSTOMPARM="$CUSTOMPARM -C \"${DIRMNTS}/${RJN}.s/\" ."
+		fi
+	fi
+fi
+
+
+
+
+# get the size of the backup (for the meter to show correctly)
+# NOTE: we only do these checks for backups, not syncs
+if [ "${TYPE}" != 'sync' ]; then
+	# WARNING: we are using SIZE here since TEMP will be filled with another value in the sections below; SIZE as TEMP
+	SIZE=''
+	SIZE="$(echo "$CUSTOMPARM" | grep -o "newer-mtime '[0-9 :\-]*'" | sed "s/.* '//;s/'//")"	# temporarily stores the date to use for filtering
+	[ "$SIZE" != '' ] && CUSTOMPARM="$(echo "$CUSTOMPARM" | sed "s/--newer-mtime '[0-9 :\-]*'//")"	# remove this switch from 'tar' since we are moving it into 'find' (since we were getting two different data sets otherwise)
+
+	# first determine what the target OS is based on the SOURCE value
+	( echo "$SOURCE" | grep -q ':[a-zA-Z]:' ) && TOS='windows' || TOS='linux'
+
+	# get the size of the backup (for the meter to show correctly)
+	if [ "${INCLUDE}" == '' ] && [ "${EXCLUDE}" == '' ]; then
+		# if the target OS is Windows -AND- it is the source value, then...
+		if [ "$TOS" == 'windows' ] && [ "${SOURCE:0:1}" == '@' ]; then
+# [X] LEFT OFF - if using windows and ssh, then do a native call here to get SIZE
+			if [ "$SIZE" != '' ]; then									# if we are doing an 'incremental', 'daily', or 'custom' with a date in the CUSTOMPARM value
+				# sed removes: blank lines, headers starting with 'Mode', header underline, lines that list directories (instead of files), removal of file data except size and name		ADDITIONAL: '/^    Directory: /d;s/ .*//' = directory label being processed, filenames split over two lines
+				eval "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path \\\\\\\"${SOURCE#*:}\\\\\\\" -Recurse | Where-Object { \\\$_.LastWriteTime -ge '$(date --date="$SIZE" +'%m-%d-%Y %H:%M:%S')' }\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}" | sed '/^[[:space:]]*$/d;/^Mode   /d;/----   /d;/^d/d;s/.*:.. [AP]M *//;s/[[:space:]]*$//' >"${DIRTEMP}/${RJN}.list"
+			elif [ "$SIZE" == '' ]; then									# otherwise we're doing a 'full' backup -or- a 'custom' backup without a date in the CUSTOMPARM value
+				# https://devblogs.microsoft.com/scripting/getting-directory-sizes-in-powershell/
+				eval "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path \\\\\\\"${SOURCE#*:}\\\\\\\" -Recurse | Measure-Object -Sum Length\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}" | grep 'Sum      :' | sed 's/Sum      : //'
+			fi
+		# for ANY other configuration (Windows or Linux), use the below code...
+		else
+			# NOTE: we provide checks like this since a person can use a 'custom' TYPE and provide a date or not (which would need to go into the appropriate section)
+			if [ "$SIZE" == '' ]; then							# if we're doing a 'full' backup -or- a 'custom' backup without a date in the CUSTOMPARM value
+				if [ "${SOURCE:0:1}" == '@' ]; then
+					SIZE="$(eval "${SOURCESSH} \"du -sb \\\"${SLOGIN#*:}/\\\"\" | sed 's/\s.*//'" 2>>"${DIRLOGS}/${ERRLOG}")"
+				else
+					SIZE="$(du -sb "${DIRMNTS}/${RJN}.s/" 2>>"${DIRLOGS}/${ERRLOG}" | sed 's/\s.*//')"
+				fi
+			else										# otherwise we are doing an 'incremental', 'daily', or 'custom' with a date in the CUSTOMPARM value
+				if [ "${SOURCE:0:1}" == '@' ]; then
+					SIZE="$(eval "${SOURCESSH} \"find \\\"${SLOGIN#*:}/\\\" -newermt '$SIZE' -type f -printf \\\"%s\\\n\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"
+				else
+					SIZE="$(find "${DIRMNTS}/${RJN}.s/" -newermt "$SIZE" -type f -printf "%s\n" 2>>\"${DIRLOGS}/${ERRLOG}\" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"
+				fi
+			fi
+		fi
+		# NOTES:
+		#	https://unix.stackexchange.com/questions/19882/directory-size-calculation-difference
+		# 	Normally, du shows information about disk usage (which is where its name comes from). Keep in mind that
+		#	disk usage != sum of file sizes
+		#	Because each file takes up a number of blocks on the filesystem (see man mkfs.ext2 for example). This means that only in a very rare situation a disk usage of a file equals its actual size - for that, the size must be exactly a multiple of the block size.
+		#	For GNU version of du, check out the --apparent-size option.
+	else
+		# INCLUDE
+		# https://serverfault.com/questions/351598/get-total-files-size-from-a-file-containing-a-file-list
+		# https://stackoverflow.com/questions/21989860/get-total-size-of-a-list-of-files-in-unix
+		# https://linuxhint.com/newline_replace_sed/
+		# https://gist.github.com/sv99/6852cc2e2a09bd3a68ed
+		# https://stackoverflow.com/questions/1133698/using-find-to-locate-files-that-match-one-of-multiple-patterns
+		# https://www.cyberciti.biz/faq/unix-linux-list-all-files-modified-on-given-date/
+		# https://stackoverflow.com/questions/18731603/how-to-tar-certain-file-types-in-all-subdirectories
+		# https://www.cyberciti.biz/faq/linux-unix-find-tar-files-into-tarball-command/
+		# https://alvinalexander.com/blog/post/linux-unix/find-how-search-multiple-folders-directories-unix/
+		# NOTE: I use 'stat' instead of 'du' to get the filesize. du is getting the amount of room it is using on disk instead of the filesize, which might be different. Depending on your filesystem, a 1 byte file will still occupy 4k on disk (or whatever the blocksize is). So for a 1 byte file, stat says 1 byte and du says 4k.
+		#	Using 'find' we can use wildcards in the include and exclude files
+		#
+		# EXCLUDE
+		# https://unix.stackexchange.com/questions/41550/find-the-total-size-of-certain-files-within-a-directory-branch
+		# https://serverfault.com/questions/351598/get-total-files-size-from-a-file-containing-a-file-list
+		# https://stackoverflow.com/questions/21989860/get-total-size-of-a-list-of-files-in-unix
+		# https://unix.stackexchange.com/questions/251388/prefix-and-suffix-strings-to-each-output-line-from-command
+		#
+		# POWERSHELL
+		# https://stackoverflow.com/questions/19207991/how-to-exclude-list-of-items-from-get-childitem-result-in-powershell
+		# https://devblogs.microsoft.com/powershell/exclude-include-filter-parameters-how-to-make-sense-of-these/
+		# https://social.technet.microsoft.com/Forums/en-US/d18401eb-8fda-4858-af68-ded734bfbf91/help-with-excluding-results-from-getchilditem?forum=winserverpowershell
+		# https://stackoverflow.com/questions/52381951/exclude-file-from-powershell-get-childitem-results
+		# https://stackoverflow.com/questions/40370854/how-does-the-get-childitem-exclude-parameter-work
+		# https://www.howtogeek.com/694949/how-to-escape-spaces-in-file-paths-on-the-windows-command-line/
+		# https://stackoverflow.com/questions/19207991/how-to-exclude-list-of-items-from-get-childitem-result-in-powershell
+		# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comparison_operators?view=powershell-7.2
+		# https://stackoverflow.com/questions/17616045/find-files-on-windows-modified-after-a-given-date-using-the-command-line
+		# https://superuser.com/questions/1134278/how-to-find-all-newly-modified-files-after-a-specific-time-windows-command-lin
+		# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.2
+# DEV NOTE: directories MUST end with a trailing '/'
+# DEV NOTE: windows os targets need to specify the drive letter at the beginning of each line
+# DEV NOTE: the windows device MUST have cygwin installed
+#	also note in the documentation that the user can use ssh instead of sshfs for greater speed via Windows native calls
+
+		# if the target OS is Windows -AND- it is the source value, then...
+		if [ "$TOS" == 'windows' ] && [ "${SOURCE:0:1}" == '@' ]; then
+			# NOTE: these are both processed so that both --include and --exclude can be used simulatenously
+			TEMP='||'								# create the initial value in the layout: dirs|includes|excludes (e.g. 'D:\Common\,D:\Profiles\|*.pdf,*.mdb|D:\dir\file.txt')
+			for FILE in "$INCLUDE" "$EXCLUDE"; do
+				[ "$FILE" == '' ] && continue					# if either file was not used, then skip it
+				[ ! -e "$FILE" ] && continue					# if either file does not exist, then skip it
+
+				while read LINE; do						# read the include file line-by-line to assign either '-name' (file) or '-wholename' (dir) appropriately
+					[ "$LINE" == '' ] && continue				# skip blank lines
+					( echo "$LINE" | grep -q ^'#' ) && continue		# skip comments
+
+					if ( echo "$LINE" | grep -q '\\'$ ) || ( echo "$LINE" | grep -q '/'$ ); then		# if the line ends with a '\' or '/', then it's a directory so add it at the beginning
+						LINE="$(echo "$LINE" | sed 's|\\$||')"		# remove the trailing '\' or '/' character
+						TEMP="$(echo "${TEMP}"|sed "s|\||\\\\\\\\\\\\\"${LINE//\\/\\\\}\\\\\\\\\\\\\",\||")"		# NOTE: if NOT using 'eval' with 'powershell' call below, reduce '\\\\\\\\\\\\\' to '\\\\\' on this line
+					else							# otherwise it's a filename or pattern so add it at the end using 'name'
+						[ "$FILE" == "$INCLUDE" ] && TEMP="$( ( echo "${TEMP}"|cut -d'|' -f1; echo -n "\\\\\\\"${LINE}\\\\\\\","; echo -n "${TEMP}"|cut -d'|' -f2; echo -n "${TEMP}"|cut -d'|' -f3; ) | tr '\n' '|' )"		# NOTE: if NOT using 'eval' with 'powershell' call below, reduce '\\\\\\\' to '\\\' on this line
+						[ "$FILE" == "$EXCLUDE" ] && TEMP="$( ( echo "${TEMP}"|cut -d'|' -f1; echo -n "${TEMP}"|cut -d'|' -f2; echo -n "\\\\\\\"${LINE}\\\\\\\","; echo -n "${TEMP}"|cut -d'|' -f3; ) | tr '\n' '|' )"		# NOTE: if NOT using 'eval' with 'powershell' call below, reduce '\\\\\\\' to '\\\' on this line
+					fi
+# LEFT OFF - we need to separate patterns (*.pdf) from FQDN files (D:\...\file.txt), whereas the prior needs to use -Exclude/-Include (in the Get-ChildItem section) and the former needs to be placed in the Where-Object section
+				done <"${FILE}"
+			done
+			TEMP="$(echo "${TEMP}"|sed 's/,|$//;s/,|/|/g')"				# remove commas around the '|' character and as last character; For example: 'D:\Common\,D:\Profiles\,|*.pdf,*.db,|*.txt,' > 'D:\Common\,D:\Profiles\|*.pdf,*.db|*.txt'
+
+# [X] LEFT OFF - if no includes were passed, then we need to at least add in the path from the SOURCE value here (parse based on cifs,nfs,ssh,sshfs)
+			[ "${TEMP:0:1}" == '|' ] && TEMP="\\\\\\\"${SOURCE#*:}\\\\\\\"${TEMP}"			# if no directories were in the list, then add '.' at the beginning
+
+			# if includes WERE provided, then...
+# [X] LEFT OFF - code this
+			( echo "$TEMP" | grep -q '||' ) || TEMP="$( ( echo "${TEMP}"|cut -d'|' -f1; echo -n " -and \\\$_.FullName -in "; echo -n "${TEMP}"|cut -d'|' -f2; echo -n "${TEMP}"|cut -d'|' -f3; ) | tr '\n' '|' )"			# NOTE: if NOT using 'eval' with 'powershell' call below, reduce '\\\' to '\' on this line
+			# if excludes WERE provided, then...
+			[ "${TEMP:$((${#TEMP}-1)):1}" != '|' ] && TEMP="$( ( echo "${TEMP}"|cut -d'|' -f1; echo -n "${TEMP}"|cut -d'|' -f2; echo -n " -and \\\$_.FullName -notin "; echo -n "${TEMP}"|cut -d'|' -f3; ) | tr '\n' '|' )"		# NOTE: if NOT using 'eval' with 'powershell' call below, reduce '\\\' to '\' on this line
+
+			if [ "$SIZE" != '' ]; then									# if we are doing an 'incremental', 'daily', or 'custom' with a date in the CUSTOMPARM value
+				# sed removes: blank lines, headers starting with 'Mode', header underline, lines that list directories (instead of files), removal of file data except size and name		ADDITIONAL: '/^    Directory: /d;s/ .*//' = directory label being processed, filenames split over two lines
+echo "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path $(echo "${TEMP}"|cut -d'|' -f1) -Recurse | Where-Object { \\\$_.LastWriteTime -ge '$(date --date="$SIZE" +'%m-%d-%Y %H:%M:%S')'$(echo "${TEMP}"|cut -d'|' -f2 | tr '\n' ' ' | sed 's/ $//')$(echo "${TEMP}"|cut -d'|' -f3 | tr '\n' ' ' | sed 's/ $//') }\\\"\""
+				eval "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path $(echo "${TEMP}"|cut -d'|' -f1) -Recurse | Where-Object { \\\$_.LastWriteTime -ge '$(date --date="$SIZE" +'%m-%d-%Y %H:%M:%S')'$(echo "${TEMP}"|cut -d'|' -f2 | tr '\n' ' ' | sed 's/ $//')$(echo "${TEMP}"|cut -d'|' -f3 | tr '\n' ' ' | sed 's/ $//') }\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}" | sed '/^[[:space:]]*$/d;/^Mode   /d;/----   /d;/^d/d;s/.*:.. [AP]M *//;s/[[:space:]]*$//' >"${DIRTEMP}/${RJN}.list"
+			elif [ "$SIZE" == '' ]; then									# otherwise we're doing a 'full' backup -or- a 'custom' backup without a date in the CUSTOMPARM value
+# LEFT OFF - may need to add backslashes below...
+				TEMP="$(echo "$TEMP" | sed 's/ -and//')"			# remove the preceeding ' -and' syntax so the the below call is correct
+# [X] LEFT OFF - get this coded correctly
+echo "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path $(echo "${TEMP}"|cut -d'|' -f1) -Recurse | Where-Object { $(echo "${TEMP}"|cut -d'|' -f2 | tr '\n' ' ' | sed 's/ $//')$(echo "${TEMP}"|cut -d'|' -f3 | tr '\n' ' ' | sed 's/ $//') }\\\"\""
+				eval "${SOURCESSH}\"powershell -command \\\"Get-ChildItem -Path $(echo "${TEMP}"|cut -d'|' -f1) -Recurse | Where-Object { $(echo "${TEMP}"|cut -d'|' -f2 | tr '\n' ' ' | sed 's/ $//')$(echo "${TEMP}"|cut -d'|' -f3 | tr '\n' ' ' | sed 's/ $//') }\\\"\"" | sed '/^[[:space:]]*$/d;/^Mode   /d;/----   /d;/^d/d;s/.*:.. [AP]M *//;s/[[:space:]]*$//' >"${DIRTEMP}/${RJN}.list"
+			fi
+
+			# remove the line wrapping
+			while IFS='' read -r LINE; do						# https://stackoverflow.com/questions/29689172/bash-read-ignores-leading-spaces
+				( ! echo "$LINE"|grep -q ^'    Directory: ' ) && ( echo "$LINE"|grep -q ^'  *' ) && LINE="$(echo "${LINE}"|sed 's|^[[:space:]]*| |')"
+				echo "${LINE//\\/\\\\}" >>"${DIRTEMP}/${RJN}.list2"		# otherwise, add the current directory (via TEMP value) as a prefix to the filename
+			done <"${DIRTEMP}/${RJN}.list"
+			sed -i ':a;N;$!ba;s/\n / /g;s/    Directory: /\n    Directory: /g' "${DIRTEMP}/${RJN}.list2" 2>>"${DIRLOGS}/${ERRLOG}"	# removes all the line wrapping in the filenames from Windows (as noted via '\n ') and then returns the 'Directory:' lines back to their own lines
+			mv -f "${DIRTEMP}/${RJN}.list2" "${DIRTEMP}/${RJN}.list" 2>>"${DIRLOGS}/${ERRLOG}"
+
+			# add the directory to each file while removing the 'Directory:' lines
+			TEMP=''
+			while IFS='' read -r LINE; do
+				( echo "$LINE"|grep -q ^'    Directory: ' ) && {		# if we have reached a new directory, then store that value in TEMP
+					TEMP="$(echo "${LINE}"|sed 's/    Directory: //')"
+					continue
+				}
+				echo "${LINE//\\/\\\\}" | sed "s| | ${TEMP}\\\\|" >>"${DIRTEMP}/${RJN}.list2"				# otherwise, add the current directory (via TEMP value) as a prefix to the filename
+			done <"${DIRTEMP}/${RJN}.list"
+			mv -f "${DIRTEMP}/${RJN}.list2" "${DIRTEMP}/${RJN}.list" 2>>"${DIRLOGS}/${ERRLOG}"
+			CUSTOMPARM="$(echo "$CUSTOMPARM" | sed 's/-P //;s/ --ignore-case//')"	# remove these switches from 'tar' since we are on a Windows device and these do not make any sense
+			CUSTOMPARM="--files-from=\"%HOMEPATH%\\\\${RJN}.list\" ${CUSTOMPARM}"						# NOTE: we don't need any TARPREFIX value because the .list file contains the full path to each file
+			SIZE="$(cat "${DIRTEMP}/${RJN}.list" | sed 's/ .*//' | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"	# obtain the amount of data to backup via the size in the beginning of each line
+			sed -i 's/^[0-9]* //;/^$/d;s|\\|/|g' "${DIRTEMP}/${RJN}.list" 2>>"${DIRLOGS}/${ERRLOG}"				# remove all the sizes at the beginning of the each line, and blank lines, so now this is just a files list to backup (with forward slashes instead of Windows-based back slashes)
+			cat "${DIRTEMP}/${RJN}.list" | eval "${SOURCESSH}\"cat - >${RJN}.list\"" 2>>"${DIRLOGS}/${ERRLOG}"		# copy this list to the users home directory
+
+		# for ANY other configuration (Windows or Linux), use the below code...
+		else
+			# NOTE: these are both processed so that both --include and --exclude can be used simulatenously
+			TEMP='|'						# create the initial value in the layout: dirs|patterns (e.g. 'Common Profiles|-name *.pdf -o -name *.mdb')
+			for FILE in "$INCLUDE" "$EXCLUDE"; do
+				[ "$FILE" == '' ] && continue			# if either file was not used, then skip it
+				[ ! -e "$FILE" ] && continue			# if either file does not exist, then skip it
+
+				while read LINE; do				# read the include file line-by-line to assign either '-name' (file) or '-wholename' (dir) appropriately
+					[ "$LINE" == '' ] && continue						# skip blank lines
+					( echo "$LINE" | grep -q ^'#' ) && continue				# skip comments
+
+					( echo "${LINE:0:2}" | grep -q ^'./' ) || LINE="./${LINE}"		# if the dir doesn't have a preceeding './', then add it (since the catalog file is generated based on this)
+
+					if ( echo "$LINE" | grep -q '/'$ ); then				# if the line ends with a '/', then it's a directory so add it at the beginning
+						TEMP="$(echo "${TEMP}"|sed "s:|:${LINE} |:")"
+					elif ( echo "$LINE" | grep -q '/' ); then				# if the line contains a '/', then it needs to use 'wholename', so add it at the end
+						[ "$FILE" == "$INCLUDE" ] && TEMP="${TEMP} -o -wholename \"${LINE// /\\ }\""
+						[ "$FILE" == "$EXCLUDE" ] && TEMP="${TEMP} -a ! -wholename \"${LINE// /\\ }\""
+					else									# otherwise it's a filename or pattern so add it at the end using 'name'
+						[ "$FILE" == "$INCLUDE" ] && TEMP="${TEMP} -o -name \"${LINE}\""
+						[ "$FILE" == "$EXCLUDE" ] && TEMP="${TEMP} -a ! -name \"${LINE}\""
+					fi
+				done <"${FILE}"
+			done
+			TEMP="$(echo "${TEMP}"|sed 's/ |/|/;s/| -o /| \\( /;s/| -a /| \\( /')"			# remove spacing around the '|' character and preceeding ' -o ' -or- ' -a '; For example: 'Common/ Profiles/ | -o -name=*.pdf -o name=*.db' > 'Common/ Profiles/|\( -name=*.pdf -o name=*.db' -or- 'Common/ Profiles/ | -a ! -name=*.pdf -a ! name=*.db' > 'Common/ Profiles/|\( ! -name=*.pdf -a ! name=*.db'
+			[ "${TEMP:0:1}" == '|' ] && TEMP=".${TEMP}"		# if no directories were in the list, then add '.' at the beginning
+			( ! echo "$TEMP" | grep -q '|'$ ) && TEMP="${TEMP} \\)"	# if there were included wildcards, then add the trailing '\)' to the 'find' syntax
+
+			CUSTOMPARM="--null -T - ${CUSTOMPARM}"			# indicate we need to read in a files list with null terminators instead of newlines (\n) and that we will read this list from stdin
+			if [ "${SOURCE:0:1}" != '@' ]; then
+# LEFT OFF - output the list from 'find' here in a temp list to use further down with 'tar' so we don't have to execute 'find' twice (once here, once down there)
+				# NOTE: we incorporate 'find' in the command since 'tar' won't look in sub directories when using wildcards; this is a work-around
+				#	we use OFMT to prevent scientific notation from being used	https://stackoverflow.com/questions/12714155/how-can-i-make-awk-not-use-scientific-notation-when-printing-small-values
+				#	the below MUST come in the order presented!
+				if [ "$SIZE" != '' ]; then
+echo top | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+echo "find ${TEMP%|*}${TEMP#*|} -newermt '$SIZE' -type f -print"
+					TARPREFIX="cd \"${DIRMNTS}/${RJN}.s/\" && find ${TEMP%|*}${TEMP#*|} -newermt '$SIZE' -type f -print0 2>>\"${DIRLOGS}/${ERRLOG}\" | "
+					SIZE="$(cd "${DIRMNTS}/${RJN}.s/" && eval "find ${TEMP%|*}${TEMP#*|} -newermt '$SIZE' -type f -printf \"%s\\n\" 2>>\"${DIRLOGS}/${ERRLOG}\"" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"	# NOTE: the '%s' is in bytes (or bits?), but can be substituted with '%k' for kilobytes
+			
+# MAYBE				[ "$SIZE" == '' ] && TARPREFIX="cd \"${DIRMNTS}/${RJN}.s/\" && find ${TEMP%|*} -type f ${TEMP#*|} -print0 | xargs -0"	# this may be required if special characters are in the filename, but may prevent catalog files from being written
+				elif [ "$SIZE" == '' ]; then
+echo btm | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+echo "find ${TEMP%|*}${TEMP#*|} -type f -print"
+					TARPREFIX="cd \"${DIRMNTS}/${RJN}.s/\" && find ${TEMP%|*}${TEMP#*|} -type f -print0 2>>\"${DIRLOGS}/${ERRLOG}\" | "
+					SIZE="$(cd "${DIRMNTS}/${RJN}.s/" && eval "find ${TEMP%|*}${TEMP#*|} -type f -printf \"%s\\n\" 2>>\"${DIRLOGS}/${ERRLOG}\"" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"	# NOTE: the '%s' is in bytes (or bits?), but can be substituted with '%k' for kilobytes
+				fi
+			elif [ "${SOURCE:0:1}" == '@' ]; then
+				if [ "$SIZE" != '' ]; then
+					TARPREFIX="cd \\\"${SLOGIN#*:}/\\\" && find ${TEMP%|*}${TEMP#*|} -newermt '$SIZE' -type f -print0 2>>\"${DIRLOGS}/${ERRLOG}\" | "
+					SIZE="$(eval "${SOURCESSH} \"cd \\\"${SLOGIN#*:}/\\\" && find ${TEMP%|*}${TEMP#*|} -newermt '$SIZE' -type f -printf \\\"%s\\\n\\\"\" 2>>\"${DIRLOGS}/${ERRLOG}\"" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"	# NOTE: the '%s' is in bytes, but can be substituted with '%k' for kilobytes
+				elif [ "$SIZE" == '' ]; then
+					TARPREFIX="cd \\\"${SLOGIN#*:}/\\\" && find ${TEMP%|*}${TEMP#*|} -type f -print0 2>>\"${DIRLOGS}/${ERRLOG}\" | "
+					SIZE="$(eval "${SOURCESSH} \"cd \\\"${SLOGIN#*:}/\\\" && find ${TEMP%|*}${TEMP#*|} -type f -printf \\\"%s\\\n\\\"\"" 2>>\"${DIRLOGS}/${ERRLOG}\" | awk '{ total+=$1 } END { OFMT="%.0f"; print total }')"	# NOTE: the '%s' is in bytes, but can be substituted with '%k' for kilobytes
+				fi
+			fi
+		fi
+	fi
+	[ "$SIZE" != '' ] && SIZE=$(sizeConvert "${SIZE}B" 'M')				# convert the size into MB
+
+	# Validate the SIZE obtained above
+	if [ "$SIZE" == '0' ] || [ "$SIZE" == '' ]; then		# NOTE: the SIZE=='' would occur is no files were returned from 'find' (e.g. no new data was available yet)
+		echo "There does NOT appear to be any data that needs to be backed up, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		exitGraceful 0
+	fi
+	if ( ! echo ${SIZE} | grep -q ^'[0-9]*'$ ); then
+		echo "ERROR: The size of the backup failed to be obtained, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		exitGraceful 1
+	fi
+
+	# Make the redirectors and filters
+	mkfifo "$FIFO"
+	trap 'rm "$FIFO"' EXIT
+	# EXPLAINATION: 'cat' reads the FIFO output from 'tar', send to 'awk' which separates the output to the correct (cata)log file based on regex matching
+	# https://askubuntu.com/questions/1093843/how-to-split-input-to-two-pipes
+	# https://stackoverflow.com/questions/64143011/searching-for-multiple-strings-in-awk
+	# https://www.baeldung.com/linux/exec-command-in-shell-script 				can possibly use some tips in here for redirects as well if needed
+	[ "${TARGET:0:1}" != '@' ] && {
+		touch "${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT:0:3}cat"			# this is so that a file will be present no matter what (to prevent errors if no data is backed up)
+		( cat <"$FIFO" | awk "/^tar: Removing leading |file is unchanged; not dumped$|: Cannot open: Text file busy$|: Warning: Cannot stat: No such file or directory$|^Total bytes /{print >>\"${DIRLOGS}/${JOBLOG}\"}; !/^.\/|^[a-zA-Z]:\/|^tar: Removing leading |file is unchanged; not dumped$|: Warning: Cannot stat: No such file or directory$|^Total bytes /{print >> \"${DIRLOGS}/${ERRLOG}\"}; /^.\/|^[a-zA-Z]:\// && !/\/$/{print > \"${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT:0:3}cat\"}" ) &
+		PID=$!										# store the pid of these background processes so they can be killed later
+	}
+	[ "${TARGET:0:1}" == '@' ] && {
+		touch "${DIRTEMP}/${RJN}${EXT:0:3}cat"
+		( cat <"$FIFO" | awk "/^tar: Removing leading |file is unchanged; not dumped$|: Cannot open: Text file busy$|: Warning: Cannot stat: No such file or directory$|^Total bytes /{print >>\"${DIRLOGS}/${JOBLOG}\"}; !/^.\/|^[a-zA-Z]:\/|^tar: Removing leading |file is unchanged; not dumped$|: Warning: Cannot stat: No such file or directory$|^Total bytes /{print >> \"${DIRLOGS}/${ERRLOG}\"}; /^.\/|^[a-zA-Z]:\// && !/\/$/{print > \"${DIRTEMP}/${RJN}${EXT:0:3}cat\"}" ) &
+		PID=$!										# store the pid of these background processes so they can be killed later
+	}
+fi
+#echo -n "check the system... "
+#read
+#exitGraceful 0
+
+
+
+
+# Execute the command
+if [ "${TYPE}" == 'sync' ]; then
+	# https://stackoverflow.com/questions/62165494/removing-all-lines-after-blank-line-with-sed-and-awk
+	# https://access.redhat.com/discussions/3548881
+	# https://serverfault.com/questions/426520/get-list-of-transferred-files-from-rsync
+	# https://linux.die.net/man/1/rsync
+	# https://unix.stackexchange.com/questions/260616/reuse-rsync-dry-run-output-to-speed-up-the-actual-transfer-later-on
+	# https://serverfault.com/questions/219013/showing-total-progress-in-rsync-is-it-possible
+	# https://fixyacloud.wordpress.com/2020/01/26/showing-total-progress-in-rsync-is-it-possible/
+	# https://unix.stackexchange.com/questions/68582/how-to-see-the-total-progress-while-copying-the-files
+	# https://stackoverflow.com/questions/18734647/using-pv-to-count-lines-and-show-total-lines-rather-then-total-bytes-in-the-pipe
+	# https://stackoverflow.com/questions/19296190/rsync-include-from-vs-exclude-from-what-is-the-actual-difference
+	# https://askubuntu.com/questions/92981/paswordless-rsync-over-ssh-without-key-authentication-un-safe
+	# NOTE: we use the '--log-file' to speed up processing (instead of redirecting stdout to file)
+	#	--inplace implies --partial
+
+	echo -n "Obtaining files list to sync:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	if [ "${SOURCE:0:1}" != '@' ] && [ "${TARGET:0:1}" != '@' ]; then
+		( eval "rsync -av --dry-run ${CUSTOMPARM} \"${DIRMNTS}/${RJN}.s/\" \"${DIRMNTS}/${RJN}.t/\"" 2>>"${DIRLOGS}/${ERRLOG}" || {
+			echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: rsync -av --dry-run ${CUSTOMPARM} \"${DIRMNTS}/${RJN}.s/\" \"${DIRMNTS}/${RJN}.t/\"" >>"${DIRLOGS}/${ERRLOG}"
+		} ) | awk '!/^sending incremental file list$/' | awk '/^$/{exit}1' >"${DIRTEMP}/${RJN}.list"
+		echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+		TEMP=$(cat "${DIRTEMP}/${RJN}.list"| wc -l)				# store the files-to-be-xferred count for 'pv' below
+		if [ "$TEMP" == '0' ] || [ "$TEMP" == '' ]; then			# NOTE: the SIZE=='' would occur is no files were returned from 'find' (e.g. no new data was available yet)
+			echo "There does NOT appear to be any data that needs to be sync'ed, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			exitGraceful 0
+		else
+			echo "Sync'ing the data..." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+# LEFT OFF - finish/test this section
+#			( eval "rsync -avuW --inplace --log-file=\"${DIRLOGS}/${JOBLOG}\" --out-format=\"%n\" --include-from=\"${DIRTEMP}/${RJN}.list\" ${CUSTOMPARM} \"${DIRMNTS}/${RJN}.s/\" \"${DIRMNTS}/${RJN}.t/\"" 2>>"${DIRLOGS}/${ERRLOG}" || { echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2; } ) | pv -w 80 -l -s "$TEMP" >/dev/null
+sleep 10
+		fi
+
+	# NOTE: the SOURCESSH and TARGETSSH value will already be configured for using the identityFile or sshpass
+	elif [ "${SOURCE:0:1}" == '@' ] && [ "${TARGET:0:1}" == '@' ]; then			# if both SOURCE and TARGET are ssh hosts, then...
+		# NOTE: unfortunately there is no way to work around this
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The sync job was called with the '--source' AND '--target' parameters as ssh, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	elif [ "${SOURCE:0:1}" == '@' ]; then							# if only the SOURCE is an ssh host, then...
+		( eval "${SOURCESSH%%|*}rsync -av --dry-run ${CUSTOMPARM} ${SOURCESSH#*| } \"${DIRMNTS}/${RJN}.t/\"" 2>>"${DIRLOGS}/${ERRLOG}" || {
+			echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: ${SOURCESSH%%|*}rsync -av --dry-run ${CUSTOMPARM} ${SOURCESSH#*| } \"${DIRMNTS}/${RJN}.t/\"" >>"${DIRLOGS}/${ERRLOG}"
+		} ) | awk '!/^receiving incremental file list$/' | awk '/^$/{exit}1' >"${DIRTEMP}/${RJN}.list"
+		echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+		TEMP=$(cat "${DIRTEMP}/${RJN}.list"| wc -l)				# store the files-to-be-xferred count for 'pv' below
+		if [ "$TEMP" == '0' ] || [ "$TEMP" == '' ]; then			# NOTE: the SIZE=='' would occur is no files were returned from 'find' (e.g. no new data was available yet)
+			echo "There does NOT appear to be any data that needs to be sync'ed, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			exitGraceful 0
+		else
+			echo "Sync'ing the data..." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+#			( eval "${SOURCESSH%%|*}rsync -avuW --inplace --log-file=\"${DIRLOGS}/${JOBLOG}\" --out-format=\"%n\" --include-from=\"${DIRTEMP}/${RJN}.list\" ${CUSTOMPARM} ${SOURCESSH#*| } \"${DIRMNTS}/${RJN}.t/\"" 2>>"${DIRLOGS}/${ERRLOG}" || { echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2; } ) | pv -w 80 -l -s "$TEMP" >/dev/null
+sleep 10
+		fi
+	elif [ "${TARGET:0:1}" == '@' ]; then							# if only the TARGET is an ssh host, then...
+		( eval "${TARGETSSH%%|*}rsync -av --dry-run ${CUSTOMPARM} \"${DIRMNTS}/${RJN}.s/\" ${TARGETSSH#*| }" 2>>"${DIRLOGS}/${ERRLOG}" || {
+			echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: ${TARGETSSH%%|*}rsync -av --dry-run ${CUSTOMPARM} \"${DIRMNTS}/${RJN}.s/\" ${TARGETSSH#*| }" >>"${DIRLOGS}/${ERRLOG}"
+		} ) | awk '!/^sending incremental file list$/' | awk '/^$/{exit}1' >"${DIRTEMP}/${RJN}.list"
+		echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+		TEMP=$(cat "${DIRTEMP}/${RJN}.list"| wc -l)				# store the files-to-be-xferred count for 'pv' below
+		if [ "$TEMP" == '0' ] || [ "$TEMP" == '' ]; then			# NOTE: the SIZE=='' would occur is no files were returned from 'find' (e.g. no new data was available yet)
+			echo "There does NOT appear to be any data that needs to be sync'ed, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			exitGraceful 0
+		else
+			echo "Sync'ing the data..." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+#			( eval "${TARGETSSH%%|*}rsync -avuW --inplace --log-file=\"${DIRLOGS}/${JOBLOG}\" --out-format=\"%n\" --include-from=\"${DIRTEMP}/${RJN}.list\" \"${DIRMNTS}/${RJN}.s/\" ${CUSTOMPARM} ${TARGETSSH#*| }" 2>>"${DIRLOGS}/${ERRLOG}" || { echo "ERROR: The 'rsync' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2; } ) | pv -w 80 -l -s "$TEMP" >/dev/null
+sleep 10
+		fi
+	fi
+
+else
+	echo "Backing up the data..." | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	# NOTE: we can NOT do any 'timeout' calls with ssh below as the piping of data does not transfer through that binary; we will have to rely on connection failures above to stop this script before reaching this point
+	# https://www.cyberciti.biz/faq/linux-unix-osx-bsd-ssh-run-command-on-remote-machine-server/
+	# https://superuser.com/questions/266422/tar-c-with-a-wildcard-file-pattern
+	# https://serverfault.com/questions/327927/use-wildcard-in-tar-with-t-option
+	# https://stackoverflow.com/questions/7114990/pseudo-terminal-will-not-be-allocated-because-stdin-is-not-a-terminal
+
+	[ "$COMPRESSION" == 'gzip' ] && {
+		EXT="${EXT}gz"			
+		COMPRESSION='| gzip '						# NOTE: we can NOT add '-z' to CUSTOMPARM since it would alter the size being piped into 'pv' causing the progress meter to be incorrect
+	}
+	[ "$COMPRESSION" == 'bzip' ] && {
+		EXT="${EXT}bz"
+		COMPRESSION='| bzip2 '						# NOTE: we can NOT add '-j' to CUSTOMPARM since it would alter the size being piped into 'pv' causing the progress meter to be incorrect
+	}
+	( [ "$COMPRESSION" == 'none' ] || [ "$COMPRESSION" == '' ] ) && {
+		EXT="${EXT}ar"
+		COMPRESSION=''
+	}
+
+	# store error log size and adjust version output temporarily
+	[ ! -e "${DIRLOGS}/${ERRLOG}" ] && touch "${DIRLOGS}/${ERRLOG}"		# if the file has not yet been created, create it now so there aren't any errors
+	TEMP=$(stat -c '%s' "${DIRLOGS}/${ERRLOG}")				# NOTE: we store the size of the error file before tar is executed so we know if an error occurs with it during execution (since we can't exitGraceful() upon tar failure and it actually exit the script, only the chained pipe command)
+	[ "$VERBOSE" == '/dev/stdout' ] && VERBOSE='/dev/stderr'		# we have to make this temporary change so that 'pv' will output if verbosity was desired
+
+	# WARNING: we MUST 'eval' the 'tar' call so that CUSTOMPARM gets interpreted correctly!!!
+	# if neither SOURCE and TARGET are ssh hosts, then...
+	if [ "${SOURCE:0:1}" != '@' ] && [ "${TARGET:0:1}" != '@' ]; then
+		( eval "${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM}" 2>"$FIFO" || {
+			echo "ERROR: The 'tar' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2
+			echo "Calling: ${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM} | pv -W -w 80 -s ${SIZE}m ${COMPRESSION}>\"${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT}\"" >>"${DIRLOGS}/${ERRLOG}"
+		} ) | eval "pv -W -w 80 -s ${SIZE}m ${COMPRESSION}>\"${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT}\"" 2>${VERBOSE}
+	# NOTE: the SOURCESSH and TARGETSSH value will already be configured for using the identityFile or sshpass
+	elif [ "${SOURCE:0:1}" == '@' ] && [ "${TARGET:0:1}" == '@' ]; then			# if both SOURCE and TARGET are ssh hosts, then...
+		( eval "${SOURCESSH} \"${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM}\"" 2>"$FIFO" || {
+			echo "ERROR: The 'tar' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2
+			echo "Calling: $(echo ${SOURCESSH}|sed "s/'[^']*'/'********'/g") \"${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM}\" | pv -W -w 80 -s ${SIZE}m ${COMPRESSION}| $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT}\\\"\"" >>"${DIRLOGS}/${ERRLOG}"
+		} ) | eval "pv -W -w 80 -s ${SIZE}m 2>${VERBOSE} ${COMPRESSION}"| eval "${TARGETSSH} \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT}\\\"\""
+	elif [ "${SOURCE:0:1}" == '@' ]; then							# if only the SOURCE is an ssh host, then...
+		( eval "${SOURCESSH} \"${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM}\"" 2>"$FIFO" || {
+			echo "ERROR: The 'tar' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2
+			echo "Calling: $(echo ${SOURCESSH}|sed "s/'[^']*'/'********'/g") \"${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM}\" | pv -W -w 80 -s ${SIZE}m ${COMPRESSION}>\"${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT}\"" >>"${DIRLOGS}/${ERRLOG}"		# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		} ) | eval "pv -W -w 80 -s ${SIZE}m ${COMPRESSION}>\"${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT}\"" 2>${VERBOSE}
+	elif [ "${TARGET:0:1}" == '@' ]; then							# if only the TARGET is an ssh host, then...
+		( eval ${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM} 2>"$FIFO" || {
+			echo "ERROR: The 'tar' binary failed in its execution, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2
+			echo "Calling: ${TARPREFIX}tar -cvf - --totals ${CUSTOMPARM} | pv -W -w 80 -s ${SIZE}m ${COMPRESSION}| $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT}\\\"\"" >>"${DIRLOGS}/${ERRLOG}"	# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+		} ) | eval "pv -W -w 80 -s ${SIZE}m 2>${VERBOSE} ${COMPRESSION}"| eval "${TARGETSSH} \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT}\\\"\""
+	fi
+	SIZE='n/a'								# update the SIZE value so as to not report a confusing value
+
+	# if we needed to temporarily change the VERBOSE value, lets change it back now
+	[ "$VERBOSE" == '/dev/stderr' ] && VERBOSE='/dev/stdout'
+	# process any tar encountered errors above and restore verbosee output if continuing
+	[ $TEMP -lt $(stat -c '%s' "${DIRLOGS}/${ERRLOG}") ] && {
+		echo "ERROR: The 'tar' binary has completed but encountered an error, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}" 1>&2
+		exitGraceful 1
+	}
+
+	# if we're ssh'ing into the TARGET, the make sure to copy the catalog file over there too!
+	if [ "${TARGET:0:1}" == '@' ]; then
+		cat "${DIRTEMP}/${RJN}${EXT:0:3}cat" | eval "${TARGETSSH} \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT:0:3}cat\\\"\""
+		[ $? -ne 0 ] && {
+			echo "ERROR: The job catalog file can NOT be copied to the --target, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: cat \"${DIRTEMP}/${RJN}${EXT:0:3}cat\" | $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"cat - >\\\"${TLOGIN#*:}${DIRTAG}/${RJN}${EXT:0:3}cat\\\"\"" >>"${DIRLOGS}/${ERRLOG}"	# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+			exitGraceful 1
+		}
+		if [ -e "${DIRTEMP}/${RJN}${EXT:0:3}cat" ]; then
+			rm "${DIRTEMP}/${RJN}${EXT:0:3}cat" 2>>"${DIRLOGS}/${ERRLOG}" || {
+				echo "ERROR: The cycled job archive (${FILE}) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: rm \"${DIRTEMP}/${RJN}${EXT:0:3}cat\"" >>"${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			}
+		fi
+	fi
+fi
+echo "[done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+
+
+
+# let the system settle down before continuing...
+sleep 5
+
+
+
+
+# create and execute the sinc script now (if that is the type of backup we are performing)
+if [ "$TYPE" == 'sinc' ]; then
+	echo -n "Sinc'ing status:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	echo " [scripting]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	echo "#!/bin/sh" >"${DIRTEMP}/${RJN}.sh"
+	echo "echo -n ' [restoring]'" >>"${DIRTEMP}/${RJN}.sh"
+	echo "restore --name=\"${NAME}\" --type='${TYPE}' --overwrite='older' --files='${RJN}${EXT}' || exit 1" >>"${DIRTEMP}/${RJN}.sh"
+	"${DIRTEMP}/${RJN}.sh" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	if [ $? -eq 0 ]; then
+		echo " [success] [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	else
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		exitGraceful 1
+	fi
+fi
+
+
+
+
+# execute the postscript now
+echo -n "Post-script status:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+if [ "$POSTSCRIPT" == "" ]; then
+	echo " [none]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+elif [ ! -e "$POSTSCRIPT" ]; then
+	echo " [missing]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+else
+	echo -n " [running]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	$POSTSCRIPT | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	if [ $? -eq 0 ]; then
+		echo " [success] [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	else
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		exitGraceful 1
+	fi
+fi
+
+
+
+
+# if we were sync'ing, we no longer need to run any code below, so we can exit the script now
+[ "${TYPE}" == 'sync' ] && exitGraceful 0
+
+
+
+
+# cycle the backups
+echo -en "Cycling the backups:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+FILE=								# have to the set to NULL so that the next 'if' will work correctly
+SIZE=0								# set initial value of SIZE
+if [ "$LIMIT" == '' ]; then					# if we do NOT need to maintain a backup limit, then....
+	echo -n " [manual]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+else								# otherwise...
+	if ( echo "${LIMIT}" | grep -q ^'[0-9]*'$ ); then	# if we are dealing with maintaining a file count, then...
+		echo -n " [count]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	elif [ "$(echo ${LIMIT} | tail -c 3 | tr '[:upper:]' '[:lower:]')" == 'mb' ]; then	# if we are dealing with maintaining a storage amount, then...
+		echo -n " [size]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+	fi
+
+	if [ "${TARGET:0:1}" != '@' ]; then			# if we are NOT using an ssh connection, then...
+		cd "${DIRMNTS}/${RJN}.t/${DIRTAG}" 2>>"${DIRLOGS}/${ERRLOG}" || {
+			echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+			echo "ERROR: The job failed to start due to --target not being accessible, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: cd \"${DIRMNTS}/${RJN}.t/${DIRTAG}\"" >>"${DIRLOGS}/${ERRLOG}"
+			exitGraceful 1
+		}
+		TEMP=$(ls -rt1 2>>"${DIRLOGS}/${ERRLOG}"|grep "${EXT:0:4}.."$)			#   store all the job-related files
+	else							# otherwise we are, so...
+		TEMP=$(eval "${TARGETSSH} \"cd \\\"${TARGET#*:}${DIRTAG}\\\"; ls -rt1|grep \\\"${EXT:0:4}..\\\"\$\"" 2>>"${DIRLOGS}/${ERRLOG}")
+	fi
+	if [ $? -ne 0 ]; then					# if the prior command failed (either 'ls' or 'ssh'), then...
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "VALUE |${TEMP}|" >>"${DIRLOGS}/${ERRLOG}"
+		echo "ERROR: The job archives can NOT be obtained to be cycled, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "Calling: ls -rt1|grep \"${EXT:0:4}..\"$" >>"${DIRLOGS}/${ERRLOG}"
+		exitGraceful 1
+	fi
+	for FILE in $(echo "$TEMP"); do
+		[ "$FILE" == "lost+found" ] && continue						# this is ONLY a safety precaution and should never be reached
+		[ "$FILE" == "${RJN}${EXT}" ] && continue					# if we've iterated to the backup we just created (e.g. there is only one backup created so far), then continue
+
+		# perform a check to see if we are within the count each iteration
+		if ( echo "${LIMIT}" | grep -q ^'[0-9]*'$ ); then				# if we are dealing with maintaining a file count, then...
+			[ $(echo "$TEMP" | grep -c "${EXT:0:4}.."$) -le $LIMIT ] && break	#   checks the current number of archives against the passed COUNT to make sure the archive count is NOT MORE than should be; otherwise, we are OVER the count defined, so delete the oldest ones until we get back into compliance
+		# perform a check to see if we are within the storage size each iteration
+		elif [ "$(echo ${LIMIT} | tail -c 3 | tr '[:upper:]' '[:lower:]')" == 'mb' ]; then		# if we are dealing with maintaining a storage amount, then...
+			if [ "${TARGET:0:1}" != '@' ]; then					# if we are NOT using an ssh connection, then...
+				SIZE=$(du -sk . 2>>"${DIRLOGS}/${ERRLOG}"| sed 's/	.*//')
+			else									# otherwise we are, so...
+				SIZE=$(eval "${TARGETSSH} \"du -sm \\\"${TARGET#*:}${DIRTAG}\\\" | sed 's/	.*//'\"" 2>>"${DIRLOGS}/${ERRLOG}")
+			fi
+			if [ $? -ne 0 ]; then							# if the prior command failed (either 'du' or 'ssh'), then...
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "$SIZE" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				#echo "Calling: " >>"${DIRLOGS}/${ERRLOG}"
+				echo "ERROR: The job archives size can NOT be obtained to be cycled, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			fi
+			if [ $SIZE -le $(echo ${LIMIT} | head -c -3) ]; then
+				echo -n " [under]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				break
+			fi
+		fi
+		echo -n " [over]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+		# delete the archive and associated catalog file
+		if [ "${TARGET:0:1}" != '@' ]; then		# if we are NOT using an ssh connection, then...
+			rm "${FILE}" 2>>"${DIRLOGS}/${ERRLOG}" || {
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "ERROR: The cycled job archive (${FILE}) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: rm \"${FILE}\"" >>"${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			}
+			[ -e "${FILE%.*}.cat" ] && {
+				rm "${FILE%.*}.cat" 2>>"${DIRLOGS}/${ERRLOG}" || {
+					echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+					echo "ERROR: The cycled job archive catalog (${FILE%.*}.cat) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+					echo "Calling: rm \"${FILE%.*}.cat\"" >>"${DIRLOGS}/${ERRLOG}"
+					exitGraceful 1
+				}
+			}
+		else
+			eval "${TARGETSSH} \"rm \\\"${TARGET#*:}${DIRTAG}/${FILE}\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}"
+			if [ $? -ne 0 ]; then							# if the prior command failed, then...
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "ERROR: The cycled job archive (${FILE}) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"rm \\\"${TARGET#*:}${DIRTAG}/${FILE}\\\"\"" >>"${DIRLOGS}/${ERRLOG}"								# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+				exitGraceful 1
+			fi
+
+			eval "${TARGETSSH} \"[ -e \\\"${TARGET#*:}${DIRTAG}/${FILE%.*}.cat\\\" ] || exit 0; rm \\\"${TARGET#*:}${DIRTAG}/${FILE%.*}.cat\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}"
+			if [ $? -ne 0 ]; then							# if the prior command failed, then...
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "ERROR: The cycled job archive catalog (${FILE%.*}.cat) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: $(echo ${TARGETSSH}|sed "s/'[^']*'/'********'/g") \"[ -e \\\"${TARGET#*:}${DIRTAG}/${FILE%.*}.cat\\\" ] || exit 0; rm \\\"${TARGET#*:}${DIRTAG}/${FILE%.*}.cat\\\"\"" >>"${DIRLOGS}/${ERRLOG}"	# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+				exitGraceful 1
+			fi
+		fi
+
+		# remove the just-deleted archive from the TEMP listing (so the LIMIT comparison at the top works correctly)
+		TEMP=$(echo "$TEMP" | sed "/${FILE}/d")
+
+		# delete the associated logs (locally)
+		[ -e "${DIRLOGS}/${FILE%%.*}.log" ] && {
+			rm "${DIRLOGS}/${FILE%%.*}.log" 2>>"${DIRLOGS}/${ERRLOG}" || {
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "ERROR: The cycled job archive log (${FILE%%.*}.log) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: rm \"${DIRLOGS}/${FILE%%.*}.log\"" >>"${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			}
+		}
+		[ -e "${DIRLOGS}/${FILE%%.*}.err" ] && {
+			rm "${DIRLOGS}/${FILE%%.*}.err" 2>>"${DIRLOGS}/${ERRLOG}" || {
+				echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+				echo "ERROR: The cycled job archive error log (${FILE%%.*}.err) can NOT be deleted, exiting." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+				echo "Calling: rm \"${DIRLOGS}/${FILE%%.*}.err\"" >>"${DIRLOGS}/${ERRLOG}"
+				exitGraceful 1
+			}
+		}
+	done
+fi
+echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+
+
+
+# validate the job
+echo -n "Validating job execution:" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+if [ "${TYPE}" == 'sync' ]; then
+	SIZE="$(cat "${DIRLOGS}/${JOBLOG}" 2>>"${DIRLOGS}/${ERRLOG}" | egrep ' \[[0-9]{1,4}\] Number of files transferred: [0-9]*$| \[[0-9]{1,4}\] Total transferred file size: [0-9]* bytes$' | sed 's/.*: //g' | tr '\n' '@' | sed 's/@/ files @ /')"
+	echo "$SIZE" | grep -q '[0-9]* files @ [0-9]* bytes' || {				# validate the result, or issue an error otherwise
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The validated size value was not obtained or is incorrect [${SIZE}]." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "VALUE |${SIZE}|" >>"${DIRLOGS}/${JOBLOG}"					# NOTE: we are not interested in having this display to the screen at all - just the log
+		SIZE='ERROR'
+	}
+# DEV NOTE: on server-side, if SIZE == ERROR; then email header = SYNC JOB FAILURE
+else
+	[ "${TARGET:0:1}" != '@' ] && SIZE=$(stat -c %s "${DIRMNTS}/${RJN}.t/${DIRTAG}/${RJN}${EXT}" 2>>"${DIRLOGS}/${ERRLOG}")		# store the size of the backup
+	[ "${TARGET:0:1}" == '@' ] && SIZE=$(eval "${TARGETSSH} \"stat -c %s \\\"${TARGET#*:}${DIRTAG}/${RJN}${EXT}\\\"\"" 2>>"${DIRLOGS}/${ERRLOG}")
+
+	if [ "$SIZE" == '' ] || [ "$SIZE" == '0' ] || ( ! echo ${SIZE} | grep -q ^'[0-9]*'$ ); then
+		echo " [failure]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+		echo "ERROR: The validated size value was not obtained or is incorrect [${SIZE}]." | tee -a "${DIRLOGS}/${JOBLOG}" -a "${DIRLOGS}/${ERRLOG}"
+		echo "VALUE |${SIZE}|" >>"${DIRLOGS}/${JOBLOG}"					# NOTE: we are not interested in having this display to the screen at all - just the log
+		SIZE='ERROR'
+	fi
+	SIZE="$SIZE bytes"									# format the value for display in the report
+fi
+[ "$SIZE" != 'ERROR' ] && echo " [done]" | tee -a "${DIRLOGS}/${JOBLOG}" >${VERBOSE}
+
+exitGraceful 0
+
+
+
+
+# DEV NOTE:
+# - in the event that the PATH is not being set correctly on the remote device, follow these steps:		https://discussions.apple.com/thread/3766395
+#	edit the sshd_config file by adding/uncommenting "PermitUserEnvironment yes"				NOTE: this file is in /usr/local/etc/ssh on TinyCore!!!
+#	restart sshd
+#	echo "PATH=$PATH" > ~/.ssh/environment
+#	---
+#	Now you can test by:
+#	ssh user@host "echo \"\$USER \$PATH \$(which du)\""	< be sure to escape the '$' character so local values don't get shown
+#	ssh user@host "which du"
+
+# LEFT OFF - how do you cycle/prune sync and restore logs
+
+# additional functionality
+# - add the ability to use wget to also backup https://unix.stackexchange.com/questions/536302/piping-of-stream-from-wget-to-tar-and-extracting-it-to-a-specific-location-fail
+
+# UI adjustments
+# Backup module
+#	add a "Backup" config button somewhere that will export the logs, job configs, etc into a file to download
+#	add a dropdown listbox to easily connect to dittodata.com (on the Jobs tab under the 'Target storage path' section)
+#	add a 'custom' option for the 'interval' box so that people can enter values for 'min hour day month dow'; no validation tho since that would be too complex
+#	add the ability to save the config in the global directory (/etc/dittodata) or personal (~/.dittodata)
+#
+#
+# Restore module
+#	Add a listbox, "+", and "-" box for the Associated archives so that the user can add in individual archives to the listing
+#	Add a "Prefix Directory" value above "Associated Archives" so that files can be restored to an alternate location
+#	"Log" tab > "Logs"
+#	add an 'alternative location' to restore the data to
+#	add pre/post script (upload) boxes
+

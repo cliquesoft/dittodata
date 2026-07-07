@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Make the config directory (if it doesn't already exist)
+[ ! -e '/etc/software/dittodata' ] && mkdir -p '/etc/software/dittodata'
+[ ! -e '/etc/dittodata' ] && ln -s '/etc/software/dittodata' '/etc/dittodata'
+
+
+# Symlink the correct default config
+[ ! -e /etc/dittodata/global.cfg ] && [ -e /etc/dittodata/_xinix.cfg ] && ln -s '/etc/dittodata/_xinix.cfg' '/etc/dittodata/global.cfg'

@@ -1,0 +1,399 @@
+/* OBJECTS */
+
+* { margin: 0; padding: 0; }
+
+
+html {
+/*	NOTE: if we use “min-height: 100%” instead of just “height: 100%” here, then the content of
+	#Body will extend beyond the height of the window, with the background expanding as well.
+
+	http://www.tutwow.com/htmlcss/quick-tip-css-100-height/
+*/
+	height: 100%;
+	min-width: 700px;
+	min-height: 450px;
+}
+
+
+body {
+	height: 100%;
+	font: 14px arial;
+	color: #fff;
+	background-color: #222;
+	cursor: default;
+}
+
+
+a, a:link, a:visited, a:active { color: #396AA4; font-weight: bold; text-decoration: none; }
+a:hover { color: #fff; }
+
+
+.button {
+	padding: 1px 5px;
+	color: rgba(255,255,255,0.5);
+	font-weight: bold;
+	background-color: #0055e3;
+	border-radius: 0.3em;
+	border: 1px solid #fff;
+}
+.button:hover { color: #fff; background-color: #4088ff; }
+
+
+.checkbox, .radio { margin-right: 4px; }			/* used so the alignment becomes correct; position: absolute; */
+
+
+.combobox, .listbox, .password, .textbox, .textarea {		/* the combobox are multi-row listboxes */
+/*	font-size: 14px;	*/
+	background-color: rgba(255,255,255,0.1);
+	color: #fff;
+	border: 1px solid #fff;
+	border-radius: 0.3em;
+	box-shadow: 0 0 4px rgba(f,f,f,0.3) inset,0 -3px 2px rgba(0,0,0,0.1);
+}
+.combobox, .listbox { padding: 1px 3px; }
+.password, .textbox { padding: 2px 3px 1px; }
+
+
+h1 {
+	margin: 0;
+	padding: 0;
+	font-size: 16px;
+	font-weight: bold;
+	color: #444;
+	text-decoration: underline;
+	text-align: center;
+}
+
+h2 {
+	margin-bottom: 5px;
+	font-size: 16px;
+	font-weight: bold;
+	text-align: left;
+}
+
+h3 { }
+
+
+img { }
+
+
+p { margin-bottom: 20px; text-align: justify; }
+
+
+ul { list-style: none; }
+ul li { }
+ul li label, ul li span { float: left; }
+ul li.liSub { padding-left: 12px !important; color: #aaa; }	/* applicable @ label level; li "sub-category" */
+
+
+#divBalloon { }
+.balloon { }
+.balloonTL { }
+.balloonTR { }
+.balloonBL { }
+.balloonBR { }
+
+
+.background { display: none; }					/* the universal background image for the project */
+
+.even { }							/* definitions for even items in a list */
+.odd { }							/* definitions for odd items in a list */
+
+.first { width: 40px; }
+.middle { width: 40px; margin-left: 2px; }
+.last { width: 80px; margin-left: 2px; }
+.suffix { width: 20px; margin-left: 2px; }
+
+.date { width: 68px !important; font-size: 11px; text-align: center !important; }	/* for all textboxes used to enter dates */
+.city { width: 105px; }						/* for all textboxes used to specify a city */
+.state { margin-left: 3px; width: 20px; text-align: center; }	/* same as above for State */
+.zip { margin-left: 3px; width: 45px; text-align: center; }	/* same as above for zip codes */
+.note { color: #bbb; font-size: 10px; }				/* for any object used to enter notes */
+
+.overlay {							/* for darkening the background for popup messages */
+	display: none;
+	position: fixed;					/* http://stackoverflow.com/questions/13532894/css-overlay-div-not-stretching-to-document-height */
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	z-index: 1001;
+	opacity: 0.6;
+	filter: alpha(opacity=60);
+}
+.info {								/* general message popup */
+	margin: 80px 26px 15px;
+	padding: 12px 0 12px 57px;
+	border: 1px solid #7ca0bf;
+	background: #f0f7fa url(../imgs/info.png) 15px 5px no-repeat;
+	border-radius: 0.4em;
+	overflow: auto;
+	opacity: 0.8;
+
+	box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-o-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+}
+.fail {								/* failure message popup */
+	margin: 80px 26px 15px;
+	padding: 12px 0 12px 57px;
+	border: 1px solid #ff0000;
+	background: #ffadad url(../imgs/errs.png) 15px 5px no-repeat;
+	border-radius: 0.4em;
+	overflow: auto;
+	opacity: 0.8;
+
+	box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-o-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+}
+.succ {								/* success message popup */
+	margin: 80px 26px 15px;
+	padding: 12px 0 12px 57px;
+	border: 1px solid #a9d260;
+	background: #fafff1 url(../imgs/succ.png) 15px 5px no-repeat;
+	border-radius: 0.4em;
+	overflow: auto;
+	opacity: 0.8;
+
+	box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-o-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+}
+.warn {								/* warning message popup */
+	margin: 80px 26px 15px;
+	padding: 12px 0 12px 57px;
+	border: 1px solid #7ca0bf;
+	background: #f0f7fa url(../imgs/warn.png) 15px 5px no-repeat;
+	border-radius: 0.4em;
+	overflow: auto;
+	opacity: 0.8;
+
+	box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-o-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: inset 0 0 4px #fff, 0 0 8px rgba(0,0,0,0.5);
+}
+
+
+
+
+/* LAYOUT */
+
+.page { overflow: hidden; }			/* definitions for the overall page/wrapper */
+
+#imgPage { }					/* NOTE: can't use 'background-image' as it doesn't provide the desired functionality */
+
+
+#divLoading { margin: 145px auto; width: 200px; text-align: center; }
+.imgPopupLoading { display: block;  }
+.lblPopupLoading {
+	position: absolute;
+	left: 50%;
+	margin-top: 70px;
+	color: #eee;
+	text-shadow: 0 2px 3px #555;
+	font-family: 'shit_happens_cursive';
+	font-size: 50px;
+	font-weight: bold;
+	font-style: italic;
+}
+
+
+.header {					/* definitions for the header of the page */
+}
+
+.body {}
+.body .top { }
+.body .mid { }
+.body .btm { }
+
+.footer {					/* definitions for the footer of the page */
+}
+
+
+.container { }					/* definitions for containers (typically between header and footer) */
+.container .Header { }				/* headers within a .container */
+.container .Body { }				/* contents of the .container */
+.container .Footer { }				/* footers within a .container */
+
+
+.sidebar { }					/* definitions for the right-hand side bar of the page */
+
+
+.title { }					/* definitions for titlebars throughout the project */
+
+
+.tabs { }					/* definitions for the tabs container used in the project */
+.tabs .liTab { }				/* definitions for each tabs */
+.tabs .liSel { }				/* definitions for the selected tab(s) */
+
+
+
+
+/* ENHANCEMENTS */
+
+.disabled, .disabled:hover {			/* definitions for disabled form objects */
+	color: #bbb !important;
+	background-color: #e8e8e8 !important;
+	cursor: default !important;
+	border: 1px solid #bbb !important;
+	opacity: 0.4;
+}
+
+.show { display: block !important; }
+.hide { display: none !important; }
+
+.bold { font-weight: bold !important; }
+.italic { font-style: italic !important; }
+.underline { text-decoration: underline !important; }
+.bottomline { border-bottom: 1px solid #808080 !important; }	/* used if you want to add 'underline' to something (e.g. <li>, <td>, ...) */
+.capitalize { text-transform: capitalize !important; }
+.uppercase { text-transform: uppercase !important; }
+.lowercase { text-transform: lowercase !important; }
+
+.right { text-align: right !important; }
+.center { text-align: center !important; }
+.left { text-align: left !important; }
+.justify { text-align: justify !important; }
+
+.cleft  { clear: left !important; }
+.cright { clear: right !important; }
+.cboth  { clear: both !important; }
+.fleft  { float: left !important; }
+.fright { float: right !important; }
+.fnone  { float: none !important; }
+.noover { overflow: hidden !important; }
+.curved { border-radius: 0.4em !important; }
+
+.uroman { list-style-type: upper-roman !important; }
+.lroman { list-style-type: lower-roman !important; }
+.ulatin { list-style-type: upper-latin !important; }
+.llatin { list-style-type: lower-latin !important; }
+.ualpha { list-style-type: upper-alpha !important; }
+.lalpha { list-style-type: lower-alpha !important; }
+.decimal { list-style-type: decimal !important; }
+.disc { list-style-type: disc !important; }
+.circle { list-style-type: circle !important; }
+.square { list-style-type: square !important; }
+.nolist { list-style-type: none !important; }
+
+.OEButton { width: 25px !important; }				/* 1/8 width button (for +/-) */
+.OQButton { width: 49px !important; }				/* 1/4 width button */
+.OTButton { width: 65px !important; }				/* 1/3 width button */
+.OHButton { width: 99px !important; }				/* 1/2 width button */
+.TTButton { width: 133px !important; }				/* 2/3 width button */
+.TQButton { width: 149px !important; }				/* 3/4 width button */
+.OFButton { width: 200px !important; }				/* One Full width button */
+.OQCombobox, .OQListbox { width: 49px !important; }		/* 1/4 width combobox */
+.OTCombobox, .OTListbox { width: 65px !important; }		/* 1/3 width combobox */
+.OHCombobox, .OHListbox { width: 99px !important; }		/* 1/2 width combobox; 2px in border */
+.TTCombobox, .TTListbox { width: 133px !important; }		/* 2/3 width combobox */
+.TQCombobox, .TQListbox { width: 150px !important; }		/* 3/4 width combobox */
+.OFCombobox, .OFListbox { width: 202px !important; }		/* One Full width combobox */
+.OQTextbox { width: 41px !important; }				/* 1/4 width textbox */
+.OTTextbox { width: 57px !important; }				/* 1/3 width textbox */
+.OHTextbox { width: 91px !important; }				/* 1/2 width textbox; 2px in border, 6px in left/right padding */
+.TTTextbox { width: 125px !important; }				/* 2/3 width textbox */
+.TQTextbox { width: 142px !important; }				/* 3/4 width textbox */
+.OFTextbox { width: 194px !important; }				/* One Full textbox */
+.Space { margin-left: 4px; }
+
+
+
+
+
+
+
+
+
+
+/* MOBILE */
+
+/*
+	NOTE: the widths for larger screens are based on a 16:9 resolution
+
+	http://stackoverflow.com/questions/18477016/switching-css-classes-based-on-screen-size
+	https://en.wikipedia.org/wiki/Display_resolution#/media/File:Vector_Video_Standards8.svg
+	http://stackoverflow.com/questions/6747242/what-is-the-difference-between-max-device-width-and-max-width-for-mobile-web
+	http://www.javascriptkit.com/dhtmltutors/cssmediaqueries2.shtml
+	https://css-tricks.com/snippets/css/media-queries-for-standard-devices/
+	http://stackoverflow.com/questions/6370690/media-queries-how-to-target-desktop-tablet-and-mobile
+*/
+
+/* Smartphone (portrait and landscape) - CGA (320) to HVGA (480) */
+@media only screen 
+and (min-device-width: 320px) 
+and (max-device-width: 736px) {
+	html {
+		min-width: 350px;
+		max-width: 400px;
+		min-height: 100px;
+	}
+
+	h1 { font-size: 24px; }
+
+	.header {					/* this is for the "Status" Bar */
+	}
+
+	.body {
+	}
+
+	.footer {					/* this is for the "Taskbar" */
+	}
+}
+
+
+/* Smartphone (landscape) */
+@media only screen 
+and (max-device-width: 736px)
+and (orientation: landscape) {
+}
+
+
+/* Smartphone (portrait) */
+@media only screen 
+and (max-device-width: 736px)
+and (orientation: portrait) {
+}
+
+
+/* Tablet (portrait and landscape) - PAL (768) to PAL+ (1024) */
+@media only screen 
+and (min-device-width: 768px) 
+and (max-device-width: 1024px) {
+}
+
+
+/* Tablet (landscape) */
+@media only screen 
+and (min-device-width: 768px) 
+and (max-device-width: 1024px) 
+and (orientation: landscape) {
+}
+
+
+/* Tablet (portrait) */
+@media only screen 
+and (min-device-width: 768px) 
+and (max-device-width: 1024px) 
+and (orientation: portrait) {
+}
+
+
+/* Desktop/Laptop (landscape) - HD 720 (1280x720), Unnamed (1366x768), WXGA (1280x800) */
+/* Anything else - Unnamed (1440x900), Unnamed (1600x900), WSXGA+ (1680x1050), HD 1080 (1920x1080), WUXGA (1920x1200) */
+/* NOTE: we 'min-device-width > 736' so that cell phones aren't triggered */
+@media only screen 
+and (min-device-width: 737px)
+and (min-height: 720px) {
+}
+

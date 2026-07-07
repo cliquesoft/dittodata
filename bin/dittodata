@@ -1,0 +1,1483 @@
+#!/bin/sh
+# dittodata	This script is the manager for the dittodata project
+#
+# Unless a valid Cliquesoft Private License (CPLv1) has been purchased for your
+# device, this software is licensed under the Cliquesoft Public License (CPLv2)
+# as found on the Cliquesoft website at www.cliquesoft.org.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the appropriate Cliquesoft License for details.
+#
+# Created	2022-03-21 by Dave Henderson (support@cliquesoft.org)
+# Updated	2022-10-20 by Dave Henderson (support@cliquesoft.org)
+#
+# Requirements:		Works With:
+#	[		busybox/coreutils
+#	cat		busybox/coreutils
+#	chmod		busybox/coreutils
+#	cp		busybox/coreutils
+#	cut		busybox/coreutils
+#	date		busybox/coreutils
+#	echo		busybox/coreutils
+#	egrep		busybox/grep
+#	grep		busybox/grep
+#	head		busybox/coreutils
+#	mkdir		busybox/coreutils
+#	mv		busybox/coreutils
+#	rm		busybox/coreutils
+#	sed		busybox/sed
+#	[setsid]	util-linux
+#	[ssh]		openssh(-client)
+#	[ssh-keygen]	openssh(-client)
+#	[sshpass]	sshpass
+#	tail		busybox/coreutils
+#	tee		busybox/coreutils
+#	tr		busybox/coreutils
+
+
+
+
+
+
+
+
+# GLOBAL VARIABLES
+
+# --- SYSTEM ---
+DATETIME="$(date +"%Y-%m-%d %H:%M:%S")"				# sets a default epoch so in the event of failure, a full backup should be performed via this date for safety
+RJN=$(( $RANDOM + 2 + $RANDOM ))
+
+# --- GLOBAL ---
+DIRCONF='/etc/dittodata'					# directory for global and specific job settings
+					# DEV NOTE: in the /etc/dittodata/global.cfg file for global settings; /etc/dittodata/JOB_NAME.cfg for specific job settings; ~/${DIRCONF}/JOB_NAME.cfg for private job settings
+					#	we can create a config file for various Linux flavors (e.g. debian, tinycore, xinix, slackware, etc) and just symlink global.cfg to one of those files
+DIRHOME="${HOME}/.dittodata"					# directory for private job settings
+DIRTEMP='/tmp'
+DIRMNTS='/mnt'
+DIRLOGS='/var/log'
+DIRSSH="${HOME}/.ssh"
+JOBLOG="dittodata/${RJN}.log"
+ERRLOG="dittodata/${RJN}.err"
+SYSLOG='dittodata.log'
+FIFO="${DIRTEMP}/backup_${RJN}"
+
+# --- JOBCFG ---
+NAME=''
+TYPE=''
+COMPRESSION='none'
+INCLUDE=''
+EXCLUDE=''
+LIMIT=''
+PRESCRIPT=''
+POSTSCRIPT=''
+ALERT='none'
+ALERTEXEC=''
+CUSTOMPARM=''
+DIRTAG=''
+SOURCE=''
+TARGET=''
+SOURCEUSER=''
+SOURCEPASS=''
+SOURCEDOMN=''
+SOURCEPARM=''
+TARGETUSER=''
+TARGETPASS=''
+TARGETDOMN=''
+TARGETPARM=''
+TAG1=''								# these are extra values that can be used in the communication (e.g. to designate a client or device name)
+TAG2=''
+TAG3=''
+TAG4=''
+
+# -- INTERNAL --
+VERBOSE='/dev/null'						# used to show output or not
+DIRCRON='/etc/cron.d'
+STATUS=''							# used to store which config files need to be written to disk: 0=global, 1=job, 2=both
+SOURCESSH=''							# adds the ssh(pass) syntax to the ssh(fs) calls
+TARGETSSH=''
+					# DEV NOTE: if an ssh IdentityFile for the job is present (@ "${DIRSSH}/${HOST}"), then use that identity file instead of password file
+TARPREFIX=''							# used to change directories before executing tar (when using --include or --exclude)
+#SSETSID=''							# whether or not the use of 'setsid' should be used when calling ssh (e.g. when using indentity files)
+#TSETSID=''
+SLOGIN=''							# these two are used by sshfs and ssh to store the entire "login" (e.g. user@host)
+TLOGIN=''
+#SHOST=''							# used to keep track of the ssh hostname (for RSA key purposes)
+THOST=''
+SUDO=''
+TEMP=''
+
+# -- SPECIFIC --
+ACTION=''
+ORIGIN=''
+DIRCFG="$DIRCONF"						# set the default config directory to the global one (e.g. /etc/dittodata)
+HOUR=''
+MIN=''
+FREQ=''
+LIST=''
+CRON=0
+CRONNAME=''
+LOCATION=''
+
+
+
+
+# ----- DO NOT EDIT BELOW THIS LINE -----
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR EXPORT
+
+
+
+
+# DEFINE BUILT-IN FUNCTIONS FOR INTERNAL USE
+
+# Usage syntax: exitGraceful [iSuccess]
+# calls all the exit routines for each used module to perform cleanup
+# iSuccess	(optional) parameter indicating whether this function was called for: 1+=failure, 0=success (default)
+exitGraceful() {
+	[ $# -gt 0 ] && local iSUCCESS=$1 || local iSUCCESS=0			# if a success/failure value was passed, store it, other assume success by default
+	[ $iSUCCESS -eq 0 ] && STATUS='success' || STATUS='failure'		# now set the STATUS value based on iSUCCESS
+
+	echo "Cleaning up..." >${VERBOSE}
+
+	# remove the TARGET "mount point"
+	echo -n "Removing the --target location:" >${VERBOSE}
+	if ( mount | grep -q "${DIRMNTS}/${RJN}.t" ); then
+		echo -n " [umounting]" >${VERBOSE}
+		cd - >/dev/null 2>&1						# have to do this step beforehand since we changed into the job directory (which is in the target dir)
+		${SUDO}umount "${DIRMNTS}/${RJN}.t" 2>>/dev/null && rmdir "${DIRMNTS}/${RJN}.t" 2>>/dev/null
+	elif [ -e "${DIRMNTS}/${RJN}.t" ]; then
+		echo -n " [deleting]" >${VERBOSE}
+		# WARNING: these tests must be in this structure -AND- in this order!!!
+		if ( test -h "${DIRMNTS}/${RJN}.t" ); then
+			rm "${DIRMNTS}/${RJN}.t" 2>>/dev/null
+		elif ( test -d "${DIRMNTS}/${RJN}.t" ); then
+			rmdir "${DIRMNTS}/${RJN}.t" 2>>/dev/null
+		fi
+	fi
+	echo " [done]" >${VERBOSE}
+
+	echo -n "Removing dynamically created files:" >${VERBOSE}
+	[ -e "${DIRTEMP}/${THOST}.sh" ] && rm "${DIRTEMP}/${THOST}.sh"		# remove any ssh password file
+	[ -e "${DIRTEMP}/${THOST}.pw" ] && rm "${DIRTEMP}/${THOST}.pw"		# remove any sshpass password file
+	[ -e "${DIRTEMP}/${RJN}_t.sh" ] && rm "${DIRTEMP}/${RJN}_t.sh"		# these two are the same as above but for TARGET
+	[ -e "${DIRTEMP}/${RJN}_t.pw" ] && rm "${DIRTEMP}/${RJN}_t.pw"
+	echo " [done]" >${VERBOSE}
+
+	[ $iSUCCESS -eq 0 ] && echo -n "The job adjustments have completed successfully: " >${VERBOSE}
+	[ $iSUCCESS -gt 0 ] && echo -n "The job adjustments have stopped due to failure: " >${VERBOSE}
+	date >${VERBOSE}
+
+	exit $iSUCCESS						# exit with the passed error number (for debugging)
+}
+
+
+# Usage syntax: mountTarget
+# mounts the target location of the backup job so that any existing related data gets its directory renamed to match the new job name
+mountTarget() {
+	# variable value alterations
+	echo -n "   Making variable value alterations:" >${VERBOSE}
+	if [ "${TARGET:0:2}" == '//' ]; then			# if we're mounting a Linux NFS share, then...		https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+		echo -n " [nfs]" >${VERBOSE}
+		[ "${TARGETPARM}" != '' ] && {
+			[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+			TARGETPARM="${TEMP}${TARGETPARM}"							# if we've made it here and this variable has a value, prepend a ',' so the mount syntax below works correctly
+		}
+# VER2 - secure nfs via ssh; read https://stackoverflow.com/questions/53604706/mount-network-share-with-nfs-with-username-password
+		# REMOVED 2022/10/20 - credentials are not part of NFS mounting (the client device institutes the security of the network share)	https://stackoverflow.com/questions/53604706/mount-network-share-with-nfs-with-username-password
+		THOST="$(echo "$TARGET" | egrep -o ^'//[^|<>"/\\\?\*]*:[/]*[^|<>:"/\\\?\*]*[/]*')"		#  store the //server:/share from the rest of the path
+		if [ "${LOCATION}" != '' ]; then								# WARNING: this MUST come above the actual processing of the value
+			TARGET="${THOST}$(echo $LOCATION | sed 's|^/||')"			# NOTE: this preserves the '//host:/share' value while appending the alternate dir; NOTE: we do NOT replace backslashes here (incase it's to escape a space in the path); admin will need to use Linux '/' in path otherwise
+		else
+			LOCATION="${TARGET:${#THOST}}"
+		fi
+	elif [ "${TARGET:0:2}" == '\\' ]; then
+		echo -n " [cifs]" >${VERBOSE}
+		TEMP=''
+		[ "${TARGETUSER}" != '' ] && TEMP="${TEMP},user=${TARGETUSER}"
+		[ "${TARGETPASS}" != '' ] && TEMP="${TEMP},pass='${TARGETPASS}'"
+		[ "${TARGETDOMN}" != '' ] && TEMP="${TEMP},dom=${TARGETDOMN}"
+		if [ "${TARGETPARM}" != '' ]; then
+			[ "${TARGETPARM:0:1}" == '-' ] && TEMP="${TEMP} ${TARGETPARM}" || TEMP="${TEMP},${TARGETPARM}"
+		fi
+		TARGETPARM="$TEMP"
+		THOST="$(echo "$TARGET" | egrep -o ^'\\\\[^|<>:"/\\\?\*]{1,15}\\[^|<>:"/\\\?\*]*[\\/]*')"	#  store the \\server\share from the rest of the path
+		if [ "${LOCATION}" != '' ]; then							# WARNING: this MUST come above the actual processing of the value
+			TARGET="${THOST}$(echo $LOCATION | sed 's|^/||;s|/|\\|g')"		# NOTE: this preserves the '\\host\share' value while appending the alternate dir (while replacing any forward slashes with back slashes)	https://stackoverflow.com/questions/1976007/what-characters-are-forbidden-in-windows-and-linux-directory-names
+		else
+			LOCATION="${TARGET:${#THOST}}"
+		fi
+	elif [ "${TARGET:0:1}" == '%' ]; then
+		echo -n " [sshfs]" >${VERBOSE}
+
+		THOST=$(echo "$TARGET"|sed 's/^%//;s/:.*//')
+		TLOGIN="@${TARGET:1}"					# NOTE: we MUST replace the preceeding '%' character with an '@' character in the TARGET to work correctly
+		[ "${TARGETUSER}" != '' ] && TLOGIN="${TARGETUSER}${TLOGIN}" || TLOGIN="${USER}${TLOGIN}"					# add the correct username to connect to the remote device with to the TARGET value
+
+		# WARNING: the below lines MUST come in the order they currently are
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		[ -e "${DIRSSH}/${THOST}" ] && {
+			TARGETPARM="IdentityFile=\"${DIRSSH}/${THOST}\"${TEMP}${TARGETPARM}"
+			TSETSID='setsid '
+		}
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		[ "${TARGETPARM}" == '' ] && TEMP=''								# if the value is blank, then ultimately do nothing
+		( [ "${TARGETUSER}" != '' ] && [ "${USER}" == "${TARGETUSER}" ] ) && TARGETPARM="allow_other,uid=$(id -u ${TARGETUSER}),gid=$(id -g)${TEMP}${TARGETPARM}" || TARGETPARM="allow_other,uid=$(id -u),gid=$(id -g)${TEMP}${TARGETPARM}"
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		[ "${TARGETPARM}" != '' ] && [ "${TARGETPARM:0:1}" != ',' ] && TARGETPARM="${TEMP}${TARGETPARM}"
+		[ "${TARGETPARM}" == '' ] && TEMP=',' || TEMP=' -o '						# since this is post-pended, always make it the LAST parameter called (with it's own '-o')
+		[ "${TARGETPASS}" != '' ] && {
+			TARGETSSH="echo '${TARGETPASS}' | ${SUDO}sshfs"
+			TARGETPARM="${TARGETPARM}${TEMP}password_stdin"						# https://unix.stackexchange.com/questions/337465/username-and-password-in-command-line-with-sshfs
+		}
+
+		if [ "${LOCATION}" != '' ]; then							# WARNING: this MUST come above the actual processing of the value
+			TARGET="${TARGET%%:*}:${LOCATION}"
+		else
+			LOCATION="${TLOGIN#*:}"
+		fi
+	elif [ "${TARGET:0:1}" == '@' ]; then
+		echo -n " [ssh]" >${VERBOSE}
+
+		THOST=$(echo "$TARGET"|sed 's/^@//;s/:.*//')
+		[ "${TARGETUSER}" != '' ] && TLOGIN="${TARGETUSER}${TARGET}" || TLOGIN="${USER}${TARGET}"					# add the correct username to connect to the remote device with to the TARGET value
+
+		[ "${TARGETPARM:0:1}" == '-' ] && TEMP=' ' || TEMP=','
+		[ -e "${DIRSSH}/${THOST}" ] && {
+			TARGETPARM="-o IdentityFile=\"${DIRSSH}/${THOST}\"${TEMP}${TARGETPARM}"
+			TSETSID='setsid '
+		}
+
+		# add the ssh syntax to the command
+		if [ "$TYPE" != 'sync' ]; then
+			TEMP=''
+			TARGETSSH="${TSETSID}ssh ${TLOGIN%%:*} ${TARGETPARM}"
+		else
+			TEMP='| '			# this is show we can split the command into two if we are sync'ing
+			TARGETSSH="-e \"${SSETSID}ssh ${TARGETPARM}\" \"${TLOGIN}\""
+		fi
+
+		# setup password-less processing if no RSA keys have been exchanged
+		if [ ! -e "${DIRSSH}/${THOST}" ]; then				# if there isn't an IdentityFile for the connection to prevent password prompts, then...
+			if [ "$(which sshpass)" != '' ]; then			# if 'sshpass' exists, then...
+				TARGETSSH="sshpass -f \"${DIRTEMP}/${RJN}_t.pw\" ${TEMP}${TARGETSSH}"	# setup the syntax to use sshpass
+				echo "${TARGETPASS}" >"${DIRTEMP}/${RJN}_t.pw"			# create the password file
+			else
+				export DISPLAY=none:0.0						# export these variables so when 'setsid ssh ...' is called it can use the script to get the password
+				export SSH_ASKPASS="${DIRTEMP}/${RJN}_t.sh"
+				echo '#!/bin/sh' >"${DIRTEMP}/${RJN}_t.sh"			# now create the script to give the password to ssh
+				echo "echo ${TARGETPASS}" >>"${DIRTEMP}/${RJN}_t.sh"
+				chmod 700 "${DIRTEMP}/${RJN}_t.sh"
+			fi
+		fi
+
+		if [ "${LOCATION}" != '' ]; then							# WARNING: this MUST come above the actual processing of the value
+			TARGET="${TARGET%%:*}:${LOCATION}"
+		else
+			LOCATION="${TLOGIN#*:}"
+		fi
+	elif [ "${TARGET:0:1}" == '/' ]; then				# no adjustments are neccessary with local directories
+		echo -n " [local]" >${VERBOSE}
+		if [ "${LOCATION}" != '' ]; then							# WARNING: this MUST come above the actual processing of the value
+			TARGET="${LOCATION}"
+		fi
+	fi
+	echo " [done]" >${VERBOSE}
+
+	ERRLOG="${SYSLOG}"						# so we don't have to manipulate the below code (since it's an exact copy from 'backup') and we need to log to SYSLOG in this script
+
+	# process the TARGET location
+	echo -n "   Processing the --target location:" >${VERBOSE}
+	if [ "${TARGET:0:2}" == '//' ]; then				# if we're mounting a Linux NFS share, then...
+		echo -n " [nfs]" >${VERBOSE}
+		eval "${SUDO}mount -t nfs -o rw${TARGETPARM} \"${THOST:2}\" \"${DIRMNTS}/${RJN}.t\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-an-nfs-share-in-linux/
+			echo " [failure]" >${VERBOSE}
+			echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: ${SUDO}mount -t nfs -o rw${TARGETPARM} \"${THOST:2}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"
+			exitGraceful 1
+		}
+	elif [ "${TARGET:0:2}" == '\\' ]; then
+		echo -n " [cifs]" >${VERBOSE}
+		THOST="$(echo ${THOST} | tr '\\' '/')"				# NOTE: we MUST replace the '\' characters with '/' characters in the TARGET to work correctly
+		LOCATION="$(echo ${LOCATION} | tr '\\' '/')"			#	same with LOCATION
+		eval "${SUDO}mount -t cifs -o rw,uid=$(id -n -u),gid=$(id -n -g)${TARGETPARM} \"${THOST}\" \"${DIRMNTS}/${RJN}.t\"" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {		# https://linuxize.com/post/how-to-mount-cifs-windows-share-on-linux/
+			echo " [failure]" >${VERBOSE}
+			echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: ${SUDO}mount -t cifs -o rw,uid=$(id -n -u),gid=$(id -n -g)$(echo "${TARGETPARM}"|sed "s/,pass='[^']*'/,pass='********'/") \"${THOST}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"		# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+			exitGraceful 1
+		}
+	elif [ "${TARGET:0:1}" == '%' ]; then
+		echo -n " [sshfs]" >${VERBOSE}
+		[ "$LOCATION" == '' ] && TEMP="${TLOGIN}" || TEMP="${TLOGIN%%:*}:/"		# if the value is the users home directory, then retain the value, otherwise it's an absolute path so mount just the root of the device
+		# NOTE: we only need to mount the home directory or root
+		eval "${TARGETSSH} \"${TEMP}\" \"${DIRMNTS}/${RJN}.t\" -o rw${TARGETPARM}" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {				# NOTE: this is after the RSA keys have already been exchanged with the server	www.beginninglinux.com/home/server-administration/openssh-keys-certificates-authentication-pem-pub-crt
+			echo " [failure]" >${VERBOSE}
+			echo "ERROR: The job --target can NOT be mounted, exiting." | tee -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: $(echo "${TARGETSSH}"|sed "s/'[^']*'/'********'/g") \"${TEMP}\" \"${DIRMNTS}/${RJN}.t\" -o rw${TARGETPARM}" >>"${DIRLOGS}/${ERRLOG}"								# ' < this character is to stop the incorrect text coloring and can be ignored as an actual comment
+			exitGraceful 1
+		}
+	elif [ "${TARGET:0:1}" == '@' ]; then
+		echo -n " [ssh]" >${VERBOSE}
+		# NOTE: these connections are made on-the-fly, so nothing to do here
+	elif [ "${TARGET:0:1}" == '/' ]; then				# we don't do any processing for local values
+		echo -n " [local]" >${VERBOSE}
+		ln -s "${TARGET}" "${DIRMNTS}/${RJN}.t" 2>>"${DIRLOGS}/${ERRLOG}" >/dev/null || {
+			echo " [failure]" >${VERBOSE}
+			echo "ERROR: The job --target can NOT be symlinked, exiting." | tee -a "${DIRLOGS}/${ERRLOG}"
+			echo "Calling: ln -s \"${TARGET}\" \"${DIRMNTS}/${RJN}.t\"" >>"${DIRLOGS}/${ERRLOG}"
+			exitGraceful 1
+		}
+	fi
+	echo " [done]" >${VERBOSE}
+}
+
+
+
+# EXIT IF APPROPRIATE
+
+
+
+
+# VARIABLE PROCESSING
+
+# process stored variables first
+[ -e "${DIRCONF}/global.cfg" ] && . "${DIRCONF}/global.cfg"	# read the global config first
+
+for i in "$@"; do						# process each of the passed parameters (looking for the --name value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--rename=' ); then		# find the job name to look for specific job configurations
+		NAME="${i##*=}"
+		[ -e "${DIRCONF}/${NAME}.cfg" ] && . "${DIRCONF}/${NAME}.cfg"	# read in specific job values (via the job name)
+		[ -e "${DIRHOME}/${NAME}.cfg" ] && . "${DIRHOME}/${NAME}.cfg"	# read in private job values (via the job name)
+
+		# NOTE: this MUST come here now that we have the --name value.
+		#	this also MUST come above any other variable value assignments so that passed or stored values can replace these.
+		#	this is also parsed here so that we have values for the FREQ, LIST, HOUR, and MIN values so as to not trigger issues with value checks below.
+		# parse an existing cron job for the HOUR, MIN, FREQ, and LIST values
+		if [ -e "${DIRCRON}/dittodata" ]; then					# if the cron file exists, then...
+			if ( grep -q ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" ); then
+				TEMP=$( ( grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | egrep -o ^'([0-9#,*/\-]{1,}	){5}' | grep -q '/' ) && echo 'interval' || echo '')
+				if [ "$TEMP" == 'interval' ]; then										# if we're dealing with an interval level, then...
+					TEMP=$(grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | egrep -o ^'([0-9#,*/\-]{1,}	){5}')	# store the entire line and process each field below to figure out which interval definition was made
+					IFS=''			# this prevents parsing errors below
+					# WARNING: do NOT surround the TEMP variable in quotes since it disrupts the processing of the * characters
+					if (echo $TEMP | grep -q ^'*/'); then
+						TEMP="interval|$(echo $TEMP | cut -d '	' -f 1 | sed 's|*/||')m|||"
+					elif (echo $TEMP | cut -d '	' -f 2 | grep -q ^'*/'); then
+						TEMP="interval|$(echo $TEMP | cut -d '	' -f 2 | sed 's|*/||')h||$(echo $TEMP | cut -d '	' -f 1)"
+					elif (echo $TEMP | cut -d '	' -f 3 | grep -q ^'*/'); then
+						TEMP="interval|$(echo $TEMP | cut -d '	' -f 3 | sed 's|*/||')d|$(echo $TEMP | cut -d '	' -f 2)|$(echo $TEMP | cut -d '	' -f 1)"
+					else
+						TEMP="interval|$(echo $TEMP | cut -d '	' -f 4 | sed 's|*/||')M|$(echo $TEMP | cut -d '	' -f 2)|$(echo $TEMP | cut -d '	' -f 1)"
+					fi
+				else							# otherwise we are dealing with days of the month or days of the week
+					TEMP=$(grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | sed 's/backup .*//;s/\*/\\\*/g')
+					[ "$(echo $TEMP | cut -d '	' -f 3)" != '\*' ] && TEMP="monthly|$(echo $TEMP | cut -d '	' -f 3)|$(echo $TEMP | cut -d '	' -f 2)|$(echo $TEMP | cut -d '	' -f 1)" || TEMP="daily|$(echo $TEMP | cut -d '	' -f 5)|$(echo $TEMP | cut -d '	' -f 2)|$(echo $TEMP | cut -d '	' -f 1)"
+				fi
+				FREQ="$(echo "$TEMP" | cut -d '|' -f 1)"
+				LIST="$(echo "$TEMP" | cut -d '|' -f 2)"
+				HOUR="$(echo "$TEMP" | cut -d '|' -f 3)"
+				MIN="$(echo "$TEMP" | cut -d '|' -f 4)"
+			fi
+		fi
+	fi
+done
+
+# NOTE: this MUST to come after the job config file above (since the user may want to use alternate values from the saved job config)
+for i in "$@"; do						# process each of the passed parameters (looking for the --config value)	https://unix.stackexchange.com/questions/129072/whats-the-difference-between-and
+	if ( echo "${i}" | grep -q ^'--config=' ); then		# read in the passed config file
+		TEMP="${i##*=}"
+		[ -e "${TEMP}" ] && . "${TEMP}"			# read in the stored values for this script if it exists
+
+		# NOTE: we blank these out since we don't want backup values in a restore (since some files may not exist [e.g. incremental backup])
+		INCLUDE=''
+		EXCLUDE=''
+	fi
+done
+
+# process passed variables last (since they will have presidence)
+for i in "$@"; do						# process each of the passed parameters (after setting default values above)
+	if [ "${i}" == "--version" ] || [ "${i}" == "-v" ]; then
+		head -25 "$0" | grep "Updated	" | sed 's/.*\t//;s/ by .*//;s/-/./g'
+		exit 0
+
+	elif [ "${i}" == "--help" ] || [ "${i}" == '/?' ]; then
+		echo
+		echo "The syntax for this script is:"
+		echo "   ${0##*/} [ACTION] [--OPTION=\"VALUE\" ...] [--config filename]"
+	        echo
+		echo "Full documentation located at:"
+		echo "   http://wiki.cliquesoft.org/index.php?title=dittodata"
+		echo
+		echo "The short project description:"
+		echo "   This script performs the specified  action using the passed options and their"
+		echo "   respective values (which need to be enclosed in double quotes).  A backup can"
+		echo "   also be run with no command line parameters IF they are all defined in a bash"
+		echo "   style config file (as identified via the --config parameter).  Another option"
+		echo "   is to pass job specific options via  the command line in conjunction with the"
+		echo "   --config parameter so any \"general\" options are used too. All the ACTIONS are"
+		echo "   listed below with each modules' individual options following."
+		echo
+		echo "   [ACTIONS]"
+		echo
+		echo " --help		this screen"
+		echo " --version	shows the version of this script"
+		echo " --copy=NAME	copies the specified job to a new job; NAME = source job name"
+		echo " --delete	deletes the specified job"
+		echo " --disable	disables the specified job"
+		echo " --enable	enables the specified job"
+		echo " --exchange=HOST exchanges the ssh keys with another device; HOST = IP or URI"
+		echo "		NOTE: you must also provide --targetUser and --targetPass"
+# VER2
+#		echo " --export	exports all the config data"						# this (g)zips the /etc/dittodata and /etc/cron.d/dittodata files
+		echo " --info		provides all the config info for the requested job"
+		echo " --show		lists all the jobs that are currently saved"
+		echo " --rename=NAME	renames the specified job; NAME = original job name"
+		echo " --save		saves or updates the passed configuration to a config file"
+		echo "		NOTE: when updating, only pass the values to be changed"
+		echo
+		echo "   [OPTIONS]"
+		echo
+		echo " --verbose	display verbose output"
+		echo " --cfgdir	specfies the directory to write the job configs:"
+		echo "		      global|home"
+		echo " --cron		adds the cron job to the users crontab instead of the system"
+		echo "		automatically picking it up via placement in /etc/cron.d"
+		echo " --cronName	adds the users name to the crontab file"			# NOTE: not all /etc/cron.d files use a username; $HOME/.dittodata cron files do NOT use usernames
+		echo " --sudo		use sudo to (u)mount the shares"
+		echo
+		echo "   {GLOBAL}"
+		echo
+		echo " --config	specifies the directory to store/read global config files"
+		echo " --home		specifies the directory to store/read personal job configs"
+		echo " --temp		specifies the temporary working directory"
+		echo " --mounts	specifies the directory where mount points are located"
+		echo " --logs		specifies the directory where the logs are stored"
+		echo " --fifo		specifies the directory and filename to use for job fifo files"
+		echo " --ssh		specifies the directory that stores the ssh files"
+		echo " --joblog	specifies the name of the job log"
+		echo " --errlog	specifies the name of the error log"
+		echo " --syslog	specifies the name of the system log"
+		echo "		NOTE: escape all variables used in any of the above values"
+		echo "		      Some examples:"
+		echo "		      --joblog='\\\${RJN}.log'"
+		echo "		      --joblog='\\\${NAME}_\\\${DATETIME}.log'"
+		echo
+		echo "   {JOB}"
+		echo
+		echo " --name		the name of the backup job (enclose in quotes)"
+		echo " --type		what type of backup job to start:"
+# VER2 archive (old data via date)|clone (ntfsclone)|bit (dd)|BMR (bare metal restore - fat32|ntfs|ext support only - gets data and mbr)"
+#	NOTE: the restore module will mount BMR 'images' to restore from (ntfs, fat32, ext, and dd)
+# for achive date: https://stackoverflow.com/questions/67409358/why-does-find-command-in-if-return-paths-must-precede-expression-error
+		echo "		      daily|full|incremental|custom|sync|sinc"
+		echo " --compression	any compression to apply to the backup:"
+		echo "		      none|gzip|bzip"
+		echo " --include	the file containing the file(s) and/or dir(s) to backup"
+		echo " --exclude	the file containing the file(s) and/or dir(s) to exclude"
+		echo " --limit	the number to limit the backup archives (count/size) to: #[MB]"		# a trailing 'MB' will limit via free megabytes instead of archive count; no values = manually manage
+		echo " --prescript	pre-script to run prior to the backup job (enclose in quotes)"
+		echo " --postscript	post-script to run after the backup job (enclose in quotes)"
+# VER 2
+#		echo " --minsize	minimum size (in KB) that an archive should be or a failed job"
+#		echo "		completion status will be triggered."
+#		echo " --zerocat	specifying this option will check that the jobs' catalog file"
+#		echo "		has actual contents, otherwise a failed job completion status"
+#		echo "		will be triggered: 0=off (default)|1=on|2=warn"
+		echo " --alert	if an email alert should be sent upon the following action:"
+		echo "		      none|success|failure|always"
+		echo " --alertExec	the file/URL to call to send the alert; variables can be passed"
+		echo " --customParm	custom parameters to pass to the underlying binary (tar/rsync)"
+		echo
+		echo "   {LOCATIONS}"
+		echo
+		echo " --dirTag	tag used in the directory structure instead of the job name"
+		echo " --source	path -OR- device to backup"
+		echo "		      absolute path example:	/local/dir               [local]"
+# VER2
+#		echo "		      device file example:	/dev/sda7"
+		echo "		      network share examples:	//server:/share/dir      [Linux]"
+		echo "						\\\\server\\share\\dir     [Windows]"
+		echo "						%host:/dir               [sshfs]"
+		echo "						@host:/dir                 [ssh]"
+		echo "		NOTE: escape all backslashes if not enclosed in SINGLE quotes."
+		echo " --target	path -OR- device to store backups (defaults to /var/backups)"
+		echo "		      absolute path example:	/local/dir               [local]"
+# VER2
+#		echo "		      device file example:	/dev/sdb2"
+		echo "		      network share examples:	//server:/share/dir      [Linux]"
+		echo "						\\\\server\\share\\dir     [Windows]"
+		echo "						%host:/dir               [sshfs]"
+		echo "						@host:/dir                 [ssh]"
+		echo "		NOTE: escape all backslashes if not enclosed in SINGLE quotes."
+		echo " --sourceUser	mount credentials for --source network shares: username"
+		echo " --sourcePass	mount credentials for --source network shares: password"
+		echo " --sourceDomn	mount credentials for --source network shares: Windows domain"
+		echo " --sourceParm	additional mount parameters to the pass when mounting source"
+		echo " --targetUser	same as above, but for --target network shares"
+		echo " --targetPass"
+		echo " --targetDomn"
+		echo " --targetParm"
+		echo
+		echo "   {MISCELLANEOUS}"
+		echo
+		echo " --tag1		user-defined values that can be passed to job alerts"
+		echo " --tag2"
+		echo " --tag3"
+		echo " --tag4"
+		echo
+		echo "   {EXECUTION}"
+		echo
+		echo " --hour		the hour for when the job needs to start (in 24 hour format)"
+		echo " --min		the minute value for when the job needs to start"
+		echo " --freq		the frequency of the job execution:"
+		echo "		      daily|monthly|interval"
+		echo " --list		the list of values associated with the --freq value"
+		echo "		      'daily' example: 0,2,4,6"
+		echo "			(Sun,Tue,Thr,Sat)"
+		echo "		      'monthly' example: 1-7,12,16"
+		echo "			(first 7 days, 12th, 16th)"
+		echo "		      'interval' example: 20m|2h|7d|3M"
+		echo "			(every 20 mins, 2 hours, 7 days, 3 months respectively)"
+		echo
+		exit 0
+
+	elif ( echo "${i}" | grep -q ^'--copy' ); then
+		ACTION='copy'
+		ORIGIN="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--delete' ); then
+		ACTION='delete'
+	elif ( echo "${i}" | grep -q ^'--disable' ); then
+		ACTION='disable'
+	elif ( echo "${i}" | grep -q ^'--enable' ); then
+		ACTION='enable'
+	elif ( echo "${i}" | grep -q ^'--exchange' ); then
+		ACTION='exchange'
+		THOST="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--info' ); then
+		ACTION='info'
+	elif ( echo "${i}" | grep -q ^'--show' ); then
+		ACTION='show'
+	elif ( echo "${i}" | grep -q ^'--rename' ); then
+		ACTION='rename'
+		ORIGIN="${i#*=}"
+	elif ( echo "${i}" | grep -q ^'--save' ); then
+		ACTION='save'
+
+	elif ( echo "${i}" | grep -q ^'--verbose' ); then
+		VERBOSE='/dev/stdout'
+	elif ( echo "${i}" | grep -q ^'--cfgdir' ); then
+		[ "${i#*=}" == 'global' ] && DIRCFG="$DIRCONF"
+		[ "${i#*=}" == 'home' ] && DIRCFG="$DIRHOME"
+	elif ( echo "${i}" | grep -q ^'--cronName' ); then	# WARNING: this MUST come above the '--cron' switch below (since neither take a value)
+		CRONNAME="${USER}	"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--cron' ); then
+		CRON=1
+	elif ( echo "${i}" | grep -q ^'--sudo' ); then
+		SUDO='sudo '
+
+	elif ( echo "${i}" | grep -q ^'--config' ); then
+		eval DIRCONF="${i#*=}"				# NOTE: we use 'eval' here so that variables can be passed
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0	# if job config params have been passed, then indicate we need to also write settings to global config, otherwise indicate we just need to write global config settings to disk
+	elif ( echo "${i}" | grep -q ^'--home' ); then
+		eval DIRHOME="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--temp' ); then
+		eval DIRTEMP="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--mounts' ); then
+		eval DIRMNTS="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--logs' ); then
+		eval DIRLOGS="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--fifo' ); then
+		eval FIFO="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--ssh' ); then
+		eval DIRSSH="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--joblog' ); then
+		eval JOBLOG="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--errlog' ); then
+		eval ERRLOG="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+	elif ( echo "${i}" | grep -q ^'--syslog' ); then
+		eval SYSLOG="${i#*=}"
+		[ "$STATUS" == '1' ] && STATUS=2 || STATUS=0
+
+	elif ( echo "${i}" | grep -q ^'--name=' ); then
+		NAME="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1	# if global config params have been passed, then indicate we need to also write settings to job config, otherwise indicate we just need to write job config settings to disk
+	elif ( echo "${i}" | grep -q ^'--type=' ); then
+		TYPE="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--compression=' ); then
+		COMPRESSION="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--include=' ); then
+		INCLUDE="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--exclude=' ); then
+		EXCLUDE="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--limit=' ); then
+		LIMIT="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--prescript=' ); then
+		PRESCRIPT="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--postscript=' ); then
+		POSTSCRIPT="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--alert=' ); then
+		ALERT="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--alertExec=' ); then
+		ALERTEXEC="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--customParm=' ); then
+		CUSTOMPARM="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+
+	elif ( echo "${i}" | grep -q ^'--dirTag=' ); then
+		DIRTAG="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--source=' ); then
+		SOURCE="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--target=' ); then
+		TARGET="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--sourceUser=' ); then
+		SOURCEUSER="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--sourcePass=' ); then
+		SOURCEPASS="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--sourceDomn=' ); then
+		SOURCEDOMN="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--sourceParm=' ); then
+		SOURCEPARM="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--targetUser=' ); then
+		TARGETUSER="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--targetPass=' ); then
+		TARGETPASS="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--targetDomn=' ); then
+		TARGETDOMN="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--targetParm=' ); then
+		TARGETPARM="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+
+	elif ( echo "${i}" | grep -q ^'--tag1=' ); then
+		TAG1="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--tag2=' ); then
+		TAG2="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--tag3=' ); then
+		TAG3="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--tag4=' ); then
+		TAG4="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+
+
+	elif ( echo "${i}" | grep -q ^'--hour=' ); then
+		HOUR="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--min=' ); then
+		MIN="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--freq=' ); then
+		FREQ="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+	elif ( echo "${i}" | grep -q ^'--list=' ); then
+		LIST="${i#*=}"
+		[ "$STATUS" == '0' ] && STATUS=2 || STATUS=1
+
+	else
+		echo "ERROR: This script was called with an invalid parameter (${i})." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exit 1
+	fi
+done
+
+
+
+
+# VALIDATE INFORMATION
+
+# variable values
+echo -n "Checking for necessary variable values:" >${VERBOSE}
+echo -n " [action]" >${VERBOSE}
+[ "${ACTION}" == '' ] && {
+	echo " [failure]" >${VERBOSE}
+	echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+	echo "ERROR: This script was called without an ACTION." | tee -a "${DIRLOGS}/${SYSLOG}"
+	exitGraceful 1
+}
+if [ "$ACTION" == 'copy' ] || [ "$ACTION" == 'rename' ]; then
+	[ "${ORIGIN}" == '' ] && {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --${ACTION} action was called without specifying the source job name." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+if [ "$ACTION" == 'exchange' ]; then
+	echo -n " [targetUser]" >${VERBOSE}
+	[ "${TARGETUSER}" == '' ] && {						# checks that the '--name' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The key exchange was called WITHOUT the '--targetUser' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [targetPass]" >${VERBOSE}
+	[ "${TARGETPASS}" == '' ] && {						# checks that the '--name' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The key exchange was called WITHOUT the '--targetPass' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+elif [ "$ACTION" != 'show' ]; then
+	echo -n " [name]" >${VERBOSE}
+	[ "${NAME}" == '' ] && ( [ "$ACTION" == 'info' ] || [ $STATUS -gt 0 ] 2>/dev/null ) && {		# checks that the '--name' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The managed job was called WITHOUT the '--name' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+if [ "$ACTION" == 'save' ] && [ $STATUS -ne 0 ]; then				# if we don't need to write just global config parameters to disk, then...
+	echo -n " [type]" >${VERBOSE}
+	[ "${TYPE}" == '' ] && {						# checks that the '--name' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The managed job was called WITHOUT the '--type' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [source]" >${VERBOSE}
+	[ "${SOURCE}" == '' ] && {						# checks that the '--source' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The managed job was called WITHOUT the '--source' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	if [ "${SOURCE:0:1}" == '@' ]; then
+		if ( ! echo "$SOURCE" | grep -q ':' ); then			# if the path wasn't included in the SOURCE parameter, then...	NOTE: we need to test for ':' since 'host:' would be the users home directory
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The managed job was called WITHOUT a directory in the SOURCE parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		fi
+	fi
+	# if we aren't dealing with an ssh SOURCE -OR- we are using ssh -and- the last character isn't a ':' (since 'host:' is valid), then append '/' to the path now so the directory structures below will be correct
+	if [ "${SOURCE:0:1}" != '@' ] || ( [ "${SOURCE:0:1}" == '@' ] && [ "$(echo ${SOURCE}|cut -c ${#SOURCE})" != ':' ]); then
+		[ "$(echo ${SOURCE}|cut -c ${#SOURCE})" != '/' ] && SOURCE="${SOURCE}/"	# if we aren't dealing with an ssh SOURCE (since 'host:' is valid) -AND- the last character isn't a '/', then add it now so the directory structures below will be correct
+	fi
+	echo -n " [target]" >${VERBOSE}
+	[ "${TARGET}" == '' ] && {						# checks that the '--target' parameter was passed to this script since it's mandatory
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The managed job was called WITHOUT the '--target' parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	if [ "${TARGET:0:1}" == '@' ]; then
+		if ( ! echo "$TARGET" | grep -q ':' ); then			# if the path wasn't included in the TARGET parameter, then...	NOTE: we need to test for ':' since 'host:' would be the users home directory
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The managed job was called WITHOUT a directory in the TARGET parameter." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		fi
+	fi
+	# if we aren't dealing with an ssh TARGET -OR- we are using ssh -and- the last character isn't a ':' (since 'host:' is valid), then append '/' to the path now so the directory structures below will be correct
+	if [ "${TARGET:0:1}" != '@' ] || ( [ "${TARGET:0:1}" == '@' ] && [ "$(echo ${TARGET}|cut -c ${#TARGET})" != ':' ]); then
+		[ "$(echo ${TARGET}|cut -c ${#TARGET})" != '/' ] && TARGET="${TARGET}/"		# if we aren't dealing with an ssh TARGET (since 'host:' is valid) -AND- the last character isn't a '/', then add it now so the directory structures below will be correct
+	fi
+fi
+echo " [done]" >${VERBOSE}
+
+
+
+
+echo -n "Making variable value alterations:" >${VERBOSE}
+echo -n " [dircron]" >${VERBOSE}
+if ( test -h "${DIRCRON}/dittodata" ); then							# this is incase the user has redirected the crontab file elsewhere (e.g. WDNas)
+	DIRCRON="$(readlink "${DIRCRON}/dittodata" | sed 's|/dittodata$||')"			# WARNING: the symlink MUST still point to a file named 'dittodata'!!!
+fi
+echo " [done]" >${VERBOSE}
+
+
+
+
+# directory existence
+# NOTE: this comes below the variable checking since we have to make sure SOURCE and TARGET are populated first (plus no job-specific logging is done yet)
+echo -n "Checking for necessary directories:" >${VERBOSE}
+echo -n " [logs]" >${VERBOSE}
+[ ! -e "${DIRLOGS}" ] && {									# must make sure the log directory is created
+	echo -n " [creating]" >${VERBOSE}
+	mkdir -p "${DIRLOGS}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The logs directory can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+}
+echo -n " [config]" >${VERBOSE}
+if [ ! -e "${DIRCONF}" ]; then
+	echo -n " [creating]" >${VERBOSE}
+	mkdir -p "${DIRCONF}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The configuration directory can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+echo -n " [home]" >${VERBOSE}
+if [ ! -e "${DIRHOME}" ]; then
+	echo -n " [creating]" >${VERBOSE}
+	mkdir -p "${DIRHOME}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The home configuration directory can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+echo -n " [rjn]" >${VERBOSE}					# this is for job renaming (which will rename any existing related data storage directory)
+if [ ! -e "${DIRMNTS}/${RJN}" ]; then
+	echo -n " [creating]" >${VERBOSE}
+	# if we're NOT using an ssh connection -AND- the TARGET value is a local directory or mount point (e.g. starting with a '/' followed by an alphanumeric, underscore, or dot character), then...
+	if [ "${TARGET:0:1}" != '@' ] && ( ! echo "$TARGET" | grep -q ^"/[a-zA-Z0-9_\.]" ); then
+		mkdir -p "${DIRMNTS}/${RJN}.t" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job --target mount point directory can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	fi
+fi
+echo -n " [target]" >${VERBOSE}					# this is for job renaming (which will rename any existing related data storage directory)
+( echo "$TARGET" | grep -q ^"/[a-zA-Z0-9_\.]" ) && [ ! -e "${TARGET}" ] && {
+	# if the target directory doesn't exist (e.g. first run of the software), then try to create it
+	mkdir -p "$TARGET" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --target directory does NOT exist and can NOT be created, exiting." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+}
+echo -n " [temp]" >${VERBOSE}
+if [ ! -e "${DIRTEMP}" ]; then
+	echo -n " [creating]" >${VERBOSE}
+	mkdir -p "${DIRTEMP}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The temporary working directory can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+fi
+echo " [done]" >${VERBOSE}
+
+
+
+
+# validate variable values
+if [ "$ACTION" == 'save' ] && [ $STATUS -ne 0 ]; then						# if we don't need to write just global config parameters to disk, then...
+	echo -n "Validating variable values:" >${VERBOSE}
+	echo -n " [cfgdir]" >${VERBOSE}
+	( [ "$CFGDIR" != "$DIRCONF" ] && [ "$CFGDIR" != "$DIRHOME" ] ) || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --cfgdir value is NOT one of the following: global, home." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [type]" >${VERBOSE}
+	( [ "$TYPE" == 'daily' ] || [ "$TYPE" == 'full' ] || [ "$TYPE" == 'incremental' ] || [ "$TYPE" == 'custom' ] || [ "$TYPE" == 'sync' ] ) || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --type value is NOT one of the following: daily, full, incremental, custom, sync." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [compression]" >${VERBOSE}
+	( [ "$COMPRESSION" == 'none' ] || [ "$COMPRESSION" == 'gzip' ] || [ "$COMPRESSION" == 'bzip' ] ) || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --compression value is NOT one of the following: none, gzip, bzip." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [alert]" >${VERBOSE}
+	( [ "$ALERT" == 'none' ] || [ "$ALERT" == 'success' ] || [ "$ALERT" == 'failure' ] || [ "$ALERT" == 'always' ] ) || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --alert value is NOT one of the following: none, success, failure, always." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [hour]" >${VERBOSE}
+	if ( echo $HOUR | egrep -q ^'[0-9]{1,2}'$ ); then							# if the value is just a number, then make sure it is within range
+		[ $HOUR -ge 0 ] 2>/dev/null && [ $HOUR -lt 24 ] || {						# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The --hour value is NOT a number that is less than 24." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	fi
+	echo -n " [min]" >${VERBOSE}
+	( echo $MIN | egrep -q ^'[0-9]{1,2}'$ ) && [ $MIN -ge 0 ] 2>/dev/null && [ $MIN -lt 60 ] || {		# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --min value is NOT a number that is less than 60." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [freq]" >${VERBOSE}
+	( [ "$FREQ" == 'daily' ] || [ "$FREQ" == 'monthly' ] || [ "$FREQ" == 'interval' ] ) || {
+		echo " [failure]" >${VERBOSE}
+		echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+		echo "ERROR: The --freq value is NOT one of the following: daily, monthly, interval." | tee -a "${DIRLOGS}/${SYSLOG}"
+		exitGraceful 1
+	}
+	echo -n " [list]" >${VERBOSE}
+	if [ "$FREQ" == 'daily' ]; then
+		( echo $LIST | egrep -q ^'[0-6](,[0-6]|-[0-6])*'$ ) || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The --list value is NOT a comma separated list ranging between 0 and 6." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	elif [ "$FREQ" == 'monthly' ]; then
+		( echo $LIST | egrep -q ^'[0-9]{1,2}(-[0-9]{1,2}){0,1}(,[0-9]{1,2}|,[0-9]{1,2}-[0-9]{1,2})*'$ ) || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The --list value is NOT a comma separated list of numbers or ranges between 0 and 31." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+	elif [ "$FREQ" == 'interval' ]; then
+		( echo $LIST | egrep -q ^'[0-9]{1,2}(m|h|d|M)'$ ) || {				# test the value is up to 2 numbers and one of the permitted characters
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The --list value is NOT a number with a suffix: m, h, d, or M." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		if ( echo $LIST | grep -q 'm'$ ); then						# test the numeric portion is less than 60 (minutes)
+			[ ${LIST/m/} -ge 0 ] 2>/dev/null && [ ${LIST/m/} -lt 60 ] || {		# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+				echo " [failure]" >${VERBOSE}
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The --list value is NOT a number that is less than 60." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		elif ( echo $LIST | grep -q 'h'$ ); then					# test the numeric portion is less than 24 (hours)
+			[ ${LIST/h/} -ge 0 ] 2>/dev/null && [ ${LIST/h/} -lt 24 ] || {		# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+				echo " [failure]" >${VERBOSE}
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The --list value is NOT a number that is less than 24." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		elif ( echo $LIST | grep -q 'd'$ ); then					# test the numeric portion is less than 32 (days)
+			[ ${LIST/d/} -gt 0 ] 2>/dev/null && [ ${LIST/d/} -lt 32 ] || {		# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+				echo " [failure]" >${VERBOSE}
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The --list value is NOT a number that is between 1 and 31." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		elif ( echo $LIST | grep -q 'M'$ ); then					# test the numeric portion is less than 12 (months)
+			[ ${LIST/M/} -gt 0 ] 2>/dev/null && [ ${LIST/M/} -lt 13 ] || {		# NOTE: the '2>/dev/null' stops an error message from the '[' binary if the value is blank or not a number
+				echo " [failure]" >${VERBOSE}
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The --list value is NOT a number that is between 1 and 12." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+	fi
+	echo " [done]" >${VERBOSE}
+fi
+
+
+
+
+# START THE DESIRED ACTION
+
+case "${ACTION}" in
+	'copy')
+		echo -n "Copying an existing job:" >${VERBOSE}
+		# NOTE: the existence of the DIRCONF directory is already checked above
+		[ ! -e "${DIRCFG}/${ORIGIN}.cfg" ] && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified by --copy does NOT exist." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		cp -dp "${DIRCFG}/${ORIGIN}.cfg" "${DIRCFG}/${NAME}.cfg" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo "Calling: cp \"${DIRCFG}/${ORIGIN}.cfg\" \"${DIRCFG}/${NAME}.cfg\"" >>"${DIRLOGS}/${SYSLOG}"
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified can NOT be copied." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		sed -i "s|NAME=\"${ORIGIN}\"|NAME=\"${NAME}\"|" "${DIRCFG}/${NAME}.cfg"		# rename the job name in the config file
+
+		grep -A2 "# \[${ORIGIN}\]" "${DIRCRON}/dittodata" | sed "s|${ORIGIN}|${NAME}|g" >>"${DIRCRON}/dittodata"
+		if [ $CRON -eq 1 ]; then
+			crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+			crontab "${DIRCRON}/dittodata" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+		;;
+
+	'delete')
+		echo -n "Deleting an existing job:" >${VERBOSE}
+		[ ! -e "${DIRCFG}/${NAME}.cfg" ] && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified by --name does NOT exist." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		rm "${DIRCFG}/${NAME}.cfg" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo "Calling: rm \"${DIRCFG}/${NAME}.cfg\"" >>"${DIRLOGS}/${SYSLOG}"
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The specified job config can NOT be deleted." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		sed -i "/# \[${NAME}\]/,/^$/d" "${DIRCRON}/dittodata"				# update the crontab file	https://www.unix.com/unix-for-dummies-questions-and-answers/188647-help-deleting-some-parts-text-file.html
+		if [ $CRON -eq 1 ]; then
+			crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+			crontab "${DIRCRON}/dittodata" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+		;;
+
+	'disable')
+		echo -n "Disabling the specified job:" >${VERBOSE}
+		( grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" 2>>/dev/null | tail -1 | grep -q ^'#' ) && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job specified by --name is already disabled." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		[ ! -e "${DIRCFG}/${NAME}.cfg" ] && {
+			echo " [failure]" | >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified by --rename does NOT exist." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		TEMP=$(grep -n "# \[${NAME}\]" "${DIRCRON}/dittodata" | sed 's/:.*//')		# find the title of the cronjob and store the line number it's on
+		TEMP=$(( $TEMP + 1 ))								# add one since we need to comment out the line following the title
+
+		sed -i "$TEMP s/.*/#&/" "${DIRCRON}/dittodata"					# now comment out the line to stop the job from running	https://stackoverflow.com/questions/58464660/awk-prepend-and-append-line-of-file
+		if [ $CRON -eq 1 ]; then
+			crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+			crontab "${DIRCRON}/dittodata" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+		;;
+
+	'enable')
+		echo -n "Enabling the specified job:" >${VERBOSE}
+		( grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" 2>>/dev/null | tail -1 | grep -q ^'#' ) || {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job specified by --name is already enabled." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		[ ! -e "${DIRCFG}/${NAME}.cfg" ] && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified by --rename does NOT exist." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		TEMP=$(grep -n "# \[${NAME}\]" "${DIRCRON}/dittodata" | sed 's/:.*//')		# find the title of the cronjob and store the line number it's on
+		TEMP=$(( $TEMP + 1 ))								# add one since we need to uncomment the line following the title
+
+		sed -i "$TEMP s/^#//" "${DIRCRON}/dittodata"					# now uncomment the line to start the job running again	https://stackoverflow.com/questions/58464660/awk-prepend-and-append-line-of-file
+		if [ $CRON -eq 1 ]; then
+			crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+			crontab "${DIRCRON}/dittodata" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+		;;
+
+	'info')
+		echo "Displaying the job info..." >${VERBOSE}
+		TEMP=$(grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" 2>>/dev/null | tail -1 | grep -q ^'#' && echo disabled || echo enabled)
+		echo "NAME=\"${NAME}\""
+		echo "STATUS=\"${TEMP}\""
+		echo "TYPE=\"${TYPE}\""
+		echo "COMPRESSION=\"${COMPRESSION}\""
+		echo "INCLUDE=\"${INCLUDE}\""
+		echo "EXCLUDE=\"${EXCLUDE}\""
+		echo "LIMIT=\"${LIMIT}\""
+		echo "PRESCRIPT=\"${PRESCRIPT}\""
+		echo "POSTSCRIPT=\"${POSTSCRIPT}\""
+		echo "ALERT=\"${ALERT}\""
+		echo "ALERTEXEC='${ALERTEXEC}'"
+		echo "CUSTOMPARM=\"${CUSTOMPARM}\""
+		echo "DIRTAG=\"${DIRTAG}\""
+		echo "SOURCE=\"${SOURCE}\""
+		echo "TARGET=\"${TARGET}\""
+		echo "SOURCEUSER=\"${SOURCEUSER}\""
+		echo "SOURCEPASS=\"${SOURCEPASS}\""
+		echo "SOURCEDOMN=\"${SOURCEDOMN}\""
+		echo "SOURCEPARM=\"${SOURCEPARM}\""
+		echo "TARGETUSER=\"${TARGETUSER}\""
+		echo "TARGETPASS=\"${TARGETPASS}\""
+		echo "TARGETDOMN=\"${TARGETDOMN}\""
+		echo "TARGETPARM=\"${TARGETPARM}\""
+		echo "TAG1=\"${TAG1}\""
+		echo "TAG2=\"${TAG2}\""
+		echo "TAG3=\"${TAG3}\""
+		echo "TAG4=\"${TAG4}\""
+		[ "$SUDO" == '' ] && echo "SUDO=false" || echo "SUDO=true"
+
+		TEMP=$( ( grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | egrep -o ^'([0-9#,*/\-]{1,}	){5}' | grep -q '/' ) && echo 'interval' || echo '')
+		if [ "$TEMP" == 'interval' ]; then										# if we're dealing with an interval level, then...
+			TEMP=$(grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | egrep -o ^'([0-9#,*/\-]{1,}	){5}')	# store the entire line and process each field below to figure out which interval definition was made
+			if (echo $TEMP | grep -q ^'*/'); then
+				TEMP="interval|$(echo "$TEMP" | cut -d '	' -f 1 | sed 's|*/||')m|||"
+			elif (echo $TEMP | cut -d '	' -f 2 | grep -q ^'*/'); then
+				TEMP="interval|$(echo "$TEMP" | cut -d '	' -f 2 | sed 's|*/||')h||$(echo "$TEMP" | cut -d '	' -f 1)"
+			elif (echo $TEMP | cut -d '	' -f 3 | grep -q ^'*/'); then
+				TEMP="interval|$(echo "$TEMP" | cut -d '	' -f 3 | sed 's|*/||')d|$(echo "$TEMP" | cut -d '	' -f 2)|$(echo "$TEMP" | cut -d '	' -f 1)"
+			else
+				TEMP="interval|$(echo "$TEMP" | cut -d '	' -f 4 | sed 's|*/||')M|$(echo "$TEMP" | cut -d '	' -f 2)|$(echo "$TEMP" | cut -d '	' -f 1)"
+			fi
+		else												# otherwise we are dealing with days of the month or days of the week
+			TEMP=$(grep -A1 ^"# \[${NAME}\]"$ "${DIRCRON}/dittodata" | tail -1 | sed 's/backup .*//;s/\*/\\\*/g')
+			[ "$(echo "$TEMP" | cut -d '	' -f 3)" != '\*' ] && TEMP="monthly|$(echo "$TEMP" | cut -d '	' -f 3)|$(echo "$TEMP" | cut -d '	' -f 2)|$(echo "$TEMP" | cut -d '	' -f 1)" || TEMP="daily|$(echo "$TEMP" | cut -d '	' -f 5)|$(echo "$TEMP" | cut -d '	' -f 2)|$(echo "$TEMP" | cut -d '	' -f 1)"
+		fi
+		echo "FREQ=\"$(echo "$TEMP" | cut -d '|' -f 1)\""
+		echo "LIST=\"$(echo "$TEMP" | cut -d '|' -f 2)\""
+		echo "HOUR=\"$(echo "$TEMP" | cut -d '|' -f 3)\""
+		echo "MIN=\"$(echo "$TEMP" | cut -d '|' -f 4 | sed 's/^#//' | awk '{printf("%02d", $1)}')\""			# https://stackoverflow.com/questions/18460123/how-to-add-leading-zeros-for-for-loop-in-shell
+		echo "[done]" >${VERBOSE}
+		;;
+
+	'show')
+		echo "Showing the saved jobs..." >${VERBOSE}
+		[ -e "${DIRCRON}/dittodata" ] && grep -A1 ^'# \[' "${DIRCRON}/dittodata" | tail -n +4 | sed 's/^# \[//;s/\]$/ |/;/^--$/d;s/^#.*/disabled;/;s/^[0-9\*].*/enabled;/' | tr '\n' ' ' | sed 's/; /;/g' | tr ';' '\n'
+		echo "[done]" >${VERBOSE}
+		;;
+
+	'rename')
+		echo -n "Renaming the existing job:" >${VERBOSE}
+		( grep -q "# \[${NAME}\]" "${DIRCRON}/dittodata" 2>>/dev/null ) && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: A job specified by --name already exists." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		[ ! -e "${DIRCFG}/${ORIGIN}.cfg" ] && {
+			echo " [failure]" >${VERBOSE}
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The job config specified by --rename does NOT exist." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		mv "${DIRCFG}/${ORIGIN}.cfg" "${DIRCFG}/${NAME}.cfg" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+			echo " [failure]" >${VERBOSE}
+			echo "Calling: mv \"${DIRCFG}/${ORIGIN}.cfg\" \"${DIRCFG}/${NAME}.cfg\"" >>"${DIRLOGS}/${SYSLOG}"
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The specified job config can NOT be deleted." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		sed -i "s|NAME=\"${ORIGIN}\"|NAME=\"${NAME}\"|" "${DIRCFG}/${NAME}.cfg"		# rename the config file
+		sed -i "s|# \[${ORIGIN}\]|# \[${NAME}\]|" "${DIRCRON}/dittodata"		# rename the job in cron
+		sed -i "s|/${ORIGIN}.cfg\"|/${NAME}.cfg\"|" "${DIRCRON}/dittodata"		# rename the job config file in cron
+		if [ $CRON -eq 1 ]; then
+			crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+			crontab "${DIRCRON}/dittodata" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+
+# LEFT OFF - test that all other forms work; NFS works
+		if [ "${TYPE}" != 'sync' ] && [ "${TYPE}" != 'sinc' ]; then			# NOTE: we only do this process for backups, not syncs
+			echo " [done]" >${VERBOSE}
+			echo "Renaming any existing job data storage location..." >${VERBOSE}
+			mountTarget
+			echo -n "   Job data storage location:" >${VERBOSE}
+			if [ "${TARGET:0:2}" == '//' ] || [ "${TARGET:0:2}" == '\\' ] || [ "${TARGET:0:1}" == '%' ]; then
+				if [ -e "${DIRMNTS}/${RJN}.t/${LOCATION}/${ORIGIN}" ]; then		# NOTE: usage of DIRTAG would not affect anything here since that value would be constant (and not change like the name is)
+					echo -n " [exists] [renaming]" >${VERBOSE}
+					mv "${DIRMNTS}/${RJN}.t/${LOCATION}/${ORIGIN}" "${DIRMNTS}/${RJN}.t/${LOCATION}/${NAME}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+						echo " [failure]" >${VERBOSE}
+						echo "Calling: mv \"${DIRMNTS}/${RJN}.t/${LOCATION}/${ORIGIN}\" \"${DIRMNTS}/${RJN}.t/${LOCATION}/${NAME}\"" >>"${DIRLOGS}/${SYSLOG}"
+						echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+						echo "ERROR: The specified job data storage directory can NOT be renamed." | tee -a "${DIRLOGS}/${SYSLOG}"
+						exitGraceful 1
+					}
+				fi
+			elif [ "${TARGET:0:1}" == '@' ]; then
+				eval "${TARGETSSH} \"[ -e \\\"${LOCATION}/${ORIGIN}\\\" ]\""
+				if [ $? -eq 0 ]; then
+					echo -n " [exists] [renaming]" >${VERBOSE}
+					eval "${TARGETSSH} \"mv \\\"${LOCATION}/${ORIGIN}\\\" \\\"${LOCATION}/${NAME}\\\"\"" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+						echo " [failure]" >${VERBOSE}
+						echo "Calling: mv \"${LOCATION}/${ORIGIN}\" \"${LOCATION}/${NAME}\"" >>"${DIRLOGS}/${SYSLOG}"
+						echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+						echo "ERROR: The specified job data storage directory can NOT be renamed." | tee -a "${DIRLOGS}/${SYSLOG}"
+						exitGraceful 1
+					}
+				else
+					echo -n " [absent]" >${VERBOSE}
+				fi
+			elif [ "${TARGET:0:1}" == '/' ]; then
+				if [ -e "${DIRMNTS}/${RJN}.t/${ORIGIN}" ]; then		# NOTE: usage of DIRTAG would not affect anything here since that value would be constant (and not change like the name is)
+					echo -n " [exists] [renaming]" >${VERBOSE}
+					mv "${DIRMNTS}/${RJN}.t/${ORIGIN}" "${DIRMNTS}/${RJN}.t/${NAME}" 2>>"${DIRLOGS}/${SYSLOG}" >${VERBOSE} || {
+						echo " [failure]" >${VERBOSE}
+						echo "Calling: mv \"${DIRMNTS}/${RJN}.t/${ORIGIN}\" \"${DIRMNTS}/${RJN}.t/${NAME}\"" >>"${DIRLOGS}/${SYSLOG}"
+						echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+						echo "ERROR: The specified job data storage directory can NOT be renamed." | tee -a "${DIRLOGS}/${SYSLOG}"
+						exitGraceful 1
+					}
+				fi
+			else
+				echo -n " [absent]" >${VERBOSE}
+			fi
+		fi
+		echo " [done]" >${VERBOSE}
+
+		exitGraceful 0
+		;;
+
+	'save')
+		# store global values
+		if [ $STATUS -ne 1 ]; then			# if we don't need to write just job config parameters to disk, then...
+			echo -n "Saving the global config:" >${VERBOSE}
+			# NOTE: we must save in the following mannor so that variable values are preserved
+			echo "DIRCRON=\"${DIRCRON}\"" >"${DIRCFG}/global.cfg"
+			for i in "$@"; do							# process each of the passed parameters (after setting default values above)
+				( echo "${i}" | grep -q ^'--config' ) && echo "DIRCONF=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--home' ) && echo "DIRHOME=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--home' ) && echo "DIRHOME=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--temp' ) && echo "DIRTEMP=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--mounts' ) && echo "DIRMNTS=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--logs' ) && echo "DIRLOGS=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--ssh' ) && echo "DIRSSH=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--joblog' ) && echo "JOBLOG=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--errlog' ) && echo "ERRLOG=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--syslog' ) && echo "SYSLOG=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+				( echo "${i}" | grep -q ^'--fifo' ) && echo "FIFO=\"${i#*=}\"" >>"${DIRCFG}/global.cfg"
+			done
+			echo " [done]" >${VERBOSE}
+		fi
+
+		# store job values
+		if [ $STATUS -ne 0 ]; then			# if we don't need to write just global config parameters to disk, then...
+			( grep -q ^"# \[${NAME}\]" "${DIRCRON}/dittodata" 2>/dev/null ) && echo -n "Updating an existing job:" >${VERBOSE} || echo -n "Saving the new job:" >${VERBOSE}
+
+			echo "NAME=\"${NAME}\"" >"${DIRCFG}/${NAME}.cfg"
+			echo "TYPE=\"${TYPE}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "COMPRESSION=\"${COMPRESSION}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "INCLUDE=\"${INCLUDE}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "EXCLUDE=\"${EXCLUDE}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "LIMIT=\"${LIMIT}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "PRESCRIPT='${PRESCRIPT}'" >>"${DIRCFG}/${NAME}.cfg"		# NOTE: we use single quotes here so variables can be passed to the script
+			echo "POSTSCRIPT='${POSTSCRIPT}'" >>"${DIRCFG}/${NAME}.cfg"
+			echo "ALERT=\"${ALERT}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "ALERTEXEC='${ALERTEXEC}'" >>"${DIRCFG}/${NAME}.cfg"
+			echo "CUSTOMPARM=\"${CUSTOMPARM}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "DIRTAG=\"${DIRTAG}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SOURCE=\"${SOURCE//\\/\\\\}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TARGET=\"${TARGET//\\/\\\\}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SOURCEUSER=\"${SOURCEUSER}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SOURCEPASS=\"${SOURCEPASS}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SOURCEDOMN=\"${SOURCEDOMN}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SOURCEPARM=\"${SOURCEPARM}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TARGETUSER=\"${TARGETUSER}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TARGETPASS=\"${TARGETPASS}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TARGETDOMN=\"${TARGETDOMN}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TARGETPARM=\"${TARGETPARM}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TAG1=\"${TAG1}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TAG2=\"${TAG2}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TAG3=\"${TAG3}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "TAG4=\"${TAG4}\"" >>"${DIRCFG}/${NAME}.cfg"
+			echo "SUDO='$SUDO'" >>"${DIRCFG}/${NAME}.cfg"
+			if [ "${DIRCFG}" == "${DIRCONF}" ]; then				# for security (since password is in file), if the job config is going into the /etc/dittodata directory, then...
+				chmod 640 "${DIRCFG}/${NAME}.cfg"				#   assign permissions for the owner and group (so multiple users of the group can edit)
+			else									# otherwise...
+				chmod 600 "${DIRCFG}/${NAME}.cfg"				#   assign permissions just for the user who created the job
+			fi
+
+			# create the crontab file if it doesn't exist
+			[ ! -e "${DIRCRON}/dittodata" ] && echo -e "SHELL=/bin/sh\nPATH=$PATH\n\n# [Job Title]\n# min	hour	day	month	dow	[user]	command\n\n" >"${DIRCRON}/dittodata"
+
+			# if the job already exists, then delete the existing entry first (before writing the new values at the end of the file)
+			( grep -q "# \[${NAME}\]" "${DIRCRON}/dittodata" ) && sed -i "/# \[${NAME}\]/,/^$/d" "${DIRCRON}/dittodata"
+
+			# now add the newly created/modified job to the crontab file
+			echo "# [${NAME}]" >>"${DIRCRON}/dittodata"
+			[ "$FREQ" == 'daily' ] && echo "${MIN}	${HOUR}	*	*	${LIST}	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"
+			[ "$FREQ" == 'monthly' ] && echo "${MIN}	${HOUR}	${LIST}	*	*	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"
+			( [ "$FREQ" == 'interval' ] && ( echo $LIST | grep -q ^'1[m|h|d|M]'$ ) ) && LIST="$(echo $LIST | sed 's/^1/\*/')" || LIST="*/${LIST}"		# if '1' was passed for the value, then replace it with an '*' (so as not to create multiple concurrent jobs), otherwise add '*/' to the beginning for a step value
+			[ "$FREQ" == 'interval' ] && ( echo $LIST | grep -q 'm'$ ) && echo "${LIST/m/}	*	*	*	*	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"	# starts @ every N minutes
+			[ "$FREQ" == 'interval' ] && ( echo $LIST | grep -q 'h'$ ) && echo "${MIN}	${LIST/h/}	*	*	*	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"	# starts @ the specified minute of every N hours
+			[ "$FREQ" == 'interval' ] && ( echo $LIST | grep -q 'd'$ ) && echo "${MIN}	${HOUR}	${LIST/d/}	*	*	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"	# starts @ the specified HH:MM of every N days
+			[ "$FREQ" == 'interval' ] && ( echo $LIST | grep -q 'M'$ ) && echo "${MIN}	${HOUR}	1	${LIST/M/}	*	${CRONNAME}$(which backup) --config=\"${DIRCFG}/${NAME}.cfg\"" >>"${DIRCRON}/dittodata"	# starts @ the specified HH:MM on the first of every N months
+			echo "" >>"${DIRCRON}/dittodata"
+
+			if [ $CRON -eq 1 ]; then
+				crontab -r 2>/dev/null							# remove any existing crontab (redirecting stderr to ignore error message if none currently exist)
+				crontab "${DIRCRON}/dittodata" || {
+					echo " [failure]" >${VERBOSE}
+					echo "Calling: crontab \"${DIRCRON}/dittodata\"" >>"${DIRLOGS}/${SYSLOG}"
+					echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+					echo "ERROR: The crontab can NOT be added to the users account." | tee -a "${DIRLOGS}/${SYSLOG}"
+					exitGraceful 1
+				}
+			fi
+			echo " [done]" >${VERBOSE}
+		fi
+		;;
+
+	'exchange')
+		echo "Exchanging the ssh keys..." >${VERBOSE}
+		echo -n "   Checking for the local SSH directory:" >${VERBOSE}
+		if [ ! -e "${DIRSSH}" ]; then
+			echo -n " [creating]" >${VERBOSE}
+			mkdir -p "${DIRSSH}" 2>>"${DIRLOGS}/${SYSLOG}" >/dev/null || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: mkdir -p \"${DIRSSH}\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The ssh directory can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Checking for the local RSA keys:" >${VERBOSE}
+		if [ -e "${DIRSSH}/${THOST}" ]; then
+			echo -n " [testing]" >${VERBOSE}
+			ssh -o 'BatchMode yes' -i "${DIRSSH}/${THOST}" ${TARGETUSER}@${THOST} 'true' 2>>"${DIRLOGS}/${SYSLOG}" >/dev/null && {
+				echo " [success]" >${VERBOSE}
+				exitGraceful 0
+			}
+			echo -n " [failure]" >${VERBOSE}
+		else
+			echo -n " [creating]" >${VERBOSE}
+			# https://unix.stackexchange.com/questions/69314/automated-ssh-keygen-without-passphrase-how
+			# https://superuser.com/questions/988185/how-to-avoid-being-asked-enter-passphrase-for-key-when-im-doing-ssh-operatio
+			# https://www.thegeekdiary.com/how-to-avoid-ssh-from-prompting-key-passphrase-for-passwordless-logins/
+			ssh-keygen -t rsa -f "${DIRSSH}/${THOST}" -q -N '' 2>>"${DIRLOGS}/${SYSLOG}" >"${DIRSSH}/${THOST}.info" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: ssh-keygen -t rsa -f \"${DIRSSH}/${THOST}\" -q -N ''" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The ssh keys can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+			chmod 600 "${DIRSSH}/${THOST}" 2>>"${DIRLOGS}/${SYSLOG}"
+		fi
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Create files for prompt-less ssh:" >${VERBOSE}
+		if [ "$(which sshpass)" != '' ]; then						# if 'sshpass' exists, then...
+			TARGETSSH="sshpass -f \"${DIRTEMP}/${THOST}.pw\" ${TARGETSSH} "		# setup the syntax to use sshpass
+			echo "${TARGETPASS}" >"${DIRTEMP}/${THOST}.pw"				# create the password file
+		else
+			TARGETSSH="setsid ${TARGETSSH} "					# setup the syntax to use ssh
+			export DISPLAY=none:0.0							# export these variables so when 'setsid ssh ...' is called it can use the script to get the password
+			export SSH_ASKPASS="${DIRTEMP}/${THOST}.sh"
+			echo '#!/bin/sh' >"${DIRTEMP}/${THOST}.sh"				# now create the script to give the password to ssh
+			echo "echo ${TARGETPASS}" >>"${DIRTEMP}/${THOST}.sh"
+			chmod 700 "${DIRTEMP}/${THOST}.sh"
+		fi
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Checking for the remote SSH directory:" >${VERBOSE}
+		eval ${TARGETSSH}ssh ${TARGETUSER}@${THOST} "[ -e \\\${HOME}/.${DIRSSH#*/.} ]" 2>>"${DIRLOGS}/${SYSLOG}" || {
+			echo -n " [creating]" >${VERBOSE}
+			eval ${TARGETSSH}ssh ${TARGETUSER}@${THOST} "mkdir \\\${HOME}/.${DIRSSH#*/.}" 2>>"${DIRLOGS}/${SYSLOG}" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: ${TARGETSSH}ssh ${TARGETUSER}@${THOST} \"mkdir \\\${HOME}/.${DIRSSH#*/.}\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The ssh keys can NOT be created." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		}
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Checking the remote SSH authorized_keys file:" >${VERBOSE}
+		if ( ! eval ${TARGETSSH}ssh ${TARGETUSER}@${THOST} "[ -e \\\${HOME}/.${DIRSSH#*/.}/authorized_keys ]" 2>>"${DIRLOGS}/${SYSLOG}" ); then
+			TEMP=0									# indicate the file is not present
+		else
+			echo -n " [exists] [checking]" >${VERBOSE}
+			# Checking if the public key has been installed
+			if ( cat "${DIRSSH}/${THOST}.pub" 2>>"${DIRLOGS}/${SYSLOG}" | eval ${TARGETSSH}ssh ${TARGETUSER}@${THOST} "grep -q \\\${HOME}/.${DIRSSH#*/.}/authorized_keys" 2>>"${DIRLOGS}/${SYSLOG}" ); then
+				echo -n " [exists]" >${VERBOSE}
+				TEMP=1								# indicate the file does exist, as does the key already being installed
+			else
+				TEMP=0
+			fi
+		fi
+		if [ $TEMP -eq 0 ]; then							# if the authorized_keys file doesn't exist -OR- it does, but the key hasn't been installed yet, then...
+			echo -n " [absent] [installing]" >${VERBOSE}
+			# Installing the public RSA key on the host
+			eval "cat \"${DIRSSH}/${THOST}.pub\" 2>>\"${DIRLOGS}/${SYSLOG}\" | ${TARGETSSH}ssh ${TARGETUSER}@${THOST} \"cat >>\\\${HOME}/.${DIRSSH#*/.}/authorized_keys\"" 2>>"${DIRLOGS}/${SYSLOG}" || {
+				echo " [failure]" >${VERBOSE}
+				echo "Calling: cat \"${DIRSSH}/${THOST}.pub\" | ${TARGETSSH}ssh ${TARGETUSER}@${THOST} \"cat >>\\\${HOME}/.${DIRSSH#*/.}/authorized_keys\"" >>"${DIRLOGS}/${SYSLOG}"
+				echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+				echo "ERROR: The ssh keys can NOT be installed on the host." | tee -a "${DIRLOGS}/${SYSLOG}"
+				exitGraceful 1
+			}
+		fi
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Updating permissions for SSH on the host:" >${VERBOSE}
+		eval "${TARGETSSH}ssh ${TARGETUSER}@${THOST} \"chmod 755 \\\${HOME}/.${DIRSSH#*/.}; chmod 640 \\\${HOME}/.${DIRSSH#*/.}/authorized_keys\"" 2>>"${DIRLOGS}/${SYSLOG}" || {
+			echo " [failure]" >${VERBOSE}
+			echo "Calling: ${TARGETSSH}ssh ${TARGETUSER}@${THOST} \"chmod 755 \\\${HOME}/.${DIRSSH#*/.}; chmod 640 \\\${HOME}/.${DIRSSH#*/.}/authorized_keys\"" >>"${DIRLOGS}/${SYSLOG}"
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The permissions on the host can NOT be updated." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		echo " [done]" >${VERBOSE}
+
+		echo -n "   Testing prompt-less access to the host:" >${VERBOSE}
+		ssh -o 'BatchMode yes' -i "${DIRSSH}/${THOST}" ${TARGETUSER}@${THOST} 'true' 2>>"${DIRLOGS}/${SYSLOG}" >/dev/null || {		# http://www.thegeekstuff.com/2009/10/how-to-execute-ssh-and-scp-in-batch-mode-only-when-passwordless-login-is-enabled/
+			echo " [failure]" >${VERBOSE}
+			echo "Calling: ssh -o 'BatchMode yes' -i \"${DIRSSH}/${THOST}\" ${TARGETUSER}@${THOST} 'true'" >>"${DIRLOGS}/${SYSLOG}"
+			echo -n "${DATETIME}	" >>"${DIRLOGS}/${SYSLOG}"
+			echo "ERROR: The ssh prompt-less connection can NOT be established." | tee -a "${DIRLOGS}/${SYSLOG}"
+			exitGraceful 1
+		}
+		echo " [done]" >${VERBOSE}
+
+		exitGraceful 0
+		;;
+esac
+

@@ -1,0 +1,800 @@
+abbotsford
+abrams
+adams
+adell
+afton
+albany
+algoma
+allenton
+allouez
+alma
+alma center
+almena
+almond
+altoona
+amberg
+amery
+amherst
+amherst junction
+aniwa
+antigo
+appleton
+arcadia
+arena
+argonne
+argyle
+arkansaw
+arkdale
+arlington
+armstrong creek
+arpin
+ashippun
+ashland
+ashwaubenon
+athelstane
+athens
+auburndale
+augusta
+avalon
+avoca
+babcock
+bagley
+baileys harbor
+baldwin
+balsam lake
+bancroft
+bangor
+baraboo
+barneveld
+barron
+barronett
+bassett
+bay city
+bay creek
+bayfield
+bayside
+bear creek
+beaver dam
+beetown
+beldenville
+belgium
+belleville
+belmont
+beloit
+benet lake
+benoit
+benton
+berlin
+big bend
+big falls
+birchwood
+birnamwood
+black creek
+black earth
+black river falls
+blair
+blanchardville
+blenker
+bloomer
+bloomington
+blue mounds
+blue river
+bonduel
+boscobel
+boulder junction
+bowler
+boyceville
+boyd
+branch
+brandon
+brantwood
+briggsville
+brill
+brillion
+bristol
+brodhead
+brokaw
+brookfield
+brooklyn
+brown deer
+brownsville
+browntown
+bruce
+brule
+brussels
+bryant
+burlington
+burnett
+butler
+butte des morts
+butternut
+byron
+cable
+cadott
+caledonia
+cambria
+cambridge
+cameron
+camp douglas
+camp lake
+campbellsport
+caroline
+cascade
+casco
+cashton
+cassville
+cataract
+catawba
+cato
+cazenovia
+cecil
+cedar grove
+cedarburg
+centuria
+chaseburg
+chetek
+chili
+chilton
+chippewa falls
+clam lake
+clayton
+clear lake
+cleveland
+clinton
+clintonville
+clyman
+cobb
+cochrane
+colby
+coleman
+colfax
+colgate
+collins
+coloma
+columbus
+combined locks
+comstock
+concord
+conover
+conrath
+coon valley
+cornell
+cornucopia
+cottage grove
+couderay
+crandon
+crivitz
+cross plains
+cuba city
+cudahy
+cumberland
+curtiss
+cushing
+custer
+dale
+dallas
+dalton
+danbury
+dane
+darien
+darlington
+de forest
+de pere
+de soto
+deer park
+deerbrook
+deerfield
+delafield
+delavan
+dellwood
+delta
+denmark
+dickeyville
+dodge
+dodgeville
+dorchester
+dousman
+downing
+downsville
+doylestown
+dresser
+drummond
+dunbar
+dunn
+durand
+eagle
+eagle river
+east ellsworth
+east troy
+eastman
+eau claire
+eau galle
+eden
+edgar
+edgerton
+edgewater
+edmund
+egg harbor
+eland
+elcho
+elderon
+eldorado
+eleva
+elk mound
+elkhart lake
+elkhorn
+ellison bay
+ellsworth
+elm grove
+elmwood
+elroy
+elton
+embarrass
+emerald
+empire
+endeavor
+ephraim
+erin
+ettrick
+eureka
+evansville
+exeland
+fairchild
+fairwater
+fall creek
+fall river
+fence
+fennimore
+ferryville
+fifield
+fish creek
+fitchburg
+florence
+fond du lac
+fontana
+footville
+forest junction
+forestville
+fort atkinson
+fort mccoy
+fountain city
+fox lake
+fox point
+francis creek
+franklin
+franksville
+frederic
+fredonia
+freedom
+fremont
+friendship
+friesland
+galesville
+galloway
+gays mills
+genesee depot
+genoa
+genoa city
+germantown
+gile
+gillett
+gilman
+gilmanton
+gleason
+glen flora
+glen haven
+glenbeulah
+glendale
+glenwood city
+glidden
+goodman
+gordon
+gotham
+grafton
+grand marsh
+grand view
+granton
+grantsburg
+gratiot
+green bay
+green lake
+green valley
+greenbush
+greendale
+greenfield
+greenleaf
+greenville
+greenwood
+gresham
+hager city
+hales corners
+hammond
+hancock
+hannibal
+hanover
+harrison
+harshaw
+hartford
+hartland
+hatley
+haugen
+hawkins
+hawthorne
+hayward lakes
+hazel green
+hazelhurst
+heafford junction
+helenville
+herbster
+hertel
+high bridge
+highland
+hilbert
+hiles
+hillpoint
+hillsboro
+hillsdale
+hingham
+hixton
+holcombe
+hollandale
+holmen
+honey creek
+horicon
+hortonville
+howard
+hubertus
+hudson
+humbird
+hurley
+hustisford
+hustler
+independence
+iola
+irma
+iron belt
+iron ridge
+iron river
+ixonia
+jackson
+janesville
+jefferson
+jim falls
+johnson creek
+juda
+jump river
+junction city
+juneau
+kansasville
+kaukauna
+kellnersville
+kempster
+kendall
+kennan
+kenosha
+keshena
+kewaskum
+kewaunee
+kiel
+kieler
+kimberly
+king
+kingston
+knapp
+kohler
+krakow
+la crosse
+la farge
+la pointe
+la valle
+lac du flambeau
+ladysmith
+lake delton
+lake geneva
+lake mills
+lake nebagamon
+lake tomahawk
+lakewood
+lancaster
+land o' lakes
+lannon
+laona
+larsen
+lebanon
+lena
+leopolis
+liberty
+lime ridge
+linden
+little chute
+little suamico
+livingston
+lodi
+loganville
+lomira
+lone rock
+long lake
+lowell
+loyal
+lublin
+luck
+luxemburg
+lyndon station
+lynxville
+lyons
+madeline island
+madison
+maiden rock
+malone
+manawa
+manitowish waters
+manitowoc
+maple
+maplewood
+marathon
+marengo
+maribel
+marinette
+marion
+markesan
+marquette
+marshall
+marshfield
+mason
+mather
+mattoon
+mauston
+mayville
+mazomanie
+mcfarland
+mcnaughton
+medford
+medina
+mellen
+melrose
+menasha
+menomonee falls
+menomonie
+mequon
+mercer
+merrill
+merrillan
+merrimac
+merton
+middleton
+mikana
+milan
+milladore
+millston
+milltown
+milton
+milwaukee
+mindoro
+mineral point
+minocqua
+minong
+mishicot
+mondovi
+monona
+monroe
+montello
+montfort
+monticello
+montreal
+morrison
+morrisonville
+mosinee
+mount calvary
+mount hope
+mount horeb
+mount sterling
+mountain
+mukwonago
+muscoda
+muskego
+nashotah
+nashville
+necedah
+neenah
+neillsville
+nekoosa
+nelson
+nelsonville
+neopit
+neosho
+neshkoro
+new auburn
+new berlin
+new franken
+new glarus
+new holstein
+new lisbon
+new london
+new munster
+new richmond
+newburg
+newton
+niagara
+nichols
+north freedom
+north lake
+north prairie
+norwalk
+oak creek
+oakdale
+oakfield
+oconomowoc
+oconto
+oconto falls
+odanah
+ogdensburg
+ogema
+ojibwa
+okauchee
+omro
+onalaska
+oneida
+ontario
+oostburg
+oregon
+orfordville
+osceola
+oshkosh
+osseo
+owen
+oxford
+packwaukee
+palmyra
+pardeeville
+park falls
+patch grove
+pelican lake
+pell lake
+pembine
+pepin
+peshtigo
+pewaukee
+phelps
+phillips
+phlox
+pickerel
+pickett
+pigeon falls
+pine river
+pittsfield
+plain
+plainfield
+platteville
+pleasant prairie
+plover
+plum city
+plymouth
+poplar
+port edwards
+port washington
+port wing
+portage
+porterfield
+potosi
+potter
+pound
+powers lake
+poy sippi
+poynette
+praire du chien
+prairie du sac
+prairie farm
+prentice
+prescott
+presque isle
+princeton
+pulaski
+racine
+radisson
+randolph
+random lake
+readfield
+readstown
+red granite
+reedsburg
+reedsville
+reeseville
+rewey
+rhinelander
+rib lake
+rice lake
+richfield
+richland center
+ridgeland
+ridgeway
+ringle
+rio
+ripon
+river falls
+roberts
+rochester
+rock falls
+rock springs
+rockland
+rome
+rosendale
+rosholt
+rothschild
+royalton
+rubicon
+rudolph
+saint cloud
+saint croix falls
+saint francis
+saint germain
+saint nazianz
+salem
+sand creek
+sarona
+sauk prairie
+saukville
+saxeville
+saxon
+sayner
+scandinavia
+schofield
+seneca
+sextonville
+seymour
+sharon
+shawano
+sheboygan
+sheboygan falls
+sheldon
+shell lake
+sherwood
+shiocton
+shorewood
+shorewood hills
+shullsburg
+silver lake
+sinsinawa
+siren
+sister bay
+slinger
+soldiers grove
+solon springs
+somers
+somerset
+south milwaukee
+south range
+south wayne
+sparta
+spencer
+spooner
+spring green
+spring valley
+springbrook
+springfield [saint croix county]
+springfield [walworth county]
+stanley
+star lake
+star prairie
+stetsonville
+steuben
+stevens point
+stitzer
+stockbridge
+stockholm
+stoddard
+stone lake
+stoughton
+stratford
+strum
+sturgeon bay
+sturtevant
+suamico
+sugar camp
+sullivan
+summit lake
+sun prairie
+superior
+suring
+sussex
+taylor
+theresa
+thiensville
+thorp
+three lakes
+tigerton
+tilleda
+tisch mills
+tomah
+tomahawk
+tony
+town of brookfield
+town of cedarburg
+town of menasha
+town of west bend
+town of westport
+townsend
+trego
+trempealeau
+trevor
+tripoli
+tunnel city
+turtle lake
+twin lakes
+two rivers
+union center
+union grove
+unity
+upson
+valders
+van dyne
+vernon
+verona
+vesper
+village of grafton
+viola
+viroqua
+wabeno
+waldo
+wales
+walworth
+warrens
+wascott
+washburn
+washington island
+waterford
+waterloo
+watertown
+waukau
+waukesha
+waumandee
+waunakee
+waupaca
+waupun
+wausau
+wausaukee
+wautoma
+wauwatosa
+wauzeka
+webb lake
+webster
+west allis
+west bend
+west lima
+west milwaukee
+west salem
+westboro
+westby
+westfield
+weyauwega
+weyerhaeuser
+wheeler
+white lake
+whitefish bay
+whitehall
+whitelaw
+whitewater
+wild rose
+willard
+williams bay
+wilmot
+wilson
+wilton
+windsor
+winnebago
+winneconne
+winter
+wisconsin dells
+wisconsin rapids
+withee
+wittenberg
+wonewoc
+woodford
+woodland
+woodman
+woodruff
+woodville
+woodworth
+wrightstown
+wyocena
+zachow
+zenda

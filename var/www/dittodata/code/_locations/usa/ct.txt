@@ -1,0 +1,300 @@
+abington
+allingtown
+amston
+andover
+ansonia
+ashford
+avon
+ballouville
+baltic
+bantam
+barkhamsted
+beacon falls
+berlin
+bethany
+bethel
+bethlehem
+bishops corner
+bloomfield
+bolton
+botsford
+bozrah
+branford
+bridgeport
+bridgewater
+bristol
+broad
+brook
+brookfield
+brooklyn
+burlington
+canaan
+canterbury
+canton
+center
+centerbrook
+central village
+chaplin
+cheshire
+chester
+clinton
+cob
+cobalt
+colchester
+colebrook
+collinsville
+columbia
+cornwall
+cornwall bridge
+cos
+coventry
+cromwell
+danbury
+danielson
+darien
+dayville
+deep river
+derby
+durham
+east berlin
+east canaan
+east glastonbury
+east granby
+east haddam
+east hampton
+east hartford
+east hartland
+east haven
+east killingly
+east lyme
+east windsor
+east windsor hill
+east woodstock
+eastford
+easton
+ellington
+enfield
+essex
+fabyan
+fairfield
+falls village
+farmington
+franklin
+gales ferry
+gaylordsville
+georgetown
+gilman
+glasgo
+glastonbury
+goshen
+granby
+greens farms
+greenwich
+griswold
+grosvenor dale
+groton
+groton long point
+guilford
+haddam
+hadlyme
+hamden
+hampton
+hanover
+hartford
+hartland
+harwinton
+hawleyville
+hebron
+higganum
+ivoryton
+jewett city
+kensington
+kent
+killingly
+killingworth
+lakeside
+lakeville
+lebanon
+ledyard
+lisbon
+litchfield
+lyme
+madison
+manchester
+mansfield
+mansfield center
+mansfield depot
+maple hill
+marble dale
+marion
+marlborough
+mashantucket
+melrose
+meriden
+middle haddam
+middlebury
+middlefield
+middletown
+milford
+milldale
+monroe
+montville
+moodus
+moosup
+morris
+mystic
+naugatuck
+new britain
+new canaan
+new fairfield
+new hartford
+new haven
+new london
+new london nsb
+new milford
+new preston
+newington
+newtown
+niantic
+noank
+norfolk
+north branford
+north canaan
+north canton
+north franklin
+north granby
+north grosvenordale
+north haven
+north stonington
+north westchester
+north windham
+northfield
+northford
+norwalk
+norwich
+oakdale
+oakville
+old greenwich
+old lyme
+old mystic
+old saybrook
+oneco
+orange
+oxford
+pawcatuck
+pequabuck
+pine meadow
+plainfield
+plainville
+plantsville
+pleasant valley
+plymouth
+pomfret
+pomfret center
+poquonock
+portland
+preston
+prospect
+putnam
+quaker hill
+quinebaug
+redding
+ridge
+ridgefield
+riverside
+riverton
+rockfall
+rockville
+rocky hill
+rogers
+rowayton
+roxbury
+salem
+salisbury
+sandy hook
+scotland
+seymour
+sharon
+shelton
+sherman
+silver lane
+simsbury
+somers
+somersville
+south britain
+south glastonbury
+south kent
+south lyme
+south norwalk
+south willington
+south windham
+south windsor
+south woodstock
+southbury
+southington
+southport
+sprague
+springs
+stafford
+staffordville
+stamford
+sterling
+stevenson
+stonington
+storrs
+storrs mansfield
+stratford
+suffield
+taconic
+taftville
+tariffville
+terryville
+thomaston
+thompson
+tolland
+torrington
+trumbull
+uncasville
+union
+unionville
+vernon
+vernon rockville
+versailles
+voluntown
+wallingford
+warren
+washington
+washington depot
+waterbury
+waterford
+watertown
+wauregan
+weatogue
+west cornwall
+west granby
+west hartford
+west hartland
+west haven
+west mystic
+west simsbury
+west suffield
+westbrook
+weston
+westport
+wethersfield
+whitneyville
+willimantic
+willington
+wilton
+winchester
+windham
+windsor
+windsor locks
+winsted
+wolcott
+woodbridge
+woodbury
+woodstock
+woodstock valley
+yalesville
+yantic

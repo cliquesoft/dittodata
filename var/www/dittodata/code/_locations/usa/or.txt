@@ -1,0 +1,421 @@
+adams
+adel
+adrian
+agness
+albany
+allegany
+aloha
+alsea
+alvadore
+amity
+antelope
+applegate
+arch cape
+arlington
+arock
+ashland
+ashwood
+astoria
+athena
+aumsville
+aurora
+azalea
+baker city
+bandon
+banks
+bates
+bay city
+beatty
+beaver
+beavercreek
+beaverton
+bend
+blachly
+black butte ranch
+blodgett
+blue river
+bly
+boardman
+bonanza
+boring
+bridal veil
+bridgeport
+brightwood
+broadbent
+brogan
+brookings-harbor
+brooks
+brothers
+brownsville
+burns
+butte falls
+buxton
+camas valley
+camp sherman
+canby
+cannon beach
+canyon city
+canyonville
+cape blanco
+carlton
+cascade locks
+cascadia
+cave junction
+cayuse
+cedar hills
+cedar mill
+central point
+charleston
+chemult
+cheshire
+chiloquin
+christmas valley
+clackamas
+clatskanie
+cloverdale
+coburg
+colton
+columbia city
+condon
+coos bay
+coquille
+corbett
+cornelius
+corvallis
+cottage grove
+cove
+crabtree
+crane
+crater lake
+crawfordsville
+crescent
+crescent lake
+creswell
+crooked river ranch
+culp creek
+culver
+curtin
+dairy
+dale
+dallas
+days creek
+dayton
+dayville
+deadwood
+deer island
+depoe bay
+detroit
+dexter
+diamond
+diamond lake
+dillard
+donald
+dorena
+drain
+drewsey
+dufur
+dundee
+durham
+durkee
+eagle creek
+eagle point
+eastside
+echo
+eddyville
+elgin
+elkton
+elmira
+enterprise
+estacada
+eugene
+fairview
+fall creek
+falls city
+fields
+florence
+forest grove
+fort klamath
+fort rock
+fossil
+foster
+fox
+frenchglen
+gales creek
+gardiner
+garibaldi
+gaston
+gates
+gearhart
+gervais
+gilchrist
+gladstone
+glendale
+gleneden beach
+glide
+gold beach
+gold hill
+government camp
+grand ronde
+grants pass
+grass valley
+gresham
+haines
+halfway {half.com}
+halsey
+hammond
+happy valley
+harbor
+harper
+harrisburg
+hebo
+helix
+heppner
+hereford
+hermiston
+hillsboro
+hines
+hood river
+hubbard
+huntington
+idanha
+idleyld park
+imbler
+imnaha
+independence
+ione
+ironside
+irrigon
+jacksonville
+jamieson
+jasper
+jefferson
+john day
+jordan valley
+joseph
+junction city
+juntura
+keizer
+keno
+kent
+kerby
+kimberly
+king city
+klamath falls
+la grande
+la pine
+lafayette
+lake oswego
+lakeside
+lakeview
+langlois
+lawen
+leaburg
+lebanon
+lexington
+lincoln city
+logsden
+long creek
+lorane
+lostine
+lowell
+lyons
+madras
+malin
+manzanita
+mapleton
+marcola
+marion
+marylhurst
+maupin
+mckenzie river valley
+mcminnville
+meacham
+medford
+mehama
+merlin
+merrill
+midland
+mill city
+milton-freewater
+milwaukie
+mitchell
+molalla
+monitor
+monmouth
+monroe
+monument
+moro
+mosier
+mount angel
+mount hood
+mount hood parkdale
+mount vernon
+mulino
+murphy
+myrtle creek
+myrtle point
+nehalem
+neotsu
+neskowin
+netarts
+new pine creek
+newberg
+newport
+north bend
+north plains
+north powder
+norway
+noti
+nyssa
+oak grove
+oakland
+oakridge
+o'brien
+oceanside
+odell
+ontario
+ophir
+oregon city
+oretech
+otis
+otter rock
+oxbow
+pacific city
+paisley
+paulina
+pendleton
+philomath
+phoenix
+pilot rock
+pistol river
+pleasant hill
+plush
+port astoria
+port orford
+portland
+post
+powell butte
+powers
+prairie city
+princeton
+prineville
+prospect
+rainier
+redmond
+reedsport
+remote
+rhododendron
+richland
+rickreall
+riddle
+riley
+ritter
+riverside
+rockaway beach
+rogue river
+rose lodge
+roseburg
+rowena
+rufus
+saginaw
+saint benedict
+saint helens
+saint paul
+salem
+sandy
+sauvie's island
+scappoose
+scholls
+scio
+scotts mills
+scottsburg
+seal rock
+seaside
+selma
+seneca
+shady cove
+shaniko
+shedd
+sheridan
+sherwood
+siletz
+silver lake
+silverton
+sisters
+sixes
+south beach
+sprague river
+spray
+springfield
+stanfield
+stayton
+sublimity
+summer lake
+summerville
+sumpter
+sunriver
+sutherlin
+sweet home
+swisshome
+talent
+tangent
+tenmile
+terrebonne
+the dalles
+thurston
+tidewater
+tigard
+tillamook
+tiller
+timber
+timberline lodge
+toledo
+tolovana park
+trail
+troutdale
+tualatin
+turner
+tygh valley
+ukiah
+umatilla
+umpqua
+union
+unity
+vale
+veneta
+vernonia
+vida
+waldport
+wallowa
+walterville
+walton
+wamic
+warm springs
+warren
+warrenton
+wasco
+wedderburn
+welches
+west linn
+west main
+west stayton
+westfall
+westfir
+westlake
+weston
+westport
+wheeler
+white city
+wilbur
+wilderville
+willamina
+williams
+wilsonville
+winchester
+winchester bay
+winston
+wolf creek
+woodburn
+yachats
+yamhill
+yoncalla

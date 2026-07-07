@@ -1,0 +1,24 @@
+#divPopup #formLogin #Username,
+#divPopup #formLogin #Password { width: 194px; text-align: center; }
+#divPopup #formLogin #txtCaptcha { margin-right: 4px; width: 100px; text-align: center; }
+#divPopup #formLogin #imgCaptcha { margin-right: 4px; padding: 2px; width: 20px; height: 19px; border: 1px solid rgba(0,0,0,0.2); border-radius: 0.3em; vertical-align: top; }
+#divPopup #formLogin #imgCaptcha:hover { border: 1px solid rgba(0,0,0,0.4); cursor: pointer; }
+#divPopup #formLogin #btnLogin { width: 60px; }
+#divPopup #formLogin #captcha {
+	border: 1px solid #8eb4f2;	/* #6FCEF4 */
+	border-radius: 0.3em;
+/*
+	box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-ms-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+	-webkit-box-shadow: 0 0 8px rgba(0,0,0,0.5);
+*/
+}
+
+#divPopup #formServices #lstPasswordKey,
+#divPopup #formServices #lstUnlockKey { margin-right: 4px; }
+#divPopup #formServices #txtPasswordValue,
+#divPopup #formServices #txtUnlockValue { margin-right: 4px; width: 175px; }
+#divPopup #formServices #btnSubmit,
+#divPopup #formServices #btnLookup { width: 60px; }
+

@@ -1,0 +1,347 @@
+abbotsford
+adams lake
+agassiz
+ahousat
+ainsworth hot springs
+aldergrove
+alert bay
+alexis creek
+alice arm
+anahim lake
+anglemont
+anmore
+argenta
+armstrong
+ashcroft
+atlin
+baker creek
+balfour
+bamfield
+bamfield inlet
+barkerville
+barkley sound
+barriere
+beaverdell
+belcarra
+bella bella
+bella coola
+big creek
+big lake
+black creek
+blue river
+boswell
+bowen island
+bowser
+brackendale
+brentwood bay
+bridge lake
+brisco
+britannia beach
+brookmere
+burnaby
+burns lake
+burton
+cache creek
+campbell river
+canal flats
+canim lake
+canyon
+cassiar
+cassidy
+castlegar
+cawston
+cedar
+celista
+charlie lake
+chase
+chemainus
+cherryville
+chetwynd
+chilko lake
+chilliwack
+christina lake
+clearwater
+clinton
+cloverdale
+coalmont
+cobble hill
+coldstream
+comox
+comox valley
+coombs
+coquitlam
+cortes island
+courtenay
+cowichan bay
+cranbrook
+crawford bay
+creston
+crofton
+cumberland
+dawson creek
+deep bay
+delta
+denman island
+dewdney
+douglas lake
+duncan
+dunster
+eagle bay
+eagle creek
+edgewater
+elkford
+elko
+enderby
+errington
+esquimalt
+fairmont hot springs
+falkland
+fanny bay
+fauquier
+fernie
+field
+forest grove
+fort langley
+fort nelson
+fort st. james
+fort st. john
+fort steele
+fraser lake
+fruitvale
+gabriola island
+galiano island
+gambier island
+ganges
+garden bay
+garibaldi highlands
+genelle
+gibsons
+gold bridge
+gold river
+golden
+grand forks
+granisle
+greenwood
+grindrod
+hagensborg
+halfmoon bay
+hanceville
+haney
+harrison hot springs
+harrison mills
+hazelton
+hedley
+heffley creek
+heriot bay
+hixon
+honeymoon bay
+hope
+hornby island
+horsefly
+houston
+hudson's hope
+invermere
+jade city
+jaffray
+jordan river
+kaleden
+kamloops
+kaslo
+kelly lake
+kelowna
+keremeos
+kildonan
+kimberley
+kitimat
+kitsumkalum
+kleena kleene
+knutsford
+kyuquot
+lac des roches
+lac la hache
+lac le jeune
+ladner
+ladysmith
+lake country
+lake cowichan
+langley
+lantzville
+lasqueti island
+lavington
+lee creek
+likely
+lillooet
+lindell beach
+lions bay
+lister
+little fort
+logan lake
+lone butte
+lumby
+lytton
+mackenzie
+madeira park
+malahat
+malcolm island
+manson creek
+maple ridge
+mara
+marysville
+masset
+mayne island
+mcbride
+meadow creek
+merritt
+merville
+metchosin
+mica creek
+midway
+mill bay
+mission
+moyie
+mt. lehman
+nakusp
+nanaimo
+nanoose bay
+naramata
+nelson
+new aiyansh
+new denver
+new hazelton
+new westminster
+nimpo lake
+north saanich
+north vancouver
+100 mile house
+108 mile house
+150 mile house
+oak bay
+okanagan centre
+okanagan falls
+oliver
+osoyoos
+oyama
+parksville
+parson
+peachland
+pemberton
+pender harbour
+pender islands
+penticton
+pitt meadows
+port alberni
+port alice
+port clements
+port coquitlam
+port edward
+port hardy
+port mcneill
+port moody
+port renfrew
+powell river
+prince george
+prince rupert
+princeton
+pritchard
+protection island
+quadra island
+qualicum bay
+qualicum beach
+quathiaski cove
+queen charlotte city
+quesnel
+radium hot springs
+read island
+revelstoke
+richmond
+rivers inlet
+roberts creek
+rock creek
+rosedale
+rossland
+royston
+70 mile house
+saanich
+saanichton
+salmo
+salmon arm
+salt spring island
+sandspit
+sardis
+saturna island
+savary island
+savona
+sayward
+scotch creek
+sechelt
+seymour arm
+shalalth
+shawnigan lake
+shirley
+sicamous
+sidney
+sidney island
+silverton
+simoom sound
+skidegate
+skookumchuck
+slocan
+slocan lake
+smithers
+sooke
+sorrento
+southbank
+sparwood
+spences bridge
+sproat lake
+squamish
+steveston
+stewart
+stuart island
+summerland
+sun peaks
+surrey
+tahsis
+tappen
+tatla lake
+tatlayoko lake
+taylor
+telegraph cove
+telegraph creek
+telkwa
+terrace
+texada island
+thetis island
+thrums
+tlell
+tofino
+topley
+trail
+tsawwassen
+tulameen
+tumbler ridge
+ucluelet
+union bay
+valemount
+vancouver
+vanderhoof
+vavenby
+vernon
+victoria
+wasa lake
+wells
+west vancouver
+westbank
+whaletown
+whistler
+white rock
+williams lake
+wilson creek
+windermere
+winfield
+winlaw
+wynndel
+yahk
+yale
+yarrow
+youbou
