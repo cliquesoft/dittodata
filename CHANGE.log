@@ -1,0 +1,6 @@
+2026/07/08
+- Removed bin/numfmt
+- Added alert.php (and associated files) into 'opt'
+- Started updating alert.cfg and alert.php
+- Started updating README.md
+
