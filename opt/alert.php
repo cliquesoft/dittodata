@@ -10,7 +10,7 @@
 # FOR A PARTICULAR PURPOSE. See the appropriate Cliquesoft License for details.
 #
 # Created	2021/01/08 by Dave Henderson (support@cliquesoft.org)
-# Updated	2022/04/14 by Dave Henderson (support@cliquesoft.org)
+# Updated	2026/07/09 by Dave Henderson (support@cliquesoft.org)
 
 
 
@@ -22,7 +22,7 @@ define("NAME",'alert');
 
 # Module Requirements						  NOTE: MUST come below Module Constant Definitions
 require_once('alert.cfg');
-require_once('_Contact.php');
+require_once('_alert.php');
 
 # Start or resume the PHP session				  NOTE: gains access to $_SESSION variables in this script
 #session_start();
@@ -44,23 +44,22 @@ if ($_GET['type'] == 'sync') { $TYPE = 'SYNC'; } else { $TYPE = 'BACKUP'; }
 
 
 
-$mail = new mime_mail();
-$mail->from = '"'.$gbl_nameNoReply.'" <'.$gbl_emailNoReply.'>';
+$mail = new mimeMail();
+$mail->from = '"'.$_sAlertsName.'" <'.$_sAlertsEmail.'>';
 $mail->cc = "";							# $_POST["cc"];
-$mail->headers = "Errors-To: support@".$gbl_uriContact;		# WARNING: this line can NOT have a trailing '\n' as it will cause problems with the _mimemail.php script!
-$mail->to = '"Dave Henderson" <dhenderson@digital-pipe.com>';
+$mail->headers = "Errors-To: ".$_sSupportEmail;
+$mail->to = '"'.$_sContactName.'" <'.$_sContactEmail.'>';
 if ($_GET['status'] == 'success')
 	{ $mail->subject = '--- '.$_GET['client'].' '.$TYPE.' REPORT ---'; }
 else
 	{ $mail->subject = '!!! '.$_GET['client'].' '.$TYPE.' FAILURE !!!'; }
-$mail->body = "<html>\n<style>\nbody {margin:0; bgcolor='#fff';}\ntable {width:100%;}\nimg {float:right; padding-left:5px;}\nh1 {padding:50px 0 10px; font-size:32px; font-variant:small-caps; color:#92bfe5;}\nh2 {margin-bottom:5px; font:12pt verdana bold; color:#808080;}\np, div {font:14px verdana; color:#808080; text-align:justify;}\ndiv {text-align:right;}\n</style>\n<body>\n<table>\n<tr>\n<td>&nbsp;</td>\n<td width='500'>\n<img src='".$gbl_uriProject."imgs/default/email_info.png' border='0' />\n<h1>".PROJECT."</h1><br />\n<h2>".$mail->subject."</h2>\n<br />\n<p>\nTeam,<br />\n<br />\nThis report was sent to inform you about the scheduled job that was run recently at the clients site. If the reported size is 0, or this email did not arrive, there is a problem that has been encountered that will need to be investigated as soon as possible! Please use the below information as a reference.<br />\n</p>\n<br />\n<div>- ".PROJECT." Staff</div><br />\n<br />\n<br />\n<p>\n<u>Date:</u> ".$_." GMT<br />\n<u>Project:</u> DittoData<br />\n<u>Script:</u> ".SCRIPT."<br />\n<br />\n<u>Client:</u> ".$_GET['client']."<br />\n<br />\n<u>Job:</u> ".$_GET['name']."<br />\n<u>Type:</u> ".$_GET['type']."<br />\n<u>Archive:</u> ".$_GET['archive']."<br />\n<u>Size:</u> ".$_GET['size']."<br />\n</p>\n</td>\n<td>&nbsp;</td>\n</tr>\n</table>\n</body>\n</html>";
+$mail->body = "<html>\n<style>\nbody {margin:0; bgcolor='#fff';}\ntable {width:100%;}\nimg {float:right; padding-left:5px;}\nh1 {padding:50px 0 10px; font-size:32px; font-variant:small-caps; color:#92bfe5;}\nh2 {margin-bottom:5px; font:12pt verdana bold; color:#808080;}\np, div {font:14px verdana; color:#808080; text-align:justify;}\ndiv {text-align:right;}\n</style>\n<body>\n<table>\n<tr>\n<td>&nbsp;</td>\n<td width='500'>\n<img src='".$_sUriProject."/imgs/alert.png' border='0' />\n<h1>".PROJECT."</h1><br />\n<h2>".$mail->subject."</h2>\n<br />\n<p>\nTeam,<br />\n<br />\nThis report was sent to inform you about the scheduled job that was run recently at the clients site. If the reported size is 0, or this email did not arrive, there is a problem that has been encountered that will need to be investigated as soon as possible! Please use the below information as a reference.<br />\n</p>\n<br />\n<div>- ".PROJECT." Staff</div><br />\n<br />\n<br />\n<p>\n<u>Date:</u> ".$_." GMT<br />\n<u>Project:</u> DittoData<br />\n<u>Script:</u> ".SCRIPT."<br />\n<br />\n<u>Client:</u> ".$_GET['client']."<br />\n<br />\n<u>Job:</u> ".$_GET['name']."<br />\n<u>Type:</u> ".$_GET['type']."<br />\n<u>Archive:</u> ".$_GET['archive']."<br />\n<u>Size:</u> ".$_GET['size']."<br />\n</p>\n</td>\n<td>&nbsp;</td>\n</tr>\n</table>\n</body>\n</html>";
 
 
 if( $mail->send() ) {
-	if ($EML = fopen("$gbl_dirLogs/$gbl_logEmail",'a')) { fwrite($EML,"Email successfully sent to user '".$strToName."' on ".date("m/d/Y H:i:s",time()).".\n"); }
+	if ($EML = fopen("$_sDirLogs/$_sLogEmail",'a')) { fwrite($EML,"Email successfully sent to '".$_sContactEmail."' on ".date("m/d/Y H:i:s",time()).".\n"); }
 
-	#$TEXT = "The backup report was sent successfully!\n";
-	$TEXT = " [success]";
+	$TEXT = "Sending backup report: [success]";
 	$HTML = "<!doctype html>\n\n" .
 		"<html lang='en'>\n" .
 		"<head>\n" .
@@ -70,10 +69,9 @@ if( $mail->send() ) {
 		"	The backup report was sent successfully!\n" .
 		"</body>\n";
 } else {
-	if ($EML = fopen("$gbl_dirLogs/$gbl_logEmail",'a')) { fwrite($EML,"Couldn't send the email to user '".$strToName."' on ".date("m/d/Y H:i:s",time()).".\n"); }
+	if ($EML = fopen("$_sDirLogs/$_sLogEmail",'a')) { fwrite($EML,"Couldn't send the email to '".$_sContactEmail."' on ".date("m/d/Y H:i:s",time()).".\n"); }
 
-	#$TEXT = "There was an error sending the report. Please check your logs.\n";
-	$TEXT = " [failure]";
+	$TEXT = "Sending backup report: [failure]";
 	$HTML = "<!doctype html>\n\n" .
 		"<html lang='en'>\n" .
 		"<head>\n" .
@@ -85,7 +83,6 @@ if( $mail->send() ) {
 }
 
 if ($_GET['verbose'] == 'true') { echo $TEXT; }
-#echo $HTML;
 
 ?>
 

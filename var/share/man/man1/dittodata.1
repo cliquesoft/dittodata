@@ -1,0 +1,398 @@
+.\"Man page for dittodata, by Dave Henderson.
+.TH dittodata 1 "2026 July 09"
+.SH NAME
+\fIdittodata\fR - data duplication
+
+
+
+
+.SH SYNOPSIS
+
+.B dittodata [ACTION] [--OPTION="VALUE" ...] [--config filename]
+
+ACTIONS:
+  --help        this screen
+  --version     shows the version of this script
+  --copy=NAME   copies the specified job to a new job; NAME = source job name
+  --delete      deletes the specified job
+  --disable     disables the specified job
+  --enable      enables the specified job
+  --exchange=HOST exchanges the ssh keys with another device; HOST = IP or URI
+                NOTE: you must also provide --targetUser and --targetPass
+  --info        provides all the config info for the requested job
+  --show        lists all the jobs that are currently saved
+  --rename=NAME renames the specified job; NAME = original job name
+  --save        saves or updates the passed configuration to a config file
+                NOTE: when updating, only pass the values to be changed
+
+OPTIONS:
+  --verbose     display verbose output
+  --cfgdir      specfies the directory to write the job configs:
+                      global|home
+  --cron        adds the cron job to the users crontab instead of the system
+                automatically picking it up via placement in /etc/cron.d
+  --cronName    adds the users name to the crontab file
+  --sudo        use sudo to (u)mount the shares
+ 
+  {GLOBAL}
+
+  --config      specifies the directory to store/read global config files
+  --home        specifies the directory to store/read personal job configs
+  --temp        specifies the temporary working directory
+  --mounts      specifies the directory where mount points are located
+  --logs        specifies the directory where the logs are stored
+  --fifo        specifies the directory and filename to use for job fifo files
+  --ssh         specifies the directory that stores the ssh files
+  --joblog      specifies the name of the job log
+  --errlog      specifies the name of the error log
+  --syslog      specifies the name of the system log
+                NOTE: escape all variables used in any of the above values
+                      Some examples:
+                      --joblog='\\\${RJN}.log'
+                      --joblog='\\\${NAME}_\\\${DATETIME}.log'
+
+  {JOB}
+
+  --name        the name of the backup job (enclose in quotes)
+  --type        what type of backup job to start:
+                      daily|full|incremental|custom|sync|sinc
+  --compression any compression to apply to the backup:
+                      none|gzip|bzip
+  --include     the file containing the file(s) and/or dir(s) to backup
+  --exclude     the file containing the file(s) and/or dir(s) to exclude
+  --limit       the number to limit the backup archives (count/size) to: #[MB]
+  --prescript   pre-script to run prior to the backup job (enclose in quotes)
+  --postscript  post-script to run after the backup job (enclose in quotes)
+  --alert       if an email alert should be sent upon the following action:
+                      none|success|failure|always
+  --alertExec   the file/URL to call to send the alert; variables can be passed
+  --customParm  custom parameters to pass to the underlying binary (tar/rsync)
+
+  {LOCATIONS}
+
+  --dirTag      tag used in the directory structure instead of the job name
+  --source      path -OR- device to backup
+                      absolute path example:    /local/dir               [local]
+                      network share examples:   //server:/share/dir      [Linux]
+                                                \\server\share\dir     [Windows]
+                                                %host:/dir               [sshfs]
+                                                @host:/dir                 [ssh]
+                NOTE: escape all backslashes if not enclosed in SINGLE quotes.
+  --target      path -OR- device to store backups (defaults to /var/backups)
+                      absolute path example:    /local/dir               [local]
+                      network share examples:   //server:/share/dir      [Linux]
+                                                \\server\share\dir     [Windows]
+                                                %host:/dir               [sshfs]
+                                                @host:/dir                 [ssh]
+                NOTE: escape all backslashes if not enclosed in SINGLE quotes.
+  --sourceUser  mount credentials for --source network shares: username
+  --sourcePass  mount credentials for --source network shares: password
+  --sourceDomn  mount credentials for --source network shares: Windows domain
+  --sourceParm  additional mount parameters to the pass when mounting source
+  --targetUser  same as above, but for --target network shares
+  --targetPass
+  --targetDomn
+  --targetParm
+
+  {MISCELLANEOUS}
+
+  --tag1        user-defined values that can be passed to job alerts
+  --tag2
+  --tag3
+  --tag4
+
+  {EXECUTION}
+
+  --hour        the hour for when the job needs to start (in 24 hour format)
+  --min         the minute value for when the job needs to start
+  --freq        the frequency of the job execution:
+                      daily|monthly|interval
+  --list        the list of values associated with the --freq value
+                      'daily' example: 0,2,4,6
+                        (Sun,Tue,Thr,Sat)
+                      'monthly' example: 1-7,12,16
+                        (first 7 days, 12th, 16th)
+                      'interval' example: 20m|2h|7d|3M
+                        (every 20 mins, 2 hours, 7 days, 3 months respectively)
+
+
+
+
+.SH TOC
+
+1.  DESCRIPTION
+2.  CONFIG
+3.  PARAMETERS
+4.  ACTIONS
+5.  OPTIONS
+6.  EXAMPLES
+7.  BUGS
+8.  COPYRIGHT
+9.  AUTHORS
+
+
+
+
+.SH DESCRIPTION
+
+.I dittodata
+is a small footprint project (under 250k) that can be used to duplicate data
+between devices regardless if they are locally attached storage, shares on a
+network, or storage half way around the world! The original purpose was as a
+data backup software, but it can be used for any reason such as migration of
+data between servers or other devices, or any other reason that data would
+need to be duplicated.
+
+Current project capabilities:
+  o Mounts ext2/3/4, FAT, NTFS, and other filesystem formats
+  o Mounts Linux (NFS) and Windows (CIFS) networked shares
+  o Can use ssh or sshfs for networked and remote data
+  o Automated ssh key installation with remote devices
+  o Securely syncs remote data using ssh encryption
+  o Jobs can be enabled or disabled
+  o Jobs can be for the device or for a user
+  o Pre and post-run script options for each job
+  o Included alert.php script for email alerts
+  o Ability to include tags in email alerts
+
+Outstanding features include:
+  o Ability to color output in the command line interface
+  o Ability to output to different formats
+  o Optionally secure NFS traffic with ssh
+  o Checks to trigger failed backups
+  o Ability to export configs
+  o Ability to duplicate data using device files (e.g. /dev/sda1)
+  o Ability to archive older data
+  o Expand the --type option to include (ntfs)clone, (dd)bit, bare metal
+
+
+
+
+.SH CONFIG
+
+Currently there are no config files associated with this utility.
+
+
+
+
+.SH PARAMETERS
+
+This utility can take several parameters to affect its operation. We will
+cover the last three here, with the first and second contained in their
+own section below.
+
+Each action requires a SOURCE, and optionally TARGET, directories. These
+will be the locations that get processed by the desired action. It is
+important to note that only the -m action requires both of these values,
+while being optional for -d, and unused by all others. However, each
+action, if passed 'move', must include the STORED directory to know where
+the targeted data should be moved. By default the path will be preserved,
+but that can be adjusted via the -P option (see below).
+
+To summarize:
+  o The -m action requires both SOURCE and TARGET
+  o The -d action can optionally accept TARGET
+  o No other action uses TARGET
+  o Each action requires STORED if moving targeted data
+
+
+
+
+.SH ACTIONS
+
+As with virtually all software, switches can be passed to modify its
+operation. The below section covers each switch in detail, separating
+the actions from the options. It is important to note that the options
+actually need to proceed the actions when executing this software.
+
+While not an action, by simply placing a blank file in the temp directory
+with the name 'PID.stop' where 'PID' is the numeric value of the running
+process, this software will stop operation immediately.
+
+.B --help
+Shows helpful information about the program.
+
+.B --version
+Displays the software version and exits.
+
+.B -a
+Over time user-generated data obvioulsy builds. Not only can this make the
+working environment cluttered, but also force the need for larger storage
+capacity in the live and backup drives. Archiving data is an easy way to
+alieviate each of these issues with a single task. For large data sets, a
+weekly, monthly, or semi-annual scheduled task can make sure that your live
+environment stays as trim as possible!
+
+This action only utilizes the SOURCE and optional STORED directory values.
+
+.B -d
+There are various scenarios where data can (accidentally) get duplicated.
+As stated above, this can cause problems as storage capacity gets needlessly
+consumed. Deduplicating files is a great way to recover drive space, some
+times in significant quantities. This action makes the data of two drives or
+directories unique.
+
+To make this process work as fast as possible, files are compared using
+their size. If two files have the same size, then a hash is generated for
+both to test if the files are truly identical. This process requires the
+generation of a database to keep track of all the information. See the -D
+option below for more information.
+
+Unless there is 100% certainty that the contents of a SOURCE directory
+are unique, it is suggested to deduplicate that directory first before
+using it as the comparison with a TARGET directory. Likewise, if there
+are suspected duplicates in the TARGET directory that only reside in
+that location and not also in SOURCE, you would need to deduplicate that
+directory by itself beforehand. In other words, deduplicating does not
+deduplicate the SOURCE, then the TARGET, and then the two against one
+another. Each directory will need to have deduplication run on it
+singularly before compared against one another if there is any doubt. One
+last note, when using both SOURCE and TARGET, only the files in TARGET
+will be moved or deleted.
+
+This action can accept SOURCE, TARGET, and STORED directory values.
+
+.B -e
+Running any other action may lead to empty directories being left behind
+once data has been moved or deleted. The removal of these directories is
+not performed automatically in order to preserve existing path structures.
+In the event that their retension is undesired, calling this script while
+using this action will process all applicable directories. Additionally,
+the date comparison of directories is ignored on all other actions except
+this one since it only deals with those objects.
+
+This action only utilizes the SOURCE and optional STORED directory values.
+
+.B -m
+There are not many instances when data sets become inconsistent, however,
+it can happen. This action makes the data of two drives or directories the
+same, with some conditions. First, the SOURCE and TARGET both need to have
+the same data, with the TARGET having additional data that is not located
+on the SOURCE. The second condition is that the data needs to be in the
+same location in both places as this action simply isolates all data that
+is not the same compared to the SOURCE. So even if the same file exists in
+both SOURCE and TARGET, but is is a different directory on the TARGET, it
+will be processed as being mismatched.
+
+If the TARGET has some data that is the same on the SOURCE, then the data
+sets will become similar after running this action.
+
+In short, whatever data is the same, and in the same location between the
+SOURCE and TARGET, is considered matching. Any other data is considered
+mismatched and will be processed.
+
+This action requires SOURCE, TARGET, and optionally STORED values.
+
+
+
+
+.SH OPTIONS
+
+To adjust the behavior of actions, you can pass one or more options when
+executing this software. Remember that these actually need to proceed the
+action switch!
+
+.B -A EPOCH
+Each action can be instructed to ignore files based on their modification
+dates. Using this option will ignore all files (not directories) that
+have a time stamp after the specified epoch. The format of the associated
+value is in 24 hour format using the syntax: 'YYYY-MM-DD HH:MM:SS'
+
+.B -B EPOCH
+Like its counterpart above, this option ignores all files before the given
+epoch.
+
+.B -D DATABASE
+When deduplicating data, there may be instances where the same directory
+has been copied more than once. As a result, the deduplication process may
+need to occur multiple times. To speed up this process you can reuse the
+database created from the first run, however, the SOURCE value must remain
+the same between the runs, and no data within it can be modified until the
+entire deduplication process has completed. This option is only valid when
+deduplicating.
+
+.B -H
+This switch controls whether hidden files and directories will be processed.
+By default, these files are ignored. Passing this switches includes them.
+
+.B -P
+There may be times when portions of the path may need to be removed, when
+moving targeted data. Simply pass the desired path prefix as the value to
+this option and it will be removed in TARGET.
+
+.B -Y
+If you want to see exactly what is going to take place before running the
+actual command, use this switch to perform a dryrun first.
+
+
+
+
+.SH EXAMPLES
+
+The below list shows various examples for using this software. This list
+is not exhaustive and does not indicate modifications using any options.
+
+Archive data before May 1st 2025 to /mnt/archive:
+     declutter -A '2025-05-01 00:00:01' -a move /mnt/nas /mnt/archive
+
+Separate live data after May 1st 2025 to /mnt/live:
+     declutter -B '2025-05-01 00:00:01' -a move /mnt/nas /mnt/live
+
+Deduplicate a single directory, ignorning newer additions
+     declutter -A '2025-05-01 00:00:01' -d delete /home/user/Videos
+
+Deduplicate two directories moving the duplicates to /opt/dupes
+     declutter -d move /mnt/sda1/files /mnt/sdb1/data /opt/dupes
+
+Remove empty directories:
+     declutter -e delete /mnt/nas/data
+
+Delete mismatch data (including hidden) between two drives:
+     declutter -H -m delete /mnt/sdb1 /mnt/sdc1
+
+Move mismatched (non-hidden) data between two drives to /opt/diff:
+     declutter -m copy /mnt/sdb1 /mnt/sdc1 /opt/diff
+
+Same as previous line but removing part of the directory structure:
+     declutter -R 'remove/me' -m copy /mnt/sdb1 /mnt/sdc1 /opt/diff
+
+Same as previous line but adding to the directory structure:
+     declutter -P 'add/me' -m copy /mnt/sdb1 /mnt/sdc1 /opt/diff
+
+
+
+
+.SH BUGS
+
+There are no known bugs as of May 2026.
+
+Please visit our website for the latest list of opened bug reports for
+this software project - http://www.cliquesoft.org.
+
+
+
+
+.SH COPYRIGHT
+
+Copyright (C) 2016-2026 Cliquesoft
+
+Unless a valid Cliquesoft Private License (CPLv1) has been purchased for your
+device, this software is licensed under the Cliquesoft Public License (CPLv2)
+as found on the Cliquesoft website at www.cliquesoft.org.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the appropriate Cliquesoft License for details.
+
+You should have received a copy of the Cliquesoft Public License v2 with the
+software itself; if not, please visit our website for the complete document:
+
+   https://www.cliquesoft.org
+
+
+
+
+.SH AUTHORS
+
+Dave Henderson <daveh@cliquesoft.org>
+
